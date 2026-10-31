@@ -28,10 +28,13 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
 2. Log in to GitHub and clone. `gh` isn't installed yet, so borrow it:
 
    ```sh
-   nix run nixpkgs#gh -- auth login     # "web browser", SSH; open the URL
-                                        # on any machine, enter the code
+   nix run nixpkgs#gh -- auth login --web --git-protocol ssh
    git clone git@github.com:ConorWilliams/nix.git ~/nix
    ```
+
+   gh has no "no browser" option; over SSH it prints "Failed opening a web
+   browser" and keeps waiting. Open https://github.com/login/device on any
+   machine and enter the code it showed.
 
    If the clone says `Permission denied (publickey)`, the key upload didn't
    happen: `nix run nixpkgs#gh -- ssh-key add ~/.ssh/id_ed25519.pub`.
