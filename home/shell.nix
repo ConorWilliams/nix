@@ -54,6 +54,8 @@
   # encrypted. Login is per machine and never in Nix: `atuin login`.
   programs.atuin = {
     enable = true;
+    # Don't bind `?` to Atuin AI (a hosted AI that would see shell context).
+    flags = [ "--disable-ai" ];
     settings = {
       auto_sync = true;
       sync_frequency = "5m";
