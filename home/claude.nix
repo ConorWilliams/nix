@@ -15,7 +15,7 @@ let
       git
       hostname
     ];
-    text = builtins.readFile ./claude/claude-statusline.sh;
+    text = builtins.readFile ./claude/statusline.sh;
   };
 in
 {
