@@ -18,6 +18,10 @@
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
 
+  # No "unread news" reminder on each switch (a desktop pop-up on desks).
+  # Read the news any time with `home-manager news`.
+  news.display = "silent";
+
   # Plain command-line tools with no config of their own. Tools with config
   # or shell integration get a `programs.<name>` block below or in their own
   # file (git, shells, claude, ssh, zellij).
