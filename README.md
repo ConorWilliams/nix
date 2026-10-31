@@ -11,8 +11,8 @@ home/common.nix      every machine; imports the files below
   shell.nix          bash -> fish, starship, atuin, zoxide
   claude.nix         Claude Code: settings, status line (claude/)
   ssh.nix            SSH client: agent forwarding to work hosts
+  zellij.nix         zellij: theme, modal keys (zellij/)
   neovim.nix         placeholder until the neovim step
-  zellij/            zellij theme and keybinding preset
 home/desk.nix        machines you sit at, any OS (+ codex)
 home/desk-linux.nix  Linux desks
 home/desk-mac.nix    the Mac
@@ -52,6 +52,13 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
 4. Log in again (bash now starts fish), then do the per-machine logins
    below.
 
+The Mac also has system settings, applied separately:
+
+```sh
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac  # first time
+sudo darwin-rebuild switch --flake ~/nix#mac                                # after that
+```
+
 ## Logging in to things (per machine, never in Nix)
 
 Every login works over SSH: the tool shows a URL or code, you open it in
@@ -70,13 +77,6 @@ on by itself (or asks you to paste a code back).
 gh's device page is https://github.com/login/device; "Failed opening a web
 browser" just means it's waiting for you to go there.
 
-The Mac also has system settings, applied separately:
-
-```sh
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac  # first time
-sudo darwin-rebuild switch --flake ~/nix#mac                                # after that
-```
-
 ## Day to day
 
 ```sh
@@ -87,7 +87,7 @@ nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
 ```
 
-## Notes for later steps
+## Notes
 
 - **Moving `conor` over:** delete `~/.gitconfig` first. Git reads it after
   Home Manager's `~/.config/git/config`, so it silently wins. Expect the
@@ -100,9 +100,14 @@ nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
   history imported from `conor` (`atuin import fish`, `atuin threads
   import`). Outside a shell set up by atuin, those need
   `export ATUIN_SESSION=$(atuin uuid)` first, and `threads import` needs
-  the daemon. Keep the `atuin key` in the password manager.
+  the daemon. Keep the `atuin key` in the password manager. Only ever use
+  the pinned atuin: brew's newer one once built a threads index the pinned
+  one couldn't open.
 - **mosh:** has no scrollback, so the mouse wheel sends Up (opening atuin).
-  Run zellij inside it: `mosh host -- zellij attach -c main`.
+  Run zellij inside it: `mosh host -- zellij attach -c main`. Over ssh,
+  add `-t` (`ssh -t host zellij attach -c main`): without a terminal,
+  zellij crashes, and the half-started session has no `TERM`; delete it
+  with `zellij delete-session main --force`.
 - **Linux GUI apps:** consider `targets.genericLinux` (launcher entries,
   terminfo). Its GPU part needs sudo and a driver-version pin on NVIDIA,
   so prefer apt for GL-heavy apps like kitty (`package = null`).

@@ -8,6 +8,7 @@
     ./shell.nix
     ./neovim.nix
     ./ssh.nix
+    ./zellij.nix
   ];
 
   # Compatibility marker for Home Manager's defaults, NOT a version pin.
@@ -17,9 +18,9 @@
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
 
-  # Plain command-line tools with no config of their own.
-  # Tools that need config or shell integration (git, fish, zellij, atuin,
-  # zoxide, fzf...) get their own `programs.<name>` block in later steps.
+  # Plain command-line tools with no config of their own. Tools with config
+  # or shell integration get a `programs.<name>` block below or in their own
+  # file (git, shells, claude, ssh, zellij).
   home.packages = with pkgs; [
     fd # fast find
     dust # du as a tree
@@ -32,10 +33,6 @@
     kitty.terminfo # lets programs drive kitty properly, including over SSH
   ];
 
-  # Find the terminfo above. The empty entry after ":" keeps each program's
-  # own default locations (Nix ncurses only looks in its own store path).
-  home.sessionVariables.TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
-
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
     ll = "eza -l --icons=auto";
@@ -43,11 +40,16 @@
     icat = "kitten icat"; # show an image; works over ssh, not over mosh
   };
 
-  # Tell programs the terminal supports 24-bit colour. SSH doesn't forward
-  # COLORTERM, so without this, tools over SSH (and inside zellij) fall back
-  # to 256 colours and round every theme colour: the "washed out" look.
-  # True for every terminal used here (kitty, zellij inside kitty).
-  home.sessionVariables.COLORTERM = "truecolor";
+  home.sessionVariables = {
+    # Tell programs the terminal supports 24-bit colour. SSH doesn't forward
+    # COLORTERM, so without this, tools over SSH (and inside zellij) fall back
+    # to 256 colours and round every theme colour: the "washed out" look.
+    # True for every terminal used here (kitty, zellij inside kitty).
+    COLORTERM = "truecolor";
+    # Find kitty's terminfo (above). The empty entry after ":" keeps each
+    # program's own default locations (Nix ncurses only looks in its store).
+    TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
+  };
 
   # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix;
   # use "Login with a web browser" and open the printed URL on any machine.
@@ -78,27 +80,6 @@
     changeDirWidget.command = "fd --type d --hidden --exclude .git";
     historyWidget.command = ""; # Ctrl-R belongs to atuin (shell.nix)
     defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
-  };
-
-  # Terminal multiplexer. Not started automatically: run `zellij`, or
-  # `zellij attach -c main` to resume a named session.
-  programs.zellij = {
-    enable = true;
-    # Named explicitly: zellij can't ask the terminal whether it's light or
-    # dark through mosh, and then falls back to a dark theme.
-    themes.rose-pine-dawn = ./zellij/rose-pine-dawn.kdl;
-    # Modal keys with a leader: see the comment at the top of the file.
-    # TODO: zellij 0.45.1 can't select this preset by name, so it's copied.
-    # The next release can: replace the file with
-    #   extraConfig = ''keybinds preset="unlock-first" { }'';
-    extraConfig = builtins.readFile ./zellij/keybinds-unlock-first.kdl;
-    settings = {
-      default_mode = "locked"; # part of the preset: keys go to the shell
-      theme = "rose-pine-dawn";
-      # Having a config file at all also skips the first-run setup screen.
-      show_startup_tips = false;
-      show_release_notes = false;
-    };
   };
 
   # Process viewer.
