@@ -63,7 +63,7 @@ on by itself (or asks you to paste a code back).
 | git + gh (desks) | `gh auth login --web --git-protocol ssh` | Creates and uploads this machine's SSH key. |
 | gh (servers) | `gh auth login --web --skip-ssh-key` | Token only, for `gh pr`, `gh run` etc.; git itself uses the forwarded agent. |
 | atuin | `atuin login`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). |
-| Claude | `claude`, then log in | No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
+| Claude | `claude`, then log in | First run asks for a theme: pick Light (the declared one). No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
 | codex | `codex login --device-auth` | Device code, like gh. |
 
 gh's device page is https://github.com/login/device; "Failed opening a web
