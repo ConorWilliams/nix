@@ -48,8 +48,9 @@
     };
   };
 
-  # Shell history in a local SQLite database: Ctrl-R searches everything
-  # (filter by directory/host/session), Up searches this session only.
+  # Shell history in a local SQLite database. Ctrl-R and Up both open a
+  # full-screen search over all history from every machine (press Ctrl-R
+  # inside it to narrow to this host, session or directory).
   # Synced every 5 minutes to Atuin's hosted server (api.atuin.sh), end-to-end
   # encrypted. Login is per machine and never in Nix: `atuin login`.
   programs.atuin = {
@@ -60,7 +61,10 @@
       auto_sync = true;
       sync_frequency = "5m";
       update_check = false; # Nix handles updates
-      filter_mode_shell_up_key_binding = "session";
+      filter_mode = "global";
+      filter_mode_shell_up_key_binding = "global";
+      workspaces = false; # don't narrow to the current git repo
+      inline_height = 0; # full screen
 
       # Background daemon, started by the shell when needed (no service).
       # Threads needs it; it also syncs every 5 minutes on its own.
