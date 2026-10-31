@@ -10,8 +10,14 @@ in
   # kitty comes from its own installer (see README), into ~/.local/kitty.app.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
-  # Locks the screen on suspend (lid close), via the startup line below.
-  home.packages = [ pkgs.xss-lock ];
+  # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
+  # (i3lock stays apt's: a Nix-built screen locker can't use Ubuntu's
+  # password checking, so it couldn't unlock.)
+  home.packages = with pkgs; [
+    rofi # launcher: mod+d
+    dex # starts the desktop's autostart apps (startup line below)
+    xss-lock # locks the screen on suspend (lid close)
+  ];
 
   # i3 from Nix: same version on hubble and luna. Unlike kitty it needs no
   # graphics drivers (plain X11). The login screen's "i3" session runs it.

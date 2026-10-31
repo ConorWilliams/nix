@@ -56,7 +56,7 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
    GUI apps can't use Ubuntu's graphics drivers:
 
    ```sh
-   sudo apt install i3 rofi dex   # login-screen "i3" session, i3lock, launcher
+   sudo apt install i3   # the login screen's "i3" session, and i3lock
    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin  # kitty
    ```
 
