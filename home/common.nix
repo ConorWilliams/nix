@@ -64,6 +64,7 @@
     defaultCommand = "fd --type f --hidden --exclude .git";
     fileWidget.command = "fd --type f --hidden --exclude .git";
     changeDirWidget.command = "fd --type d --hidden --exclude .git";
+    historyWidget.command = ""; # Ctrl-R belongs to atuin (shell.nix)
     defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
   };
 
