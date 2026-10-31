@@ -2,30 +2,29 @@
 { ... }:
 
 let
-  # Remote URLs that mark a repo as personal. GitHub ignores case in URLs,
+  # Remote URLs that mark a repo as work. GitHub ignores case in URLs,
   # but git's matching doesn't, so both spellings are listed.
-  personalRemotes = [
-    "git@github.com:ConorWilliams/**"
-    "git@github.com:conorwilliams/**"
-    "https://github.com/ConorWilliams/**"
-    "https://github.com/conorwilliams/**"
+  myrtleRemotes = [
+    "git@github.com:MyrtleSoftware/**"
+    "git@github.com:myrtlesoftware/**"
+    "https://github.com/MyrtleSoftware/**"
+    "https://github.com/myrtlesoftware/**"
   ];
 in
 {
   programs.git = {
     enable = true;
 
-    # Default identity: work.
+    # Default identity: personal.
     settings.user = {
       name = "Conor Williams";
-      email = "conor@myrtle.ai";
+      email = "conorwilliams@outlook.com";
     };
 
-    # Personal identity for any repo with a personal remote. Git checks
-    # each condition when it runs, so this works the same on every machine.
+    # Myrtle identity for any repo with a myrtle remote.
     includes = map (url: {
       condition = "hasconfig:remote.*.url:${url}";
-      contents.user.email = "conorwilliams@outlook.com";
-    }) personalRemotes;
+      contents.user.email = "conor@myrtle.ai";
+    }) myrtleRemotes;
   };
 }
