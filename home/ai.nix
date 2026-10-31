@@ -31,10 +31,9 @@ in
         type = "command";
         command = "${statusline}/bin/claude-statusline";
       };
-      # Draws with the terminal's 16 colours, i.e. kitty's Rosé Pine Dawn.
-      # Immune to truecolor problems over SSH/zellij. A full custom Rosé Pine
-      # theme is in git history (commit 3727c9f) if this looks too plain.
-      theme = "light-ansi";
+      # Claude's own light palette; relies on COLORTERM=truecolor (common.nix)
+      # to look right over SSH/zellij.
+      theme = "light";
       tui = "fullscreen";
       autoCompactEnabled = true;
       idleCompaction = false; # don't compact sessions I've stepped away from

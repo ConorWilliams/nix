@@ -50,13 +50,30 @@
 
   # Shell history in a local SQLite database: Ctrl-R searches everything
   # (filter by directory/host/session), Up searches this session only.
-  # Sync is off; enabling it is a separate decision (work policy).
+  # Synced every 5 minutes to Atuin's hosted server (api.atuin.sh), end-to-end
+  # encrypted. Login is per machine and never in Nix: `atuin login`.
   programs.atuin = {
     enable = true;
     settings = {
-      auto_sync = false;
+      auto_sync = true;
+      sync_frequency = "5m";
       update_check = false; # Nix handles updates
       filter_mode_shell_up_key_binding = "session";
+
+      # Background daemon, started by the shell when needed (no service).
+      # Threads needs it; it also syncs every 5 minutes on its own.
+      daemon = {
+        enabled = true;
+        autostart = true;
+      };
+
+      # Threads: capture Claude Code (and Codex) sessions from their
+      # transcript files, synced like history. `atuin threads` to search,
+      # `atuin resume` to continue one, on any machine.
+      threads = {
+        capture = true;
+        capture_tools = true; # include tool input/output and edit diffs
+      };
     };
   };
 
