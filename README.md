@@ -25,7 +25,10 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
 
 1. Install Nix (Determinate installer). For a new user on a machine that
    already has Nix: `sudo useradd -m -s /bin/bash <user>`.
-2. Log in to GitHub and clone. `gh` isn't installed yet, so borrow it:
+2. Log in to GitHub and clone. On a **server**, skip the login: your
+   forwarded SSH agent already lets git through (`ssh-add -l` should list a
+   key), so just `git clone`. On a **desk**, `gh` isn't installed yet, so
+   borrow it:
 
    ```sh
    nix run nixpkgs#gh -- auth login --web --git-protocol ssh
@@ -45,15 +48,26 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
    nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@desk
    ```
 
-4. Log in again (bash now starts fish), then the per-machine logins. None
-   of these are in Nix; each prints a URL to open in any browser:
+4. Log in again (bash now starts fish), then do the per-machine logins
+   below.
 
-   ```sh
-   atuin login        # no -u (that's password login); then the atuin key
-   atuin sync
-   claude             # then /login
-   codex login
-   ```
+## Logging in to things (per machine, never in Nix)
+
+Every login works over SSH: the tool shows a URL or code, you open it in
+the browser on whatever machine you're sitting at, and the terminal carries
+on by itself (or asks you to paste a code back).
+
+| What | Command | Notes |
+| --- | --- | --- |
+| git (servers) | nothing | The SSH agent is forwarded to short hostnames (`home/ssh.nix`), so servers use your desk's key and hold none. Connect with plain `ssh` from a machine whose agent has a key. |
+| git + gh (desks) | `gh auth login --web --git-protocol ssh` | Creates and uploads this machine's SSH key. |
+| gh (servers) | `gh auth login --web --skip-ssh-key` | Token only, for `gh pr`, `gh run` etc.; git itself uses the forwarded agent. |
+| atuin | `atuin login`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). |
+| Claude | `claude`, then log in | No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
+| codex | `codex login --device-auth` | Device code, like gh. |
+
+gh's device page is https://github.com/login/device; "Failed opening a web
+browser" just means it's waiting for you to go there.
 
 The Mac also has system settings, applied separately:
 
