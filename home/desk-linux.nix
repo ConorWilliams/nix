@@ -19,6 +19,7 @@ in
     xss-lock # locks the screen on suspend (lid close)
     scrot # screenshots: Print key below, or `scrot` in a terminal
     xclip # terminal <-> X clipboard (also neovim's clipboard on X11)
+    arandr # arrange monitors visually (GTK, no OpenGL, so Nix's is fine)
   ];
 
   # i3 from Nix: same version on hubble and luna. Unlike kitty it needs no

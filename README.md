@@ -14,7 +14,7 @@ home/common.nix      every machine; imports the files below
   zellij.nix         zellij: theme, modal keys (zellij/)
   neovim.nix         placeholder until the neovim step
 home/desk.nix        machines you sit at, any OS: kitty config, font, codex, zk
-home/desk-linux.nix  Linux desks: i3, scrot, xclip
+home/desk-linux.nix  Linux desks: i3, scrot, xclip, arandr
 home/desk-mac.nix    the Mac
 home/hubble.nix      hubble-only tweaks (mouse speed)
 home/luna.nix        luna-only tweaks (font size)
