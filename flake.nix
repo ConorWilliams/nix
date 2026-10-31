@@ -76,7 +76,7 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          # Makes `inputs` available to every module, e.g. home/ai.nix.
+          # Makes `inputs` available to every module, e.g. home/claude.nix.
           extraSpecialArgs = { inherit inputs; };
           modules = role.modules ++ [
             {

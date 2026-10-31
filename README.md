@@ -9,10 +9,11 @@ flake.nix            users, roles, mkHome, checks, formatter
 home/common.nix      every machine; imports the files below
   git.nix            git, delta, lazygit, lfs
   shell.nix          bash -> fish, starship, atuin, zoxide
-  ai.nix             claude (+ settings, status line), codex
+  claude.nix         Claude Code: settings, status line (claude/)
+  ssh.nix            SSH client: agent forwarding to work hosts
   neovim.nix         placeholder until the neovim step
-  scripts/           scripts packaged by the modules above
-home/desk.nix        machines you sit at, any OS
+  zellij/            zellij theme and keybinding preset
+home/desk.nix        machines you sit at, any OS (+ codex)
 home/desk-linux.nix  Linux desks
 home/desk-mac.nix    the Mac
 darwin/mac.nix       Mac system settings only

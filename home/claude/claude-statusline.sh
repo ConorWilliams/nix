@@ -1,6 +1,6 @@
 # Claude Code status line, e.g.   Opus 5.5 | ~/nix@main | 58k/1000k | 5h 5%  7d 1%
 # Over SSH the location gains user@host, like the shell prompt.
-# Reads Claude's status JSON on stdin; jq and git are pinned by home/ai.nix.
+# Reads Claude's status JSON on stdin; jq and git are pinned by home/claude.nix.
 # Runs in bash strict mode (set -euo pipefail), added by writeShellApplication.
 
 # All fields in one jq call. \x1f (not tab) as separator, because bash's read

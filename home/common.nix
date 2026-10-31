@@ -4,7 +4,7 @@
 {
   imports = [
     ./git.nix
-    ./ai.nix
+    ./claude.nix
     ./shell.nix
     ./neovim.nix
     ./ssh.nix
