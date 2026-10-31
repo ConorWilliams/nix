@@ -35,6 +35,12 @@
     lt = "eza --tree --icons=auto";
   };
 
+  # Tell programs the terminal supports 24-bit colour. SSH doesn't forward
+  # COLORTERM, so without this, tools over SSH (and inside zellij) fall back
+  # to 256 colours and round every theme colour: the "washed out" look.
+  # True for every terminal used here (kitty, zellij inside kitty).
+  home.sessionVariables.COLORTERM = "truecolor";
+
   # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix.
   programs.gh.enable = true;
 
