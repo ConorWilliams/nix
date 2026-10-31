@@ -24,6 +24,9 @@
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
       ty
+      # Markdown (zk's server comes with zk, in desk.nix)
+      marksman
+      rumdl
     ];
 
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers

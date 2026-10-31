@@ -11,6 +11,8 @@ vim.lsp.enable({
   'bashls', -- bash-language-server (sh and bash)
   'ty', -- Python types
   'ruff', -- Python lint and format
+  'marksman', -- Markdown links, headings, references
+  'rumdl', -- Markdown lint and format
 })
 
 -- Keys for buffers with a server attached, as in LazyVim. Built in already:
