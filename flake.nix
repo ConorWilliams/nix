@@ -24,9 +24,9 @@
 
       # What each kind of machine gets, and what it runs on.
       roles = {
-        desk   = { system = "x86_64-linux";   modules = [ ./home/common.nix ./home/desk.nix ./home/i3.nix ]; };
+        desk   = { system = "x86_64-linux";   modules = [ ./home/common.nix ./home/desk.nix ./home/desk-linux.nix ]; };
         server = { system = "x86_64-linux";   modules = [ ./home/common.nix ]; };
-        mac    = { system = "aarch64-darwin"; modules = [ ./home/common.nix ./home/desk.nix ./home/mac.nix ]; };
+        mac    = { system = "aarch64-darwin"; modules = [ ./home/common.nix ./home/desk.nix ./home/desk-mac.nix ]; };
       };
 
       # Build one Home Manager config for a given user and role.
