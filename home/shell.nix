@@ -47,4 +47,19 @@
       };
     };
   };
+
+  # Shell history in a local SQLite database: Ctrl-R searches everything
+  # (filter by directory/host/session), Up searches this session only.
+  # Sync is off; enabling it is a separate decision (work policy).
+  programs.atuin = {
+    enable = true;
+    settings = {
+      auto_sync = false;
+      update_check = false; # Nix handles updates
+      filter_mode_shell_up_key_binding = "session";
+    };
+  };
+
+  # `z foo` jumps to the most-used directory matching foo; `zi` picks with fzf.
+  programs.zoxide.enable = true;
 }

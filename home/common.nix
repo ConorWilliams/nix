@@ -67,6 +67,10 @@
     defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
   };
 
+  # Terminal multiplexer, with its default config (no config file).
+  # Not started automatically: run `zellij`, or `zellij attach -c main`.
+  programs.zellij.enable = true;
+
   # Process viewer.
   programs.htop.enable = true;
 
