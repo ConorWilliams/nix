@@ -6,21 +6,28 @@
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      # Use our nixpkgs rather than home-manager's own copy, 
+      # Use our nixpkgs rather than home-manager's own copy,
       # so there is exactly one package set.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
+      # Same as above.
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, nix-darwin, ... }:
     let
       users = [ "conor" "conix" ];
 
       roles = {
-        desk   = [ ./home/common.nix ./home/desk.nix ];
+        desk   = [ ./home/common.nix ./home/desk.nix ./home/i3.nix ];
         server = [ ./home/common.nix ];
       };
 
+      # Linux only; the Mac's system is set in darwin/mac.nix.
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
@@ -34,8 +41,7 @@
       };
     in
     {
-      # Every user × role combination, named "<user>@<role>":
-      #   conor@desk, conor@server, conix@desk, conix@server
+      # Linux: every user × role combination, named "<user>@<role>"
       # Activate one with:
       #   home-manager switch --flake .#conix@desk
       homeConfigurations = builtins.listToAttrs (
@@ -46,5 +52,15 @@
           }) roles
         ) users
       );
+
+      # macOS: system settings + the same home modules, in one config.
+      # Activate with:
+      #   darwin-rebuild switch --flake .#mac
+      darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
+        modules = [
+          home-manager.darwinModules.home-manager
+          ./darwin/mac.nix
+        ];
+      };
     };
 }
