@@ -1,5 +1,13 @@
 {
   "plugins": {
+    "flash.nvim": {
+      "rev": "5f0f270fdc7c5b0c21d903ee85b9cb06f2ac636a",
+      "src": "https://github.com/folke/flash.nvim"
+    },
+    "mini.nvim": {
+      "rev": "6d5a29e86a7352739506c28e0bc50fe214b5216f",
+      "src": "https://github.com/nvim-mini/mini.nvim"
+    },
     "rose-pine": {
       "rev": "ff483051a47e27d84bdef47703538df1ed9f4a47",
       "src": "https://github.com/rose-pine/neovim"
