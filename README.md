@@ -19,28 +19,47 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
 ## Set up a new machine
 
 1. Install Nix (Determinate installer).
-2. Trust the Numtide binary cache, so codex is downloaded rather than
-   compiled (~20 min). Once per machine, needs sudo:
+2. Clone this repo to `~/nix` and activate:
 
    ```sh
-   printf '%s\n' \
-     'extra-substituters = https://cache.numtide.com' \
-     'extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=' \
-     | sudo tee -a /etc/nix/nix.conf
-   sudo systemctl restart nix-daemon
+   nix run home-manager -- switch --flake ~/nix#conix@desk
    ```
 
-3. Clone this repo and activate:
+The Mac also has system settings, applied separately:
 
-   ```sh
-   nix run home-manager -- switch --flake .#conix@desk
-   ```
+```sh
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac  # first time
+sudo darwin-rebuild switch --flake ~/nix#mac                                # after that
+```
 
 ## Day to day
 
 ```sh
 home-manager switch --flake .#conix@desk   # apply changes
 nix flake update                           # bump all pinned inputs
-nix flake update llm-agents                # bump just claude/codex
+nix flake update llm-agents                # bump just claude
 nix fmt                                    # format all .nix files
+
+# Check every config evaluates, Mac included (~10s, no building).
+# `nix flake check` does NOT catch mistakes in home configs.
+nix eval --json .#homeConfigurations \
+  --apply 'builtins.mapAttrs (_: c: c.activationPackage.drvPath)'
 ```
+
+## Notes for later steps
+
+- **Moving `conor` over:** delete `~/.gitconfig` first. Git reads it after
+  Home Manager's `~/.config/git/config`, so it silently wins. Expect the
+  first switch to hit existing `.bashrc`/`.profile`/`config.fish`; use
+  `home-manager switch -b backup`.
+- **Shells:** keep bash as the login shell and start fish from bash for
+  interactive sessions, so `ssh host cmd`, scp and mosh stay plain bash.
+  Stop running `brew shellenv`, or linuxbrew shadows Nix tools.
+- **Linux GUI apps:** consider `targets.genericLinux` (launcher entries,
+  terminfo). Its GPU part needs sudo and a driver-version pin on NVIDIA,
+  so prefer apt for GL-heavy apps like kitty (`package = null`).
+- **Servers:** add `nix.gc` (a systemd user timer, so needs
+  `loginctl enable-linger`). `home.sessionVariables` only reach login
+  shells.
+- **Neovim:** live-editing the config via `mkOutOfStoreSymlink` relies on
+  the repo always living at `~/nix`.

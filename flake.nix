@@ -100,7 +100,7 @@
 
       # The Mac's system settings only (Homebrew casks, macOS defaults).
       # Rarely changed. Activate with:
-      #   darwin-rebuild switch --flake .#mac
+      #   sudo darwin-rebuild switch --flake .#mac
       darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/mac.nix ];
       };

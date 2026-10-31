@@ -9,7 +9,7 @@
 
   # Compatibility marker for Home Manager's defaults, NOT a version pin.
   # Set once when a user is first created; never bump it casually.
-  home.stateVersion = "26.05";
+  home.stateVersion = "26.11";
 
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
@@ -48,8 +48,5 @@
 
   # Terminal file manager. Run `y`; quitting leaves the shell in the
   # directory you were browsing.
-  programs.yazi = {
-    enable = true;
-    shellWrapperName = "y";
-  };
+  programs.yazi.enable = true;
 }
