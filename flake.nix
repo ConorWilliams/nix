@@ -22,45 +22,45 @@
     let
       users = [ "conor" "conix" ];
 
+      # What each kind of machine gets, and what it runs on.
       roles = {
-        desk   = [ ./home/common.nix ./home/desk.nix ./home/i3.nix ];
-        server = [ ./home/common.nix ];
+        desk   = { system = "x86_64-linux";   modules = [ ./home/common.nix ./home/desk.nix ./home/i3.nix ]; };
+        server = { system = "x86_64-linux";   modules = [ ./home/common.nix ]; };
+        mac    = { system = "aarch64-darwin"; modules = [ ./home/common.nix ./home/desk.nix ./home/mac.nix ]; };
       };
-
-      # Linux only; the Mac's system is set in darwin/mac.nix.
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
 
       # Build one Home Manager config for a given user and role.
-      mkHome = user: modules: home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = modules ++ [{
-          home.username = user;
-          home.homeDirectory = "/home/${user}";
-        }];
-      };
+      mkHome = user: role:
+        let
+          pkgs = nixpkgs.legacyPackages.${role.system};
+          homeRoot = if pkgs.stdenv.hostPlatform.isDarwin then "/Users" else "/home";
+        in
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = role.modules ++ [{
+            home.username = user;
+            home.homeDirectory = "${homeRoot}/${user}";
+          }];
+        };
     in
     {
-      # Linux: every user × role combination, named "<user>@<role>"
-      # Activate one with:
+      # Your home directory, on every machine. Every user × role, named
+      # "<user>@<role>". Activate one with:
       #   home-manager switch --flake .#conix@desk
       homeConfigurations = builtins.listToAttrs (
         nixpkgs.lib.concatMap (user:
-          nixpkgs.lib.mapAttrsToList (role: modules: {
-            name = "${user}@${role}";
-            value = mkHome user modules;
+          nixpkgs.lib.mapAttrsToList (name: role: {
+            name = "${user}@${name}";
+            value = mkHome user role;
           }) roles
         ) users
       );
 
-      # macOS: system settings + the same home modules, in one config.
-      # Activate with:
+      # The Mac's system settings only (Homebrew casks, macOS defaults).
+      # Rarely changed. Activate with:
       #   darwin-rebuild switch --flake .#mac
       darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
-        modules = [
-          home-manager.darwinModules.home-manager
-          ./darwin/mac.nix
-        ];
+        modules = [ ./darwin/mac.nix ];
       };
     };
 }
