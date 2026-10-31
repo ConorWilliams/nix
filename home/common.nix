@@ -41,8 +41,12 @@
   # True for every terminal used here (kitty, zellij inside kitty).
   home.sessionVariables.COLORTERM = "truecolor";
 
-  # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix.
-  programs.gh.enable = true;
+  # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix;
+  # use "Login with a web browser" and open the printed URL on any machine.
+  programs.gh = {
+    enable = true;
+    settings.git_protocol = "ssh"; # clone/push over SSH (key uploaded by gh)
+  };
 
   # Fast grep. Smart case: case-insensitive unless you type a capital.
   programs.ripgrep = {
