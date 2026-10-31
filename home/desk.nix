@@ -1,12 +1,13 @@
 # Extras for machines you sit at, on any OS (hubble, luna, mac).
 # Never imported on servers. OS-specific bits go in desk-linux.nix / desk-mac.nix.
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   home.packages = [
     # OpenAI's coding CLI, from nixpkgs: a few days behind, but prebuilt.
     # Desk only: it pulls in ~1 GiB (GStreamer, for voice features).
     pkgs.codex
+    pkgs.zk # Markdown notes (zettelkasten)
   ];
 
   # kitty's config. The app itself is installed outside Nix (kitty's own
@@ -17,7 +18,7 @@
     package = null;
     font = {
       name = "CaskaydiaCove Nerd Font";
-      size = 20;
+      size = lib.mkDefault 20; # luna.nix overrides it
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme

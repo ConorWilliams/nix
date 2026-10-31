@@ -17,6 +17,8 @@ in
     rofi # launcher: mod+d
     dex # starts the desktop's autostart apps (startup line below)
     xss-lock # locks the screen on suspend (lid close)
+    scrot # screenshots: Print key below, or `scrot` in a terminal
+    xclip # terminal <-> X clipboard (also neovim's clipboard on X11)
   ];
 
   # i3 from Nix: same version on hubble and luna. Unlike kitty it needs no
@@ -36,6 +38,10 @@ in
         "${mod}+n" = "exec i3lock -d -c000000";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
+        # Print: drag to select an area (click for one window) -> ~/Pictures.
+        # --release: scrot can only grab the mouse once the key is let go.
+        "--release Print" =
+          "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
       };
 
       startup = [

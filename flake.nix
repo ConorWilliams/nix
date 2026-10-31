@@ -62,6 +62,7 @@
             ./home/common.nix
             ./home/desk.nix
             ./home/desk-linux.nix
+            ./home/luna.nix
           ];
         };
         server = {
