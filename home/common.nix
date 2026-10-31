@@ -1,5 +1,5 @@
 # Everything shared by every machine: desks (hubble, laptop) and servers.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -7,6 +7,7 @@
     ./ai.nix
     ./shell.nix
     ./neovim.nix
+    ./ssh.nix
   ];
 
   # Compatibility marker for Home Manager's defaults, NOT a version pin.
@@ -27,12 +28,19 @@
     uv # Python packages, projects and interpreters
     mosh # SSH that survives sleep and network changes
     tokei # count lines of code
+    kitty.kitten # kitty's helper (icat etc.), without the 600 MiB GUI app
+    kitty.terminfo # lets programs drive kitty properly, including over SSH
   ];
+
+  # Find the terminfo above. The empty entry after ":" keeps each program's
+  # own default locations (Nix ncurses only looks in its own store path).
+  home.sessionVariables.TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
+    icat = "kitten icat"; # show an image; works over ssh, not over mosh
   };
 
   # Tell programs the terminal supports 24-bit colour. SSH doesn't forward

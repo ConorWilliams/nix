@@ -3,7 +3,4 @@
 { ... }:
 
 {
-  home.shellAliases = {
-    icat = "kitten icat"; # show an image in kitty
-  };
 }
