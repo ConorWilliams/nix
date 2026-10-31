@@ -1,4 +1,5 @@
-# AI coding CLIs. Logins stay per machine, outside Nix.
+# Claude Code, its settings and status line. Logins stay per machine.
+# (codex is in desk.nix: its ~1 GiB of audio libraries stay off servers.)
 { pkgs, inputs, ... }:
 
 let
@@ -41,8 +42,4 @@ in
       skipAutoPermissionPrompt = true; # no one-time auto-mode notice per machine
     };
   };
-
-  home.packages = [
-    pkgs.codex # from nixpkgs: a few days behind, but prebuilt (no compiling)
-  ];
 }
