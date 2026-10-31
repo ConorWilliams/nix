@@ -12,7 +12,7 @@ home/common.nix      every machine; imports the files below
   claude.nix         Claude Code: settings, status line (claude/)
   ssh.nix            SSH client: agent forwarding to work hosts
   zellij.nix         zellij: theme, modal keys (zellij/)
-  neovim.nix         placeholder until the neovim step
+  neovim.nix         neovim: tools from Nix, Lua config linked live (nvim/)
 home/desk.nix        machines you sit at, any OS: kitty config, font, codex, zk
 home/desk-linux.nix  Linux desks: i3, scrot, xclip, arandr
 home/desk-mac.nix    the Mac
@@ -134,5 +134,6 @@ nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
 - **Servers:** add `nix.gc` (a systemd user timer, so needs
   `loginctl enable-linger`). `home.sessionVariables` only reach login
   shells.
-- **Neovim:** live-editing the config via `mkOutOfStoreSymlink` relies on
+- **Neovim:** `~/.config/nvim` is a live link to `~/nix/nvim` (edits apply
+  without a switch; vim.pack writes its lockfile there), so it relies on
   the repo always living at `~/nix`.
