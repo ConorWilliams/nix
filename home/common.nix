@@ -29,6 +29,7 @@
     uv # Python packages, projects and interpreters
     mosh # SSH that survives sleep and network changes
     tokei # count lines of code
+    fuc # rmz / cpz: fast rm and cp for big trees (checkpoints, datasets)
     kitty.kitten # kitty's helper (icat etc.), without the 600 MiB GUI app
     kitty.terminfo # lets programs drive kitty properly, including over SSH
   ];
