@@ -11,6 +11,18 @@
     # the wrapper instead so ~/.config/nvim can be our own directory.
     sideloadInitLua = true;
 
+    # Language servers and formatters, on nvim's PATH only (appended, so a
+    # project's own versions win). Configured in nvim/plugin/60_lsp.lua.
+    extraPackages = with pkgs; [
+      lua-language-server
+      stylua
+      nixd
+      nixfmt
+      bash-language-server
+      shellcheck # used by bash-language-server for diagnostics
+      shfmt
+    ];
+
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers
     # and their matching queries, all from the binary cache (no compiler).
     # nvim/plugin/40_treesitter.lua turns it on per buffer.

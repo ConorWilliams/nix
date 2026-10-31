@@ -1,0 +1,47 @@
+-- Language servers. The servers themselves come from Nix (extraPackages in
+-- home/neovim.nix). nvim-lspconfig only supplies default configs (command,
+-- filetypes, root markers) as lsp/<name>.lua files; our tweaks per server
+-- live in after/lsp/<name>.lua and are merged on top.
+
+vim.pack.add({ 'https://github.com/neovim/nvim-lspconfig' })
+
+vim.lsp.enable({
+  'lua_ls', -- lua-language-server
+  'nixd',
+  'bashls', -- bash-language-server (sh and bash)
+})
+
+-- Keys for buffers with a server attached, as in LazyVim. Built in already:
+-- K hover, [d ]d diagnostics, gO document symbols.
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('config-lsp', {}),
+  callback = function(ev)
+    local map = function(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc, nowait = true })
+    end
+    map('n', 'gd', vim.lsp.buf.definition, 'Goto definition')
+    map('n', 'gD', vim.lsp.buf.declaration, 'Goto declaration')
+    map('n', 'gr', vim.lsp.buf.references, 'References') -- nowait: skips the built-in gr* keys
+    map('n', 'gI', vim.lsp.buf.implementation, 'Goto implementation')
+    map('n', 'gy', vim.lsp.buf.type_definition, 'Goto type definition')
+    map('n', 'gK', vim.lsp.buf.signature_help, 'Signature help')
+    map('i', '<C-k>', vim.lsp.buf.signature_help, 'Signature help')
+    map({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, 'Code action')
+    map('n', '<leader>cr', vim.lsp.buf.rename, 'Rename')
+  end,
+})
+
+-- How diagnostics are shown
+vim.diagnostic.config({
+  severity_sort = true, -- Errors above warnings when several share a line
+  virtual_text = { spacing = 4, source = 'if_many', prefix = '●' },
+  float = { source = 'if_many' },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = ' ',
+      [vim.diagnostic.severity.WARN] = ' ',
+      [vim.diagnostic.severity.HINT] = ' ',
+      [vim.diagnostic.severity.INFO] = ' ',
+    },
+  },
+})
