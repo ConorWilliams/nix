@@ -26,7 +26,14 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
 ## Set up a new machine
 
 1. Install Nix (Determinate installer). For a new user on a machine that
-   already has Nix: `sudo useradd -m -s /bin/bash <user>`.
+   already has Nix: `sudo useradd -m -s /bin/bash <user>`. If Nix says
+   "experimental Nix feature 'flakes' is disabled" (the official nixos.org
+   installer leaves them off), turn them on for your user:
+
+   ```sh
+   mkdir -p ~/.config/nix
+   echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+   ```
 2. Log in to GitHub and clone. On a **server**, skip the login: your
    forwarded SSH agent already lets git through (`ssh-add -l` should list a
    key), so just `git clone`. On a **desk**, `gh` isn't installed yet, so
