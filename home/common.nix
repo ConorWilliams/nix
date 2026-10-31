@@ -30,8 +30,8 @@
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
-    ll = "eza -l --icons=always";
-    lt = "eza --tree --icons=always";
+    ll = "eza -l --icons=auto";
+    lt = "eza --tree --icons=auto";
   };
 
   # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix.
