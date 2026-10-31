@@ -63,7 +63,7 @@ on by itself (or asks you to paste a code back).
 | git (servers) | nothing | The SSH agent is forwarded to short hostnames (`home/ssh.nix`), so servers use your desk's key and hold none. Connect with plain `ssh` from a machine whose agent has a key. |
 | git + gh (desks) | `gh auth login --web --git-protocol ssh` | Creates and uploads this machine's SSH key. |
 | gh (servers) | `gh auth login --web --skip-ssh-key` | Token only, for `gh pr`, `gh run` etc.; git itself uses the forwarded agent. |
-| atuin | `atuin login`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). |
+| atuin | `atuin login`, then `atuin daemon restart`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). The restart matters: the daemon started before login with a temporary key and keeps using it until restarted. |
 | Claude | `claude`, then log in | First run asks for a theme: pick Light (the declared one). No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
 | codex | `codex login --device-auth` | Device code, like gh. |
 
