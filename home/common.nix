@@ -48,6 +48,9 @@
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
     icat = "kitten icat"; # show an image; works over ssh, not over mosh
+    # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
+    # about Ubuntu's /etc/ssh/ssh_config; use the system's ssh instead.
+    mosh = "mosh --ssh=ssh";
   };
 
   home.sessionVariables = {
