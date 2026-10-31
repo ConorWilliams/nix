@@ -72,9 +72,20 @@
     defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
   };
 
-  # Terminal multiplexer, with its default config (no config file).
-  # Not started automatically: run `zellij`, or `zellij attach -c main`.
-  programs.zellij.enable = true;
+  # Terminal multiplexer. Not started automatically: run `zellij`, or
+  # `zellij attach -c main` to resume a named session.
+  programs.zellij = {
+    enable = true;
+    # Named explicitly: zellij can't ask the terminal whether it's light or
+    # dark through mosh, and then falls back to a dark theme.
+    themes.rose-pine-dawn = ./zellij/rose-pine-dawn.kdl;
+    settings = {
+      theme = "rose-pine-dawn";
+      # Having a config file at all also skips the first-run setup screen.
+      show_startup_tips = false;
+      show_release_notes = false;
+    };
+  };
 
   # Process viewer.
   programs.htop.enable = true;
