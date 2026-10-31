@@ -9,6 +9,8 @@ vim.lsp.enable({
   'lua_ls', -- lua-language-server
   'nixd',
   'bashls', -- bash-language-server (sh and bash)
+  'ty', -- Python types
+  'ruff', -- Python lint and format
 })
 
 -- Keys for buffers with a server attached, as in LazyVim. Built in already:

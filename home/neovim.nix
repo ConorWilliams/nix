@@ -21,6 +21,9 @@
       bash-language-server
       shellcheck # used by bash-language-server for diagnostics
       shfmt
+      # Python: fallbacks; a project's .venv/bin versions are preferred
+      ruff
+      ty
     ];
 
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers
