@@ -21,6 +21,8 @@ require('which-key').setup({
     { '<leader>b', group = 'buffer' },
     { '<leader>c', group = 'code' },
     { '<leader>f', group = 'file/find' },
+    { '<leader>g', group = 'git' },
+    { '<leader>gh', group = 'hunks' },
     { '<leader>q', group = 'quit/session' },
     { '<leader>s', group = 'search' },
     { '<leader>u', group = 'ui' },
