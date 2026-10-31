@@ -87,7 +87,10 @@
     # Named explicitly: zellij can't ask the terminal whether it's light or
     # dark through mosh, and then falls back to a dark theme.
     themes.rose-pine-dawn = ./zellij/rose-pine-dawn.kdl;
+    # Modal keys with a leader: see the comment at the top of the file.
+    extraConfig = builtins.readFile ./zellij/keybinds-unlock-first.kdl;
     settings = {
+      default_mode = "locked"; # part of the preset: keys go to the shell
       theme = "rose-pine-dawn";
       # Having a config file at all also skips the first-run setup screen.
       show_startup_tips = false;
