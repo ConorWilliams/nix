@@ -1,4 +1,4 @@
-# Linux desks only (hubble, laptop): window manager and GUI apps.
+# Linux desks only (hubble, luna): window manager and GUI app config.
 { ... }:
 
 {

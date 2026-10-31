@@ -19,8 +19,8 @@ home/desk-mac.nix    the Mac
 darwin/mac.nix       Mac system settings only
 ```
 
-Configs are named `<user>@<role>`: users `conor`/`conix`, roles
-`desk`/`server`/`mac`.
+Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
+`hubble`, `luna` (laptop), `mac`, and `server` (shared by every work server).
 
 ## Set up a new machine
 
@@ -46,7 +46,7 @@ Configs are named `<user>@<role>`: users `conor`/`conix`, roles
 3. Activate (`-b backup` renames the starter `.bashrc`/`.profile`):
 
    ```sh
-   nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@desk
+   nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@<machine>
    ```
 
 4. Log in again (bash now starts fish), then do the per-machine logins
@@ -80,7 +80,7 @@ browser" just means it's waiting for you to go there.
 ## Day to day
 
 ```sh
-home-manager switch --flake .#conix@desk   # apply changes
+home-manager switch --flake .#conix@hubble # apply changes (this machine's name)
 nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump just claude
 nix fmt                                    # format all .nix files

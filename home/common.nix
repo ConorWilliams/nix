@@ -1,4 +1,4 @@
-# Everything shared by every machine: desks (hubble, laptop) and servers.
+# Everything shared by every machine: hubble, luna, mac and the servers.
 { config, pkgs, ... }:
 
 {

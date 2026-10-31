@@ -43,9 +43,19 @@
         "conix"
       ];
 
-      # What each kind of machine gets, and what it runs on.
+      # What each machine gets, and what it runs on. Every work server shares
+      # one role. A machine-only tweak goes in a small home/<name>.nix added
+      # to its list.
       roles = {
-        desk = {
+        hubble = {
+          system = "x86_64-linux";
+          modules = [
+            ./home/common.nix
+            ./home/desk.nix
+            ./home/desk-linux.nix
+          ];
+        };
+        luna = {
           system = "x86_64-linux";
           modules = [
             ./home/common.nix
@@ -89,7 +99,7 @@
     {
       # Your home directory, on every machine. Every user × role, named
       # "<user>@<role>". Activate one with:
-      #   home-manager switch --flake .#conix@desk
+      #   home-manager switch --flake .#conix@hubble
       homeConfigurations = builtins.listToAttrs (
         nixpkgs.lib.concatMap (
           user:
