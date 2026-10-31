@@ -53,6 +53,7 @@
             ./home/common.nix
             ./home/desk.nix
             ./home/desk-linux.nix
+            ./home/hubble.nix
           ];
         };
         luna = {

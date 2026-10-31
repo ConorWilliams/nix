@@ -13,9 +13,10 @@ home/common.nix      every machine; imports the files below
   ssh.nix            SSH client: agent forwarding to work hosts
   zellij.nix         zellij: theme, modal keys (zellij/)
   neovim.nix         placeholder until the neovim step
-home/desk.nix        machines you sit at, any OS (+ codex)
-home/desk-linux.nix  Linux desks
+home/desk.nix        machines you sit at, any OS: kitty config, font, codex
+home/desk-linux.nix  Linux desks: i3
 home/desk-mac.nix    the Mac
+home/hubble.nix      hubble-only hardware tweaks
 darwin/mac.nix       Mac system settings only
 ```
 
@@ -51,6 +52,16 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
 
 4. Log in again (bash now starts fish), then do the per-machine logins
    below.
+5. Desks (hubble, luna) also need things from outside Nix, since Nix-built
+   GUI apps can't use Ubuntu's graphics drivers:
+
+   ```sh
+   sudo apt install i3 rofi dex   # login-screen "i3" session, i3lock, launcher
+   curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin  # kitty
+   ```
+
+   GUI apps stay with apt/snap: google-chrome, thunderbird, code (apt);
+   slack, obsidian (snap). Then log out and pick the "i3" session.
 
 The Mac also has system settings, applied separately:
 
@@ -108,9 +119,10 @@ nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
   add `-t` (`ssh -t host zellij attach -c main`): without a terminal,
   zellij crashes, and the half-started session has no `TERM`; delete it
   with `zellij delete-session main --force`.
-- **Linux GUI apps:** consider `targets.genericLinux` (launcher entries,
-  terminfo). Its GPU part needs sudo and a driver-version pin on NVIDIA,
-  so prefer apt for GL-heavy apps like kitty (`package = null`).
+- **Linux GUI apps:** stay with apt/snap/vendor installers. Making Nix GUI
+  apps work needs `targets.genericLinux.gpu`: sudo, plus pinning the exact
+  NVIDIA driver version (hubble's display is on the 4090) and re-pinning
+  after every driver update. Not an option on work-managed machines.
 - **Servers:** add `nix.gc` (a systemd user timer, so needs
   `loginctl enable-linger`). `home.sessionVariables` only reach login
   shells.
