@@ -5,6 +5,8 @@
   imports = [
     ./git.nix
     ./ai.nix
+    ./shell.nix
+    ./neovim.nix
   ];
 
   # Compatibility marker for Home Manager's defaults, NOT a version pin.
