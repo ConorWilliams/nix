@@ -18,7 +18,6 @@
   # Tools that need config or shell integration (git, fish, zellij, atuin,
   # zoxide, fzf...) get their own `programs.<name>` block in later steps.
   home.packages = with pkgs; [
-    ripgrep # rg: fast grep
     fd # fast find
     dust # du as a tree
     duf # df as a table
@@ -37,11 +36,28 @@
   # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix.
   programs.gh.enable = true;
 
-  # cat with syntax highlighting.
-  programs.bat.enable = true;
+  # Fast grep. Smart case: case-insensitive unless you type a capital.
+  programs.ripgrep = {
+    enable = true;
+    arguments = [ "--smart-case" ];
+  };
+
+  # cat with syntax highlighting. "ansi" reuses the terminal's own colours,
+  # so it matches kitty's theme everywhere, including over SSH.
+  programs.bat = {
+    enable = true;
+    config.theme = "ansi";
+  };
 
   # Fuzzy finder. Shell keys: Ctrl-T pick a file, Alt-C cd into a dir.
-  programs.fzf.enable = true;
+  # Listing via fd means .gitignore'd paths (checkpoints, data/) are skipped.
+  programs.fzf = {
+    enable = true;
+    defaultCommand = "fd --type f --hidden --exclude .git";
+    fileWidget.command = "fd --type f --hidden --exclude .git";
+    changeDirWidget.command = "fd --type d --hidden --exclude .git";
+    defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
+  };
 
   # Process viewer.
   programs.htop.enable = true;

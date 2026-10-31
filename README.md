@@ -39,11 +39,7 @@ home-manager switch --flake .#conix@desk   # apply changes
 nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump just claude
 nix fmt                                    # format all .nix files
-
-# Check every config evaluates, Mac included (~10s, no building).
-# `nix flake check` does NOT catch mistakes in home configs.
-nix eval --json .#homeConfigurations \
-  --apply 'builtins.mapAttrs (_: c: c.activationPackage.drvPath)'
+nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
 ```
 
 ## Notes for later steps

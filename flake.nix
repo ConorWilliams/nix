@@ -25,12 +25,19 @@
 
   outputs =
     inputs@{
+      self,
       nixpkgs,
       home-manager,
       nix-darwin,
       ...
     }:
     let
+      # Every system we build for.
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+
       users = [
         "conor"
         "conix"
@@ -94,8 +101,15 @@
       );
 
       # `nix fmt` formats every .nix file in the repo with nixfmt.
-      formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (
-        system: nixpkgs.legacyPackages.${system}.nixfmt-tree
+      formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+
+      # Lets `nix flake check` test every home config (by default it doesn't).
+      # Each config is checked under the system it runs on.
+      checks = nixpkgs.lib.genAttrs systems (
+        system:
+        nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (
+          nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system) self.homeConfigurations
+        )
       );
 
       # The Mac's system settings only (Homebrew casks, macOS defaults).
