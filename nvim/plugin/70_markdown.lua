@@ -37,7 +37,7 @@ vim.keymap.set(
 if vim.fn.executable('zk') == 1 then
   vim.pack.add({ 'https://github.com/zk-org/zk-nvim' })
   require('zk').setup({
-    picker = 'select', -- vim.ui.select for now; snacks once the picker is in
+    picker = 'snacks_picker',
   })
   vim.keymap.set('n', '<leader>z', '<cmd>ZkNotes<cr>', { desc = 'Find note' })
   vim.keymap.set(

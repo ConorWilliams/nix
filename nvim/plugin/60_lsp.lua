@@ -23,11 +23,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local map = function(mode, lhs, rhs, desc)
       vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc, nowait = true })
     end
-    map('n', 'gd', vim.lsp.buf.definition, 'Goto definition')
-    map('n', 'gD', vim.lsp.buf.declaration, 'Goto declaration')
-    map('n', 'gr', vim.lsp.buf.references, 'References') -- nowait: skips the built-in gr* keys
-    map('n', 'gI', vim.lsp.buf.implementation, 'Goto implementation')
-    map('n', 'gy', vim.lsp.buf.type_definition, 'Goto type definition')
+    -- Through the picker (55_picker.lua): jumps straight there if there's
+    -- only one result, else lists them with a preview.
+    map('n', 'gd', Snacks.picker.lsp_definitions, 'Goto definition')
+    map('n', 'gD', Snacks.picker.lsp_declarations, 'Goto declaration')
+    map('n', 'gr', Snacks.picker.lsp_references, 'References') -- nowait: skips the built-in gr* keys
+    map('n', 'gI', Snacks.picker.lsp_implementations, 'Goto implementation')
+    map('n', 'gy', Snacks.picker.lsp_type_definitions, 'Goto type definition')
     map('n', 'gK', vim.lsp.buf.signature_help, 'Signature help')
     map('i', '<C-k>', vim.lsp.buf.signature_help, 'Signature help')
     map({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, 'Code action')

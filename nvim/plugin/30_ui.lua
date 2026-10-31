@@ -22,6 +22,7 @@ require('which-key').setup({
     { '<leader>c', group = 'code' },
     { '<leader>f', group = 'file/find' },
     { '<leader>q', group = 'quit/session' },
+    { '<leader>s', group = 'search' },
     { '<leader>u', group = 'ui' },
     { '<leader>w', group = 'windows' },
     { '<leader><tab>', group = 'tabs' },
