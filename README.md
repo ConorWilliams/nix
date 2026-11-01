@@ -17,15 +17,21 @@ My terminal environment, managed with Nix + Home Manager.
 ## Layout
 
 ```text
-flake.nix                users, hosts -> layer
-bootstrap.sh
-home/default.nix         server layer: every machine; all CLI tools
-  gui/default.nix        GUI layer: desks on any OS
-    ubuntu/default.nix   Ubuntu layer
-      hubble.nix
-      luna.nix
-    mac/default.nix      Mac layer
-darwin/mac.nix           Mac system settings: not a layer
+.
+├── flake.nix                users, hosts -> layer
+├── bootstrap.sh
+├── home
+│   ├── default.nix          server layer: every machine; all CLI tools
+│   └── gui
+│       ├── default.nix      GUI layer: desks on any OS
+│       ├── ubuntu
+│       │   ├── default.nix  Ubuntu layer
+│       │   ├── hubble.nix
+│       │   └── luna.nix
+│       └── mac
+│           └── default.nix  Mac layer
+└── darwin
+    └── mac.nix              Mac system settings: not a layer
 ```
 
 Each layer imports the one above it (server -> gui -> ubuntu -> hubble,
