@@ -53,6 +53,12 @@ nix flake check --all-systems --no-build   # check every config, Mac too
 
 ### Straight into zellij
 
+```sh
+zzh brahe         # new zellij session on brahe, over ssh
+zzh brahe main    # join "main" on brahe, creating it if needed
+zosh brahe main   # the same over mosh
+```
+
 Full commands:
 
 ```sh
