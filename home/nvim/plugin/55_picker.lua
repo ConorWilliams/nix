@@ -25,38 +25,70 @@ local hide_dot_folders = function(item, ctx)
   end
 end
 
--- Full screen: list, input, then a preview below
-local fullscreen = {
-  backdrop = false,
-  width = 0,
-  height = 0,
-  min_width = 80,
-  min_height = 30,
-  border = 'none',
-  box = 'vertical',
-  { win = 'list', border = 'rounded' },
-  {
-    win = 'input',
-    height = 1,
-    border = 'rounded',
-    title = '{title} {live} {flags}',
-    title_pos = 'center',
+-- Two full-screen layouts. Pickers use the tall one; the explorer picks
+-- by the window's shape each time it opens: terminal cells are about twice
+-- as tall as wide, so more than twice as many columns as lines means a
+-- landscape window.
+local layouts = {
+  -- Landscape: search and results on the left, preview on the right.
+  wide = {
+    layout = {
+      backdrop = false,
+      width = 0,
+      height = 0,
+      border = 'none',
+      box = 'horizontal',
+      {
+        box = 'vertical',
+        width = 0.4,
+        {
+          win = 'input',
+          height = 1,
+          border = 'rounded',
+          title = '{title} {live} {flags}',
+          title_pos = 'center',
+        },
+        { win = 'list', border = 'rounded' },
+      },
+      { win = 'preview', border = 'rounded', title = '{preview}' },
+    },
   },
-  -- A top border, though it's never seen: snacks overlaps each window's top
-  -- row with the bottom border above, which hid line 1 of every preview.
-  { win = 'preview', height = 0.6, border = 'top' },
+  -- Portrait: results, the search box under them (best match next to it),
+  -- then a preview below.
+  tall = {
+    reverse = true,
+    layout = {
+      backdrop = false,
+      width = 0,
+      height = 0,
+      min_width = 80,
+      min_height = 30,
+      border = 'none',
+      box = 'vertical',
+      { win = 'list', border = 'rounded' },
+      {
+        win = 'input',
+        height = 1,
+        border = 'rounded',
+        title = '{title} {live} {flags}',
+        title_pos = 'center',
+      },
+      -- A top border, though it's never seen: snacks overlaps each window's
+      -- top row with the bottom border above, which hid line 1 of every
+      -- preview.
+      { win = 'preview', height = 0.6, border = 'top' },
+    },
+  },
 }
+local shape = function() return vim.o.columns > 2 * vim.o.lines and 'wide' or 'tall' end
 
 require('snacks').setup({
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
   scroll = {}, -- animated C-d, C-u, zz, jumps (as in LazyVim; not the mouse)
   picker = {
     enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
-    layout = {
-      cycle = true,
-      reverse = true, -- input at the bottom, best match next to it
-      layout = fullscreen,
-    },
+    layouts = layouts,
+    layout = { cycle = true, preset = 'tall' }, -- the explorer picks by shape (below)
     matcher = { frecency = true }, -- rank often/recently opened files higher
     win = { input = { keys = { ['<Esc>'] = { 'close', mode = { 'n', 'i' } } } } },
     sources = {
@@ -70,7 +102,7 @@ require('snacks').setup({
         hidden = true,
         transform = hide_dot_folders,
         auto_close = true,
-        layout = { layout = fullscreen, preview = true, reverse = false },
+        layout = { preset = shape, preview = true, reverse = false }, -- tree top-down
       },
     },
   },
