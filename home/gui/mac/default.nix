@@ -6,7 +6,12 @@
 {
   imports = [ ../. ]; # the GUI layer
 
-  # The Mac's system settings (darwin/mac.nix): the counterpart of `hms`.
-  # nh picks darwinConfigurations.<hostname> and asks for sudo itself.
-  home.shellAliases.dms = "nh darwin switch ${config.home.homeDirectory}/nix";
+  # Everything on the Mac: system settings (darwin/mac.nix), then home.
+  # `hms` stays home only, like everywhere else. nh picks
+  # darwinConfigurations.<hostname> and asks for sudo itself.
+  home.shellAliases.dms =
+    let
+      flake = "${config.home.homeDirectory}/nix";
+    in
+    "nh darwin switch ${flake} && nh home switch ${flake}";
 }
