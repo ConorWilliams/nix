@@ -4,9 +4,10 @@ set -euo pipefail
 
 repo=https://github.com/ConorWilliams/nix.git
 dir=$HOME/nix
-nix_min=2.31 # nh warns below this
 
+# Pretty output
 say() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
+
 # Answers come from the terminal: under `curl | bash`, stdin is this script.
 ask() {
   local answer
@@ -14,21 +15,14 @@ ask() {
   [[ $answer == [yY]* ]]
 }
 
-# Everything runs inside main, called on the last line: under `curl | bash`
-# that makes bash read the whole script before running any of it, so a
-# command reading stdin can't swallow the rest.
 main() {
   say "Nix"
   if ! type -P nix >/dev/null; then
-    echo "Nix isn't installed. Install it (multi-user), open a new shell, re-run:"
-    echo "  sh <(curl -L https://nixos.org/nix/install) --daemon"
+    echo "Nix isn't installed. Install it, open a new shell, re-run"
     exit 1
   fi
-  version=$(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)
-  echo "Nix $version"
-  if [[ $(printf '%s\n' "$nix_min" "$version" | sort -V | head -1) != "$nix_min" ]]; then
-    echo "Older than $nix_min (nh will warn). To upgrade: sudo -i nix upgrade-nix"
-  fi
+  echo "Nix $(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+
   # The official installer leaves flakes off; turn them on for this user.
   nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
   if ! nix config show experimental-features | grep -qw flakes; then
@@ -75,8 +69,7 @@ main() {
     fi
   fi
 
-  # The Mac: system settings (nix-darwin) first. Always the pinned version
-  # via nix run, so the same command works the first time and every time.
+  # The Mac: system settings (nix-darwin) first.
   if [[ $(uname -s) == Darwin ]]; then
     say "Mac system settings"
     if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
@@ -98,7 +91,6 @@ main() {
     echo "gh logged in"
   elif $desk; then
     if ask "Log in to GitHub (gh, in a browser)?"; then
-      echo "No browser here? Open https://github.com/login/device anywhere and enter the code."
       gh auth login --web --git-protocol https --skip-ssh-key </dev/tty
     fi
   elif ask "Log in to GitHub (gh) with a fine-grained token for this server?"; then
@@ -121,7 +113,6 @@ main() {
 
   say "Done"
   echo "Open a new terminal (or log in again) to start fish with everything."
-  echo "Other logins (Claude, codex, Copilot): see the README."
   if $desk && [[ $(uname -s) == Linux ]]; then
     echo "First time on this desk: log out and pick the \"i3\" session."
   fi
