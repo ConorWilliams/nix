@@ -22,13 +22,32 @@ local restore = function()
   if vim.fn.filereadable(persistence.current()) == 0 then return {} end
   return { { section = '', name = 's  Restore session', action = persistence.load } }
 end
+-- Neovim's own logo, from its intro screen (src/nvim/version.c), coloured
+-- the same way: Special up to the first diagonal, String from there on.
+local logo = { '│ ╲ ││', '││╲╲││', '││ ╲ │' }
+local colour_logo = function(content)
+  for _, line in ipairs(content) do
+    local unit = line[1]
+    local split = unit and unit.type == 'header' and unit.string:find('╲', 1, true)
+    if split then
+      local part = function(text, hl)
+        return vim.tbl_extend('force', unit, { string = text, hl = hl })
+      end
+      line[1] = part(unit.string:sub(1, split - 1), 'Special')
+      table.insert(line, 2, part(unit.string:sub(split), 'String'))
+    end
+  end
+  return content
+end
+
 starter.setup({
   evaluate_single = true,
+  header = table.concat(logo, '\n'),
   items = {
     { section = '', name = 'f  Find file', action = function() Snacks.picker.files() end },
     restore,
     { section = '', name = 'q  Quit', action = 'qall' },
   },
   footer = '', -- no usage hints
-  content_hooks = { starter.gen_hook.aligning('center', 'center') },
+  content_hooks = { colour_logo, starter.gen_hook.aligning('center', 'center') },
 })
