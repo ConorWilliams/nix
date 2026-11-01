@@ -54,19 +54,19 @@ nix flake check --all-systems --no-build   # check every config, Mac too
 ### Straight into zellij
 
 ```sh
-zzh brahe         # new zellij session on brahe, over ssh
-zzh brahe main    # join "main" on brahe, creating it if needed
-zosh brahe main   # the same over mosh
+zzh host         # new zellij session on host, over ssh
+zzh host main    # join "main" on host, creating it if needed
+zosh host main   # the same over mosh
 ```
 
 Full commands:
 
 ```sh
-ssh -t brahe zellij attach -c main
+ssh -t host zellij attach -c main
 ```
 
 ```sh
-mosh brahe -- zellij attach -c main
+mosh host -- zellij attach -c main
 ```
 
 ### Credentials
