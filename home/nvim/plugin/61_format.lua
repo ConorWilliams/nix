@@ -23,6 +23,19 @@ conform.setup({
   end,
 })
 
+-- Trailing whitespace goes on save in every filetype, formatter or not.
+-- Separate from conform: listing a formatter for all filetypes there would
+-- stop its fallback to the language server (ruff, rumdl).
+vim.api.nvim_create_autocmd('BufWritePre', {
+  group = vim.api.nvim_create_augroup('config-trim', {}),
+  callback = function(ev)
+    if vim.g.autoformat == false or not vim.bo[ev.buf].modifiable then return end
+    local view = vim.fn.winsaveview()
+    vim.cmd([[keeppatterns silent! %s/\s\+$//e]])
+    vim.fn.winrestview(view)
+  end,
+})
+
 -- gq uses conform too
 vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
