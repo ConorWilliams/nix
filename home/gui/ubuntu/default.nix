@@ -1,27 +1,22 @@
-# Ubuntu layer: Linux desks (hubble, luna). Window manager and GUI app
-# config on top of the GUI layer. GUI apps themselves come from apt/snap
-# (see README): Nix-built GUI apps can't use Ubuntu's graphics drivers.
 { lib, pkgs, ... }:
 
 let
-  mod = "Mod1"; # Alt. AeroSpace on the Mac mirrors these keys.
+  mod = "Mod1"; # Alt.
 in
 {
   imports = [ ../. ]; # the GUI layer
 
-  # kitty comes from its own installer (see README), into ~/.local/kitty.app.
+  # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
-  # (i3lock stays apt's: a Nix-built screen locker can't use Ubuntu's
-  # password checking, so it couldn't unlock.)
   home.packages = with pkgs; [
-    rofi # launcher: mod+d
+    rofi
     dex # starts the desktop's autostart apps (startup line below)
     xss-lock # locks the screen on suspend (lid close)
-    scrot # screenshots: Print key below, or `scrot` in a terminal
-    xclip # terminal <-> X clipboard (also neovim's clipboard on X11)
-    arandr # arrange monitors visually (GTK, no OpenGL, so Nix's is fine)
+    scrot
+    xclip
+    arandr
   ];
 
   # i3 from Nix: same version on hubble and luna. Unlike kitty it needs no

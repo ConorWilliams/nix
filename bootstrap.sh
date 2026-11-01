@@ -54,7 +54,7 @@ main() {
   desk=false
   [[ $config == *@* ]] && desk=true
 
-  # Ubuntu desks: the few things that can't come from Nix (see README).
+  # Ubuntu desks: the few things that can't come from Nix.
   if $desk && [[ $(uname -s) == Linux ]]; then
     say "Ubuntu desk extras"
     if dpkg -s i3 >/dev/null 2>&1; then

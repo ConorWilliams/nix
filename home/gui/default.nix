@@ -5,9 +5,8 @@
 {
   imports = [ ../. ]; # the server layer
 
-  # kitty's config. The app itself is installed outside Nix (kitty's own
-  # installer; see README), because a Nix-built kitty can't use Ubuntu's
-  # graphics drivers.
+  # kitty's config. The app itself is installed outside Nix, because a
+  # Nix-built kitty can't use Ubuntu's graphics drivers.
   programs.kitty = {
     enable = true;
     package = null;
