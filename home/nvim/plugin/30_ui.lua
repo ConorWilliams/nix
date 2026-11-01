@@ -7,6 +7,13 @@
 vim.pack.add({ { src = 'https://github.com/rose-pine/neovim', name = 'rose-pine' } })
 vim.cmd.colorscheme('rose-pine')
 
+-- Command line and messages: Neovim 0.12's built-in redesign (ui2,
+-- experimental). The command line row is hidden until you type : or /,
+-- and messages show in a small window that disappears by itself, so
+-- there are no "Press ENTER" prompts. Use :messages for the history.
+vim.o.cmdheight = 0
+require('vim._core.ui2').enable({ msg = { targets = 'msg' } })
+
 -- go-up: scroll above line 1, like you can below the last line, so zz can
 -- centre the top of a file too. As before, it sets scrolloff=0 and
 -- splitkeep=topline (overriding 10_options.lua), which it needs to work well.
