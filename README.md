@@ -14,9 +14,6 @@ My terminal environment, managed with Nix + Home Manager.
 
 3. Open a new terminal, then do the [logins](#logins) it doesn't.
 
-On the Mac, the script also offers to apply the system settings
-(nix-darwin, `darwin/mac.nix`). After that, `dms` applies them, then home.
-
 ## Layout
 
 ```text
