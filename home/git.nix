@@ -63,6 +63,11 @@ in
       # All terminals use the light Rosé Pine Dawn theme. Declared because
       # detection fails inside lazygit/zellij.
       light = true;
+      # Lines git marks as moved (diff.colorMoved) arrive in git's own bold
+      # magenta / cyan, which delta would show unstyled; give them soft
+      # backgrounds instead: lavender where they left, light blue where
+      # they arrived.
+      map-styles = "bold purple => syntax #efe0ff, bold cyan => syntax #dff0ff";
     };
   };
 
