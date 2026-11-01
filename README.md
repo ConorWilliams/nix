@@ -78,13 +78,15 @@ mosh host -- zellij attach -c main
 
 ### Credentials
 
-Servers hold no keys of their own. Desks run an SSH agent that loads your
-key the first time ssh uses it, and `home/ssh.nix` forwards that agent to
-every dotless host, so git on a server signs with your desk's key
-(`ssh-add -l` on the server lists it). Only over ssh, and only while you're
-connected; anyone with root on the server can use it in that time.
+git authenticates to GitHub through gh, over HTTPS: no SSH keys on GitHub's
+side and nothing forwarded to servers. Desks log gh in with the browser;
+each server gets its own [fine-grained token][pat], limited to the repos it
+needs, with Contents read/write and an expiry. The bootstrap script asks
+for it; to renew one, run `gh auth login --with-token` and paste the new
+token. Since nothing is forwarded, git and gh keep working in zellij after
+you disconnect, under mosh too.
 
-A zellij session keeps the agent of the connection that first started it,
-so after you disconnect and reattach, git inside it can't reach your agent
-(new panes included). Use a shell outside zellij for that, or start a new
-session.
+A fine-grained token covers one owner (MyrtleSoftware or ConorWilliams),
+and pushing `.github/workflows/` needs its Workflows permission.
+
+[pat]: https://github.com/settings/personal-access-tokens

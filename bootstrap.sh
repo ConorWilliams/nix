@@ -93,21 +93,22 @@ main() {
   export PATH=$HOME/.nix-profile/bin:$PATH # the tools it just installed
 
   say "Logins"
+  # git authenticates to GitHub through gh's token, over HTTPS (git.nix).
   if gh auth status >/dev/null 2>&1; then
     echo "gh logged in"
-  elif ask "Log in to GitHub (gh)?"; then
-    echo "No browser here? Open https://github.com/login/device anywhere and enter the code."
-    if $desk; then
-      gh auth login --web --git-protocol ssh </dev/tty # also creates and uploads an SSH key
-    else
-      gh auth login --web --skip-ssh-key </dev/tty # git uses your forwarded agent
+  elif $desk; then
+    if ask "Log in to GitHub (gh, in a browser)?"; then
+      echo "No browser here? Open https://github.com/login/device anywhere and enter the code."
+      gh auth login --web --git-protocol https --skip-ssh-key </dev/tty
     fi
-  fi
-  # Push over SSH once a key works (a desk's own, or a server's forwarded agent)
-  github=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 || true)
-  if [[ $(git -C "$dir" remote get-url origin) == https://* && $github == *"successfully authenticated"* ]]; then
-    git -C "$dir" remote set-url origin git@github.com:ConorWilliams/nix.git
-    echo "Repo remote switched to SSH"
+  elif ask "Log in to GitHub (gh) with a fine-grained token for this server?"; then
+    echo "Create one at https://github.com/settings/personal-access-tokens:"
+    echo "only the repos needed here, Contents read/write, and an expiry."
+    local token
+    read -rsp "Paste it (not shown): " token </dev/tty
+    echo
+    printf '%s\n' "$token" | gh auth login --with-token
+    gh auth status | grep -i 'logged in' || true
   fi
 
   if atuin status 2>/dev/null | grep -q '^Username:'; then

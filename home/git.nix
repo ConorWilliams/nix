@@ -33,6 +33,14 @@ in
 
       init.defaultBranch = "main";
 
+      # GitHub over HTTPS, authenticated by gh's token (no SSH keys or agent
+      # forwarding needed, so servers just hold a limited, expiring token).
+      # SSH-style URLs, in old clones or pasted, are rewritten to HTTPS.
+      url."https://github.com/".insteadOf = [
+        "git@github.com:"
+        "ssh://git@github.com/"
+      ];
+
       diff = {
         algorithm = "histogram"; # clearer diffs when code moves around
         colorMoved = "default"; # moved lines get their own colour...

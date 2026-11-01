@@ -96,9 +96,11 @@
 
   # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix;
   # use "Login with a web browser" and open the printed URL on any machine.
+  # git authenticates to GitHub through gh (its token, over HTTPS): see
+  # git.nix. Home Manager registers gh as git's credential helper.
   programs.gh = {
     enable = true;
-    settings.git_protocol = "ssh"; # clone/push over SSH (key uploaded by gh)
+    settings.git_protocol = "https"; # gh repo clone etc. use HTTPS too
   };
 
   # Fast grep. Smart case: case-insensitive unless you type a capital.
