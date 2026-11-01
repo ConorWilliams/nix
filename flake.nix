@@ -59,10 +59,6 @@
       url = "github:rose-pine/atuin";
       flake = false;
     };
-    rose-pine-delta = {
-      url = "github:rose-pine/delta";
-      flake = false;
-    };
 
     # zellij plugin behind Ctrl-h/j/k/l moving between nvim splits and
     # zellij panes (home/zellij.nix). A release file, pinned here.

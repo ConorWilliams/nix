@@ -156,7 +156,6 @@
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_2",
         "rose-pine-atuin": "rose-pine-atuin",
-        "rose-pine-delta": "rose-pine-delta",
         "rose-pine-eza": "rose-pine-eza",
         "rose-pine-fish": "rose-pine-fish",
         "rose-pine-fzf": "rose-pine-fzf",
@@ -181,22 +180,6 @@
       "original": {
         "owner": "rose-pine",
         "repo": "atuin",
-        "type": "github"
-      }
-    },
-    "rose-pine-delta": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791334996,
-        "narHash": "sha256-Ou23eR4c44ChyQ8FgstE2dg2sGSUYNTQJGAAahprA6I=",
-        "owner": "rose-pine",
-        "repo": "delta",
-        "rev": "38d58cbd01d9d619e2b3d63cdb63005451c8238c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rose-pine",
-        "repo": "delta",
         "type": "github"
       }
     },
