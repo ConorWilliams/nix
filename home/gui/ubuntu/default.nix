@@ -23,10 +23,6 @@ in
     arandr
   ];
 
-  # i3 from Nix: same version on hubble and luna. Unlike kitty it needs no
-  # graphics drivers (plain X11). The login screen's "i3" session runs it.
-  # Everything not set here is i3's stock default: mod+arrows to focus,
-  # mod+shift+arrows to move, mod+1..0 for workspaces, mod+r to resize...
   xsession.windowManager.i3 = {
     enable = true;
     config = {
@@ -40,9 +36,7 @@ in
         "${mod}+n" = "exec i3lock -d -c000000";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
-        # Print: drag to select an area (click for one window) -> ~/Pictures.
-        # --release: scrot can only grab the mouse once the key is let go.
-        "--release Print" =
+        "--release ${mod}+p" =
           "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
       };
 
