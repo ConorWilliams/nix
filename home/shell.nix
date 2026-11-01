@@ -52,12 +52,12 @@
     };
     functions.zosh = {
       description = "zellij on a host over mosh: new session, or join/create one";
-      wraps = "mosh";
+      wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
       body = ''
         if set -q argv[2]
-          mosh --ssh=ssh $argv[1] -- zellij attach -c $argv[2]
+          mosh $argv[1] -- zellij attach -c $argv[2]
         else
-          mosh --ssh=ssh $argv[1] -- zellij
+          mosh $argv[1] -- zellij
         end
       '';
     };
