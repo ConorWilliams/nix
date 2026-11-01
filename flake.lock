@@ -178,6 +178,7 @@
         "rose-pine-fzf": "rose-pine-fzf",
         "rose-pine-i3": "rose-pine-i3",
         "rose-pine-lazygit": "rose-pine-lazygit",
+        "rose-pine-mako": "rose-pine-mako",
         "rose-pine-rofi": "rose-pine-rofi",
         "rose-pine-starship": "rose-pine-starship",
         "rose-pine-tm-theme": "rose-pine-tm-theme",
@@ -280,6 +281,22 @@
       "original": {
         "owner": "rose-pine",
         "repo": "lazygit",
+        "type": "github"
+      }
+    },
+    "rose-pine-mako": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1762352814,
+        "narHash": "sha256-4DAVlzODCKv6pqQcDph0jLuJGJKSzew4u+3sn9sM1Mw=",
+        "owner": "rose-pine",
+        "repo": "mako",
+        "rev": "12f7814de6a485ecc373933cc04bb2b13b23e491",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "mako",
         "type": "github"
       }
     },

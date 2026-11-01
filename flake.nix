@@ -67,6 +67,11 @@
       url = "github:rose-pine/rofi";
       flake = false;
     };
+    # (mako's: there's no dunst port; home/gui/ubuntu/default.nix)
+    rose-pine-mako = {
+      url = "github:rose-pine/mako";
+      flake = false;
+    };
 
     # zellij plugin behind Ctrl+arrows moving between nvim splits and
     # zellij panes (home/zellij.nix). A release file, pinned here.
