@@ -36,7 +36,7 @@ in
 
       diff = {
         algorithm = "histogram"; # clearer diffs when code moves around
-        colorMoved = "default"; # moved lines get their own colour...
+        colorMoved = "blocks"; # moved lines get their own colour (no alternating)...
         colorMovedWS = "allow-indentation-change"; # ...even if re-indented
       };
 
