@@ -18,9 +18,24 @@ require('go-up').setup()
 vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 require('mini.icons').setup()
 
--- Statusline at the bottom: mode, git branch and changes, diagnostics,
--- file name, file type, position.
-require('mini.statusline').setup()
+-- Statusline at the bottom, kept light: mode, git branch, file name
+-- (+ [+] when modified), then search count while searching and line:col.
+local statusline = require('mini.statusline')
+statusline.setup({
+  content = {
+    active = function()
+      local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
+      return statusline.combine_groups({
+        { hl = mode_hl, strings = { mode } },
+        { hl = 'MiniStatuslineDevinfo', strings = { statusline.section_git({}) } },
+        '%<', -- truncate from here when narrow
+        { hl = 'MiniStatuslineFilename', strings = { '%f%m%r' } }, -- path from cwd
+        '%=', -- the rest goes on the right
+        { hl = mode_hl, strings = { statusline.section_searchcount({}), '%l:%v' } },
+      })
+    end,
+  },
+})
 
 -- Tabline at the top: open buffers as tabs (Shift-h / Shift-l move
 -- between them); tab pages, when there's more than one, show at the right.
