@@ -50,16 +50,16 @@
       hosts = {
         hubble = {
           system = "x86_64-linux";
-          module = ./home/server/gui/ubuntu/hubble.nix;
+          module = ./home/gui/ubuntu/hubble.nix;
         };
         luna = {
           system = "x86_64-linux";
-          module = ./home/server/gui/ubuntu/luna.nix;
+          module = ./home/gui/ubuntu/luna.nix;
         };
         # TODO: rename to the Mac's real hostname once it's set up.
         mac = {
           system = "aarch64-darwin";
-          module = ./home/server/gui/mac;
+          module = ./home/gui/mac;
         };
       };
 
@@ -68,7 +68,7 @@
       # the user alone, which nh and home-manager fall back to.
       server = {
         system = "x86_64-linux";
-        module = ./home/server;
+        module = ./home;
       };
 
       # Build one Home Manager config for a user on a machine.

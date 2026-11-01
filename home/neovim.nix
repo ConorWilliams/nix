@@ -1,4 +1,4 @@
-# Neovim: plain Lua config in ../nvim, plugins via vim.pack (pinned by the
+# Neovim: plain Lua config in ./nvim, plugins via vim.pack (pinned by the
 # committed nvim-pack-lock.json), language servers and tools from Nix.
 { config, pkgs, ... }:
 
@@ -79,5 +79,5 @@
   # Live symlink into the repo (not a store copy): edits apply without a
   # switch, and vim.pack can write its lockfile. Assumes the repo is at ~/nix.
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix/nvim";
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix/home/nvim";
 }

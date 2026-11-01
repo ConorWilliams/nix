@@ -5,21 +5,21 @@ My terminal environment, managed with Nix + Home Manager.
 ## Layout
 
 ```text
-flake.nix                  users, hosts -> layer, mkHome, checks, formatter
-home/server/default.nix    server layer: every machine; all CLI tools
-  git.nix                  git, delta, lazygit, lfs
-  shell.nix                bash -> fish, starship, atuin, zoxide
-  claude.nix               Claude Code: settings, status line (claude/)
-  ssh.nix                  SSH client: agent forwarding to work hosts
-  zellij.nix               zellij: theme, modal keys (zellij/)
-  neovim.nix               neovim: tools from Nix, Lua config linked live (nvim/)
-  gui/default.nix          GUI layer: desks on any OS: kitty config, font
-    ubuntu/default.nix     Ubuntu layer: i3, scrot, xclip, arandr
-      hubble.nix           hubble: mouse speed
-      luna.nix             luna: font size, touchpad
-    mac/default.nix        Mac layer (empty for now)
-nvim/                      neovim's Lua config (~/.config/nvim links here)
-darwin/mac.nix             Mac system settings only
+flake.nix                users, hosts -> layer, mkHome, checks, formatter
+bootstrap.sh             set up or update a machine (see below)
+home/default.nix         server layer: every machine; all CLI tools
+  git.nix                git, delta, lazygit, lfs
+  shell.nix              bash -> fish, starship, atuin, zoxide
+  claude.nix             Claude Code: settings, status line (claude/)
+  ssh.nix                SSH client: agent forwarding to work hosts
+  zellij.nix             zellij: theme, modal keys (zellij/)
+  neovim.nix             neovim: tools from Nix, Lua config linked live (nvim/)
+  gui/default.nix        GUI layer: desks on any OS: kitty config, font
+    ubuntu/default.nix   Ubuntu layer: i3, scrot, xclip, arandr
+      hubble.nix         hubble: mouse speed
+      luna.nix           luna: font size, touchpad
+    mac/default.nix      Mac layer (empty for now)
+darwin/mac.nix           Mac system settings (nix-darwin, sudo): not a layer
 ```
 
 Each layer imports the one above it: server -> gui -> ubuntu -> hubble,
@@ -121,6 +121,6 @@ nh clean user --keep 5 --keep-since 7d     # what the weekly cleanup timer runs
   runs while you're logged in (it catches up at the next login) unless
   `loginctl enable-linger` is set. `home.sessionVariables` only reach login
   shells.
-- **Neovim:** `~/.config/nvim` is a live link to `~/nix/nvim` (edits apply
+- **Neovim:** `~/.config/nvim` is a live link to `~/nix/home/nvim` (edits apply
   without a switch; vim.pack writes its lockfile there), so it relies on
   the repo always living at `~/nix`.

@@ -1,5 +1,5 @@
 -- Treesitter: syntax highlighting, folds and indentation from a real parse
--- tree. The plugin and parsers come from Nix (home/server/neovim.nix); add a
+-- tree. The plugin and parsers come from Nix (home/neovim.nix); add a
 -- language there. The nvim-treesitter main branch turns nothing on by
 -- itself, so do it here whenever a buffer's filetype has a parser.
 
