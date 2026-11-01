@@ -5,6 +5,20 @@
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.
 
 vim.pack.add({ 'https://github.com/folke/snacks.nvim' })
+
+-- Hidden files: dotfiles (.env, .gitignore, ...) are shown, but of the
+-- dot-folders only these, so .venv, .cache, .git etc. stay out.
+local dot_folders = { ['.claude'] = true, ['.github'] = true }
+local hide_dot_folders = function(item)
+  local parts = vim.split(item.file, '/', { plain = true })
+  for i = 1, #parts - 1 do -- folders only: the last part is the file
+    local part = parts[i]
+    if part:sub(1, 1) == '.' and part ~= '.' and part ~= '..' and not dot_folders[part] then
+      return false -- drop it
+    end
+  end
+end
+
 require('snacks').setup({
   picker = {
     enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
@@ -32,9 +46,9 @@ require('snacks').setup({
     },
     matcher = { frecency = true }, -- rank often/recently opened files higher
     win = { input = { keys = { ['<Esc>'] = { 'close', mode = { 'n', 'i' } } } } },
-    sources = { -- show dotfiles such as .github (.git stays hidden)
-      files = { hidden = true },
-      grep = { hidden = true },
+    sources = {
+      files = { hidden = true, transform = hide_dot_folders },
+      grep = { hidden = true, transform = hide_dot_folders },
     },
   },
 })
