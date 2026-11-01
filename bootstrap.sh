@@ -1,22 +1,5 @@
 #!/usr/bin/env bash
-# Set up (or update) this machine from github.com/ConorWilliams/nix:
-#
-#   curl -fsSL https://raw.githubusercontent.com/ConorWilliams/nix/main/bootstrap.sh | bash
-#
-# What it does:
-#   1. Checks Nix (warns if old) and turns on flakes for this user if off.
-#   2. Clones ~/nix over HTTPS, or pulls it if it's already there.
-#   3. Picks the config: <user>@<hostname> if flake.nix lists this machine,
-#      else plain <user> (the server layer).
-#   4. Ubuntu desks: offers `apt install i3` (sudo) and kitty's installer.
-#      The Mac: offers to apply its system settings (nix-darwin, sudo).
-#   5. Switches Home Manager (-b backup moves files in the way to *.backup).
-#   6. Offers the gh and atuin logins, then moves the repo's remote to SSH
-#      once a GitHub key works.
-#
-# Safe to re-run: it pulls, switches, and skips whatever is already done.
-# Needs Nix already installed (it never installs or upgrades it), and asks
-# before anything that uses sudo.
+
 set -euo pipefail
 
 repo=https://github.com/ConorWilliams/nix.git
