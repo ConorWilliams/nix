@@ -11,8 +11,8 @@ in
 {
   imports = [ ../. ]; # the GUI layer
 
-  # Non-NixOS Linux: lets the desktop (e.g. rofi's app list) find apps and
-  # icons installed by Nix, and programs find Ubuntu's terminfo too.
+  # Non-NixOS Linux: lets the desktop find apps and icons installed by Nix,
+  # and programs find Ubuntu's terminfo too.
   targets.genericLinux.enable = true;
   # ...but not its GPU drivers for Nix programs (GUI apps stay with apt;
   # README), which would also print a setup notice on every switch.

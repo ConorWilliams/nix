@@ -17,7 +17,7 @@ require('vim._core.ui2').enable({ msg = { targets = 'msg' } })
 
 -- go-up: scroll above line 1, as is possible below the last line, so zz can
 -- centre the top of a file too. As before, it sets scrolloff=0 and
--- splitkeep=topline (overriding 10_options.lua), which it needs to work well.
+-- splitkeep=topline, which it needs to work well.
 vim.pack.add({ 'https://github.com/nullromo/go-up.nvim' })
 require('go-up').setup()
 

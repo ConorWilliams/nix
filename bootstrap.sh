@@ -103,7 +103,7 @@ main() {
   export PATH=$HOME/.nix-profile/bin:$PATH # the tools it just installed
 
   say "Logins"
-  # git authenticates to GitHub through gh's token, over HTTPS (git.nix).
+  # git authenticates to GitHub through gh's token, over HTTPS (programs.gh in home/default.nix).
   if gh auth status >/dev/null 2>&1; then
     echo "gh logged in"
   elif $desk; then
@@ -133,9 +133,6 @@ main() {
 
   say "Done"
   echo "Open a new terminal (or log in again) to start fish with everything."
-  if [[ $(uname -s) == Darwin ]]; then
-    echo "On the Mac, kitty starts fish itself (the login shell stays zsh)."
-  fi
   if $desk && [[ $(uname -s) == Linux ]]; then
     echo "First time on this desk: log out and pick the \"i3\" session."
   fi
