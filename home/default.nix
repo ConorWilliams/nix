@@ -74,7 +74,7 @@
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
-    hms = "nh home switch";
+    hms = "nh home switch ${config.home.homeDirectory}/nix"; # path given: works before NH_FLAKE reaches the shell
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
     icat = "kitten icat"; # show an image; works over ssh, not over mosh
