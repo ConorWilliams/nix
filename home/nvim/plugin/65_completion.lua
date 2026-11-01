@@ -18,19 +18,20 @@ require('blink.cmp').setup({
   },
   signature = { enabled = true }, -- parameter hints while typing a call
   sources = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
-  -- Completion in the : command line (LazyVim's settings, plus arrows).
-  -- Tab / S-Tab or Up / Down move through the menu (Up / Down still walk
-  -- the command history when no menu is open), C-y accepts, C-e closes.
+  -- Completion in the : command line, like insert mode: the first match is
+  -- selected and Tab accepts it. Up / Down move through the menu (and still
+  -- walk the command history when no menu is open), C-e closes it.
   cmdline = {
     keymap = {
       preset = 'cmdline',
+      ['<Tab>'] = { 'select_and_accept', 'show' },
       ['<Down>'] = { 'select_next', 'fallback' },
       ['<Up>'] = { 'select_prev', 'fallback' },
       ['<Right>'] = false, -- arrows left / right move the cursor, as usual
       ['<Left>'] = false,
     },
     completion = {
-      list = { selection = { preselect = false } },
+      list = { selection = { preselect = true } },
       -- pop up by itself for : commands, not for / searches
       menu = { auto_show = function() return vim.fn.getcmdtype() == ':' end },
       ghost_text = { enabled = true }, -- the top match shown faintly
