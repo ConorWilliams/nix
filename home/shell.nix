@@ -5,6 +5,17 @@
 {
   programs.bash = {
     enable = true;
+    # Runs in every bash, before the "not interactive? stop here" check.
+    # `ssh host <command>` (and mosh, which starts mosh-server that way)
+    # gets a non-interactive bash, and Ubuntu's /etc/bash.bashrc only loads
+    # Nix for interactive ones; load it here so the host's own Nix tools
+    # (mosh-server, zellij...) are found. nix-daemon.sh guards against
+    # being loaded twice.
+    bashrcExtra = ''
+      if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      fi
+    '';
     # Runs only in interactive bash (Home Manager puts it after its
     # "not interactive? stop here" check), so `ssh host cmd`, scp and mosh
     # stay plain bash. Skipped when bash was started from fish, so typing
