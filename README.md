@@ -4,25 +4,28 @@ My terminal environment, managed with Nix + Home Manager.
 
 ## Quick start
 
-1. Have Nix (multi-user). If it's missing:
-   `sh <(curl -L https://nixos.org/nix/install) --daemon`, then open a new
-   shell. Run everything as the user who'll own `~/nix`: Nix refuses a repo
-   owned by someone else.
-2. Run the bootstrap script. It sets up the machine, or updates it when run
-   again; see the comments in [`bootstrap.sh`](bootstrap.sh) for what it does.
+1. Install `nix`: <https://nixos.org/download/>
+
+2. Run the bootstrap script:
 
    ```sh
    curl -fsSL https://raw.githubusercontent.com/ConorWilliams/nix/main/bootstrap.sh | bash
    ```
 
-3. Open a new terminal, then do the [logins](#logins) it doesn't. On a new
-   Ubuntu desk, log out and pick the "i3" session.
+3. Open a new terminal, then do the [logins](#logins) it doesn't.
 
-The Mac also has system settings, applied separately (not set up yet):
+The Mac also has system settings, applied separately
+
+First time (to setup):
 
 ```sh
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac  # first time
-sudo darwin-rebuild switch --flake ~/nix#mac                                # after that
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac
+```
+
+After that (to rebuild), just run:
+
+```sh
+sudo darwin-rebuild switch --flake ~/nix#mac
 ```
 
 ## Layout
