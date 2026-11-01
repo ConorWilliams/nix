@@ -49,11 +49,10 @@ if vim.fn.executable('zk') == 1 then
   local in_notebook = function() return zk_util.notebook_root(zk_util.resolve_notebook_path(0)) end
   vim.keymap.set('n', '<leader>n', function()
     if not in_notebook() then return vim.notify('Not in a zk notebook') end
+    local title = vim.fn.input('Title: ')
+    if title == '' then return end -- Esc (or no title) cancels
     local dir = vim.fn.expand('%:p:h')
-    require('zk').new({
-      dir = dir ~= '' and dir or vim.fn.getcwd(),
-      title = vim.fn.input('Title: '),
-    })
+    require('zk').new({ dir = dir ~= '' and dir or vim.fn.getcwd(), title = title })
   end, { desc = 'New note (zk notebook)' })
   vim.keymap.set('n', '<leader><space>', function()
     if in_notebook() then
