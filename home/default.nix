@@ -134,6 +134,6 @@
 
   programs.yazi = {
     enable = true;
-    theme = builtins.fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml");
+    theme = fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml");
   };
 }

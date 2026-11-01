@@ -4,7 +4,7 @@
 let
   # Rose Pine Dawn palette from the official starship port.
   rosePine =
-    (builtins.fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
+    (fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
     .palettes.rose-pine-dawn;
 in
 
