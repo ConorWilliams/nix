@@ -70,6 +70,7 @@ in
           separator_color = "frame";
           highlight = lib.removePrefix "over " mako.normal.progress-color; # progress bars
           corner_radius = 8;
+          width = "(300, 600)"; # grows with the text, up to 600 px
         };
         urgency_low = colours;
         urgency_normal = colours;
