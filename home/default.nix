@@ -1,7 +1,5 @@
 # The base layer: every machine gets this, and on its own it's the config
-# for the work servers. All command-line tools live here.
-#   server -> gui -> ubuntu -> hubble, luna
-#                 -> mac
+# for servers. All command-line tools live here.
 { config, pkgs, ... }:
 
 {
@@ -14,17 +12,13 @@
     ./zellij.nix
   ];
 
-  # Compatibility marker for Home Manager's defaults, NOT a version pin.
-  # Set once when a user is first created; never bump it casually.
+  # Compatibility marker for Home Manager's defaults, not a version pin.
   home.stateVersion = "26.11";
 
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
 
-  # nh: a friendlier front end for switching. `hms` builds this machine's
-  # config (<user>@<hostname>, else plain <user>: see flake.nix), shows
-  # what changed, and activates. Also cleans up weekly: old generations go once they're more
-  # than 7 days old (the newest 5 always stay), then unused store paths.
+  # nh: a friendlier front end for switching.
   programs.nh = {
     enable = true;
     flake = "${config.home.homeDirectory}/nix";
@@ -39,36 +33,31 @@
     };
   };
 
-  # No "unread news" reminder on each switch (a desktop pop-up on desks).
-  # Read the news any time with `home-manager news`.
+  # No "unread news" reminder on each switch.
   news.display = "silent";
 
   # Plain command-line tools with no config of their own. Tools with config
   # or shell integration get a `programs.<name>` block below or in their own
-  # file (git, shells, claude, ssh, zellij).
+  # file.
   home.packages = with pkgs; [
     fd # fast find
     dust # du as a tree
     duf # df as a table
-    eza # modern ls, used via `ll` below
+    eza # modern ls
     uv # Python packages, projects and interpreters
     mosh # SSH that survives sleep and network changes
     tokei # count lines of code
-    rsync
-    # rmz / cpz: fast rm and cp for big trees (checkpoints, datasets), built
-    # with their progress bars (not in nixpkgs' default build, so each
-    # machine compiles this once, ~a minute).
+    rsync # remote copy, with progress bar
+    # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
     (fuc.overrideAttrs {
       cargoBuildFeatures = [
         "rmz/progress"
         "cpz/progress"
       ];
     })
-    kitty.kitten # kitty's helper (icat etc.), without the 600 MiB GUI app
+    kitty.kitten # kitty's helper (icat etc.), without the GUI app
     kitty.terminfo # lets programs drive kitty properly, including over SSH
     zk # Markdown notes (zettelkasten)
-    # OpenAI's coding CLI, from nixpkgs: a few days behind, but prebuilt.
-    # Pulls in ~1 GiB (GStreamer, for voice features).
     codex
   ];
 
