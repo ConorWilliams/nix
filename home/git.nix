@@ -40,7 +40,7 @@ in
       # Conflict markers also show the original (common ancestor) version.
       merge.conflictStyle = "zdiff3";
 
-      pull.rebase = true; # `git pull` replays your commits, no merge commits
+      pull.rebase = true; # `git pull` replays local commits, no merge commits
       push.autoSetupRemote = true; # first push of a new branch needs no -u
       fetch.prune = true; # drop refs to branches deleted on the remote
 

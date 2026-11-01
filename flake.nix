@@ -93,7 +93,7 @@
         };
     in
     {
-      # Your home directory, on every machine: "<user>@<hostname>" for the
+      # The home directory, on every machine: "<user>@<hostname>" for the
       # hosts above, plain "<user>" for everything else (the servers). `hms`
       # (nh) picks the right one by itself; with home-manager directly:
       #   home-manager switch --flake ~/nix#conix@luna   (a desk)

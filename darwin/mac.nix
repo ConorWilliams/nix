@@ -1,4 +1,4 @@
-# The Mac's system settings. Your home directory is NOT managed here;
+# The Mac's system settings. The home directory is NOT managed here;
 # that's homeConfigurations."<user>@mac", the same as every other machine.
 # Stub: evaluates, but nothing is configured yet.
 { ... }:

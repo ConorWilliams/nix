@@ -25,7 +25,7 @@ vim.pack.add({ 'https://github.com/MeanderingProgrammer/render-markdown.nvim' })
 require('render-markdown').setup({
   latex = { enabled = false },
   -- Draw a code block's ``` lines as thin edges instead of hiding them
-  -- (the default), so you can see where it starts and ends.
+  -- (the default), so its start and end stay visible.
   code = { border = 'thin' },
 })
 vim.keymap.set(

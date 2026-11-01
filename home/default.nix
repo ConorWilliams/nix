@@ -103,7 +103,7 @@
     settings.git_protocol = "https"; # gh repo clone etc. use HTTPS too
   };
 
-  # Fast grep. Smart case: case-insensitive unless you type a capital.
+  # Fast grep. Smart case: case-insensitive unless the pattern has a capital.
   programs.ripgrep = {
     enable = true;
     arguments = [ "--smart-case" ];
@@ -131,6 +131,6 @@
   programs.htop.enable = true;
 
   # Terminal file manager. Run `y`; quitting leaves the shell in the
-  # directory you were browsing.
+  # directory last browsed.
   programs.yazi.enable = true;
 }

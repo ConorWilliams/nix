@@ -105,7 +105,7 @@ main() {
 
   if atuin status 2>/dev/null | grep -q '^Username:'; then
     echo "atuin logged in"
-  elif ask "Log in to atuin (shell history sync; have the key from your password manager)?"; then
+  elif ask "Log in to atuin (shell history sync; needs the key from a password manager)?"; then
     atuin login </dev/tty
     atuin daemon restart # it started with a temporary key before the login
     atuin sync

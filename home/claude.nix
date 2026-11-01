@@ -37,7 +37,7 @@ in
       theme = "light";
       tui = "fullscreen";
       autoCompactEnabled = true;
-      idleCompaction = false; # don't compact sessions I've stepped away from
+      idleCompaction = false; # don't compact sessions left idle
       permissions.defaultMode = "auto";
       skipAutoPermissionPrompt = true; # no one-time auto-mode notice per machine
     };

@@ -37,7 +37,7 @@ gs.setup({
 
 local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs, { desc = desc }) end
 
--- lazygit (your config from home/git.nix, colours from the colour scheme).
+-- lazygit (config from home/git.nix, colours from the colour scheme).
 -- snacks writes the colours to ~/.cache/nvim but doesn't create it.
 vim.fn.mkdir(vim.fn.stdpath('cache'), 'p')
 map('<leader>gg', function() Snacks.lazygit({ cwd = Snacks.git.get_root() }) end, 'Lazygit')

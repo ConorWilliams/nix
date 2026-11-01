@@ -1,5 +1,5 @@
 -- Options. Only things that differ from Neovim 0.12's defaults; mostly the
--- LazyVim settings you were used to. See :help '<option>' for any of them.
+-- LazyVim settings carried over. See :help '<option>' for any of them.
 
 -- General
 vim.o.undofile = true -- Persistent undo across sessions

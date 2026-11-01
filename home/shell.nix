@@ -19,7 +19,7 @@
     # Runs only in interactive bash (Home Manager puts it after its
     # "not interactive? stop here" check), so `ssh host cmd`, scp and mosh
     # stay plain bash. Skipped when bash was started from fish, so typing
-    # `bash` inside fish still gives you bash.
+    # `bash` inside fish still gives bash.
     initExtra = ''
       if [[ $(ps -o comm= -p $PPID) != *fish* ]]; then
         exec fish

@@ -1,6 +1,6 @@
 # SSH client. Nothing is forwarded to servers: git there authenticates
-# through gh's own token (programs.gh in default.nix), so your keys never
-# leave your desk.
+# through gh's own token (programs.gh in default.nix), so SSH keys never
+# leave the desk.
 { ... }:
 
 {

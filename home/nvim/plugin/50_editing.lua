@@ -25,8 +25,8 @@ require('mini.surround').setup({
   },
 })
 
--- flash: press s and a couple of characters, then the label shown at the
--- match you want. S selects a treesitter node (function, block, ...).
+-- flash: s and a couple of characters, then the label shown at the
+-- wanted match. S selects a treesitter node (function, block, ...).
 vim.pack.add({ 'https://github.com/folke/flash.nvim' })
 local flash = require('flash')
 flash.setup()

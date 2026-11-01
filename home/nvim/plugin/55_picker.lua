@@ -1,5 +1,5 @@
 -- Picker: snacks.nvim's fuzzy finder for files, grep, buffers, symbols,
--- help, ... and its file explorer, with your old layout. snacks is a
+-- help, ... and its file explorer, with the custom full-screen layout. snacks is a
 -- collection of modules; only the picker, explorer and smooth scrolling
 -- are switched on here (bufdelete is a plain function).
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s

@@ -44,7 +44,7 @@ graphics drivers. On the Mac, GUI apps are Homebrew casks in `darwin/mac.nix`.
 hms                                        # apply home changes
 dms                                        # on Mac: system settings, then home
 nix flake update                           # bump all pinned inputs
-nix flake update llm-agents                # bump just claude
+nix flake update llm-agents                # bump only claude
 nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too
 ```

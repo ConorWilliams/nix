@@ -1,4 +1,4 @@
-# GUI layer: machines you sit at, on any OS (hubble, luna, mac). Adds the
+# GUI layer: machines with a screen, on any OS (hubble, luna, mac). Adds the
 # terminal's config and fonts on top of the server layer.
 # OS-specific bits go in ubuntu/ and mac/.
 { lib, pkgs, ... }:
