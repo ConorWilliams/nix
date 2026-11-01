@@ -57,10 +57,13 @@ main() {
   # Ubuntu desks: the few things that can't come from Nix.
   if $desk && [[ $(uname -s) == Linux ]]; then
     say "Ubuntu desk extras"
-    if dpkg -s i3 >/dev/null 2>&1; then
-      echo "i3 installed"
-    elif ask "Install i3 with apt (the i3 login session and i3lock; uses sudo)?"; then
-      sudo apt-get install -y i3
+    # Only what Nix can't provide: the login screen's "i3" session entry
+    # (i3-wm) and a locker that can use Ubuntu's PAM (i3lock). i3 itself
+    # and everything else come from Nix.
+    if dpkg -s i3-wm i3lock >/dev/null 2>&1; then
+      echo "i3-wm and i3lock installed"
+    elif ask "Install i3-wm and i3lock with apt (login session entry, screen lock; uses sudo)?"; then
+      sudo apt-get install -y --no-install-recommends i3-wm i3lock
     fi
     if [[ -x ~/.local/kitty.app/bin/kitty ]]; then
       echo "kitty installed"

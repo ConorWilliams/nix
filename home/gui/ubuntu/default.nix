@@ -6,6 +6,10 @@ in
 {
   imports = [ ../. ]; # the GUI layer
 
+  # Desktop notifications (notify-send, Slack...): nothing shows them under
+  # i3, so dunst from Nix, started by the first notification.
+  services.dunst.enable = true;
+
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
