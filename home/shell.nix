@@ -102,6 +102,9 @@
       filter_mode_shell_up_key_binding = "host";
       workspaces = false; # don't narrow to the current git repo
       inline_height = 0; # full screen
+      # Enter runs the picked command straight away; Tab puts it in the
+      # prompt to edit first.
+      enter_accept = true;
 
       # Background daemon, started by the shell when needed (no service).
       # Threads needs it; it also syncs every 5 minutes on its own.
