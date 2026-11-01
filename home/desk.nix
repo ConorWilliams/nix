@@ -10,6 +10,10 @@
     pkgs.zk # Markdown notes (zettelkasten)
   ];
 
+  # GitHub Copilot for neovim (nvim/plugin/80_ai.lua). Desk only: each
+  # machine needs its own sign-in. Unfree; allowed by name in flake.nix.
+  programs.neovim.extraPackages = [ pkgs.copilot-language-server ];
+
   # kitty's config. The app itself is installed outside Nix (kitty's own
   # installer; see README), because a Nix-built kitty can't use Ubuntu's
   # graphics drivers.

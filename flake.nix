@@ -83,7 +83,12 @@
       mkHome =
         user: role:
         let
-          pkgs = nixpkgs.legacyPackages.${role.system};
+          pkgs = import nixpkgs {
+            inherit (role) system;
+            # Unfree packages we accept, by name (everything else stays refused).
+            config.allowUnfreePredicate =
+              pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "copilot-language-server" ];
+          };
           homeRoot = if pkgs.stdenv.hostPlatform.isDarwin then "/Users" else "/home";
         in
         home-manager.lib.homeManagerConfiguration {

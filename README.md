@@ -92,6 +92,7 @@ on by itself (or asks you to paste a code back).
 | atuin | `atuin login`, then `atuin daemon restart`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). The restart matters: the daemon started before login with a temporary key and keeps using it until restarted. |
 | Claude | `claude`, then log in | First run asks for a theme: pick Light (the declared one). No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
 | codex | `codex login --device-auth` | Device code, like gh. |
+| Copilot (desks) | `:LspCopilotSignIn` in nvim | Copies a device code to the clipboard; enter it at GitHub's device page. Until then nvim warns "not signed into GitHub". |
 
 gh's device page is https://github.com/login/device; "Failed opening a web
 browser" just means it's waiting for you to go there.
