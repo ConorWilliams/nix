@@ -1,7 +1,28 @@
-# Shells: bash is the login shell, interactive sessions switch to fish.
-{ inputs, ... }:
+# Shells: the system's login shell (bash on Linux, zsh on macOS) stays as
+# it is and hands interactive sessions over to fish, the same way on every
+# machine (terminals, ssh, zellij panes).
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
+  # The hand-off, for bash and zsh alike. Not when the parent is already
+  # fish (so typing `bash` inside fish gives bash), not for `-ic 'cmd'`
+  # (tools probing the environment), not in nix-shell / nix develop (they
+  # need their own shell for the dev environment).
+  toFish =
+    { commandVar, isLogin }:
+    ''
+      if [[ $(ps -o comm= -p $PPID) != *fish* && -z ''${${commandVar}:-} && -z ''${IN_NIX_SHELL:-} ]]; then
+        ${isLogin} && exec ${config.programs.fish.package}/bin/fish --login
+        exec ${config.programs.fish.package}/bin/fish
+      fi
+    '';
+
   # Rose Pine Dawn palette from the official starship port.
   rosePine =
     (fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
@@ -20,14 +41,20 @@ in
       fi
     '';
     # Runs only in interactive bash
-    # Not for `bash -ic 'cmd'` (tools probing the environment) or nix-shell
-    # / nix develop (they need bash for the dev environment).
-    initExtra = ''
-      if [[ $(ps -o comm= -p $PPID) != *fish* && -z ''${BASH_EXECUTION_STRING:-} && -z ''${IN_NIX_SHELL:-} ]]; then
-        shopt -q login_shell && exec fish --login
-        exec fish
-      fi
-    '';
+    initExtra = toFish {
+      commandVar = "BASH_EXECUTION_STRING";
+      isLogin = "shopt -q login_shell";
+    };
+  };
+
+  # macOS's login shell is zsh: the same hand-off from there.
+  programs.zsh = {
+    enable = pkgs.stdenv.hostPlatform.isDarwin;
+    # (first thing in .zshrc, before zsh sets up completion it won't use)
+    initContent = lib.mkBefore (toFish {
+      commandVar = "ZSH_EXECUTION_STRING";
+      isLogin = "[[ -o login ]]";
+    });
   };
 
   programs.fish = {
