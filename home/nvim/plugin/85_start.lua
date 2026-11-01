@@ -15,7 +15,7 @@ map('<leader>qd', persistence.stop, "Don't save this session")
 
 -- mini.starter: shown when nvim starts without files. Typing filters items
 -- by the start of their name and runs the one left, so each name begins
--- with its key: s restores the session, q quits.
+-- with its key: f finds a file, s restores the session, q quits.
 local starter = require('mini.starter')
 local restore = function()
   -- Only offered when this folder has a saved session
@@ -24,7 +24,11 @@ local restore = function()
 end
 starter.setup({
   evaluate_single = true,
-  items = { restore, { section = '', name = 'q  Quit', action = 'qall' } },
+  items = {
+    { section = '', name = 'f  Find file', action = function() Snacks.picker.files() end },
+    restore,
+    { section = '', name = 'q  Quit', action = 'qall' },
+  },
   footer = '', -- no usage hints
   content_hooks = { starter.gen_hook.aligning('center', 'center') },
 })
