@@ -74,6 +74,16 @@
       url = "file+https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm";
       flake = false;
     };
+
+    # nvim plugins nixpkgs doesn't package (home/neovim.nix).
+    go-up-nvim = {
+      url = "github:nullromo/go-up.nvim";
+      flake = false;
+    };
+    smart-splits-zellij = {
+      url = "github:smart-splits-nvim/backend-zellij-lua";
+      flake = false;
+    };
   };
 
   outputs =

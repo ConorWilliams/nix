@@ -11,13 +11,6 @@ map({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true })
 -- Windows. Ctrl+arrows move between splits and, at the edge of nvim, on
 -- into the neighbouring zellij pane (zellij hands them over the other way:
 -- home/zellij.nix). Resize with the built-in C-w + - < >.
-vim.pack.add({
-  {
-    src = 'https://github.com/smart-splits-nvim/smart-splits.nvim',
-    version = vim.version.range('3'),
-  },
-  'https://github.com/smart-splits-nvim/backend-zellij-lua',
-})
 local splits = require('smart-splits')
 splits.setup({
   -- (no warning outside zellij, where there's simply nothing to hand over to)

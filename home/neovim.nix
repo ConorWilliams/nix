@@ -1,6 +1,22 @@
-# Neovim: plain Lua config in ./nvim, plugins via vim.pack (pinned by the
-# committed nvim-pack-lock.json), language servers and tools from Nix.
-{ config, pkgs, ... }:
+# Neovim: plain Lua config in ./nvim; plugins, language servers and tools
+# from Nix, so `nix flake update` updates them with everything else.
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
+
+let
+  # A plugin nixpkgs doesn't package, from its flake input.
+  fromInput =
+    name: input:
+    pkgs.vimUtils.buildVimPlugin {
+      pname = name;
+      version = input.shortRev;
+      src = input;
+    };
+in
 
 {
   programs.neovim = {
@@ -29,13 +45,27 @@
       copilot-language-server
     ];
 
-    # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers
-    # and their matching queries, all from the binary cache (no compiler).
-    plugins = [
-      # Completion (nvim/plugin/65_completion.lua): built by nixpkgs with its
-      # Rust fuzzy matcher, rather than downloaded on each machine.
-      pkgs.vimPlugins.blink-cmp
-      (pkgs.vimPlugins.nvim-treesitter.withPlugins (
+    # All loaded at startup, before nvim/plugin/*.lua (which set them up).
+    plugins = with pkgs.vimPlugins; [
+      rose-pine # (30_ui.lua)
+      mini-nvim
+      which-key-nvim
+      (fromInput "go-up.nvim" inputs.go-up-nvim)
+      smart-splits-nvim # (20_keymaps.lua)
+      (fromInput "smart-splits-zellij" inputs.smart-splits-zellij)
+      flash-nvim # (50_editing.lua)
+      snacks-nvim # (55_picker.lua)
+      nvim-lspconfig # (60_lsp.lua)
+      conform-nvim # (61_format.lua)
+      blink-cmp # (65_completion.lua; built with its Rust fuzzy matcher)
+      friendly-snippets
+      render-markdown-nvim # (70_markdown.lua)
+      zk-nvim
+      gitsigns-nvim # (75_git.lua)
+      persistence-nvim # (85_start.lua)
+      # Treesitter: the plugin, prebuilt parsers and their matching queries,
+      # all from the binary cache (no compiler).
+      (nvim-treesitter.withPlugins (
         p: with p; [
           # Neovim's own languages (it ships some parsers, but these match the queries)
           lua
@@ -83,7 +113,7 @@
   '';
 
   # Live symlink into the repo (not a store copy): edits apply without a
-  # switch, and vim.pack can write its lockfile. The repo is where nh
+  # switch. The repo is where nh
   # expects it (~/nix, home/default.nix).
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.programs.nh.flake}/home/nvim";

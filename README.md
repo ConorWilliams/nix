@@ -54,9 +54,9 @@ nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too
 ```
 
-In nvim, `:lua vim.pack.update()` updates plugins: review, `:w` to accept,
-then commit `home/nvim/nvim-pack-lock.json` (do it on a desk; other machines
-follow the lockfile). Copilot needs `:LspCopilotSignIn` once per machine.
+nvim's plugins come from nixpkgs (two from flake inputs), so
+`nix flake update` updates them too. Copilot needs `:LspCopilotSignIn` once
+per machine.
 In zellij, Ctrl+arrows move between panes and nvim splits; the first press
 asks to allow the navigator plugin (answer `y`).
 

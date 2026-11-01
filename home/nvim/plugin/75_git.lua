@@ -1,7 +1,6 @@
 -- Git: gitsigns for changes in the gutter and hunk actions, lazygit in a
 -- float, and snacks' git pickers. Keys as in LazyVim.
 
-vim.pack.add({ 'https://github.com/lewis6991/gitsigns.nvim' })
 local gs = require('gitsigns')
 local bar = { text = '▎' }
 gs.setup({

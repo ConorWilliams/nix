@@ -3,8 +3,6 @@
 -- filetypes, root markers) as lsp/<name>.lua files; per-server tweaks
 -- live in after/lsp/<name>.lua and are merged on top.
 
-vim.pack.add({ 'https://github.com/neovim/nvim-lspconfig' })
-
 vim.lsp.enable({
   'lua_ls', -- lua-language-server
   'nixd',

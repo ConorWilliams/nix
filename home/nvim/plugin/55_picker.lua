@@ -5,8 +5,6 @@
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.
 
-vim.pack.add({ 'https://github.com/folke/snacks.nvim' })
-
 -- Hidden files, for files, grep and the explorer alike: dotfiles (.env,
 -- .gitignore, ...) are shown, but of the dot-folders only these, so .venv,
 -- .cache, .git etc. stay out.

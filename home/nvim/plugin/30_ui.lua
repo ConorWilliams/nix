@@ -1,10 +1,8 @@
--- Look and feel. vim.pack.add installs a plugin on first start (asking
--- first), records its exact commit in nvim-pack-lock.json, and loads it.
--- Update later with :lua vim.pack.update(), which shows a diff to accept.
+-- Look and feel. Plugins come from Nix (home/neovim.nix) and are already
+-- loaded; each file here sets up its own.
 
 -- Colour scheme: Rose Pine Dawn, always (detecting the terminal's
 -- background fails over mosh and inside zellij).
-vim.pack.add({ { src = 'https://github.com/rose-pine/neovim', name = 'rose-pine' } })
 require('rose-pine').setup({ variant = 'dawn' })
 vim.cmd.colorscheme('rose-pine')
 
@@ -18,12 +16,10 @@ require('vim._core.ui2').enable({ msg = { targets = 'msg' } })
 -- go-up: scroll above line 1, as is possible below the last line, so zz can
 -- centre the top of a file too. As before, it sets scrolloff=0 and
 -- splitkeep=topline, which it needs to work well.
-vim.pack.add({ 'https://github.com/nullromo/go-up.nvim' })
 require('go-up').setup()
 
 -- mini.nvim: one repo of small modules (icons here; ai and surround in
 -- 50_editing.lua). Icons for file types, used by which-key and others.
-vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 require('mini.icons').setup()
 MiniIcons.mock_nvim_web_devicons() -- for plugins that expect nvim-web-devicons
 
@@ -67,7 +63,6 @@ vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {
 require('mini.tabline').setup({ tabpage_section = 'right' })
 
 -- which-key: pause after a prefix (e.g. <Space>) to see what follows
-vim.pack.add({ 'https://github.com/folke/which-key.nvim' })
 require('which-key').setup({
   preset = 'helix', -- LazyVim's layout: a narrow column in the bottom right
   spec = {

@@ -3,7 +3,6 @@
 -- persistence: on exit, saves the open buffers, windows and tabs as a
 -- session for this folder (and git branch). Nothing is restored unless
 -- asked for, with these keys (LazyVim's) or from the start screen.
-vim.pack.add({ 'https://github.com/folke/persistence.nvim' })
 local persistence = require('persistence')
 persistence.setup()
 

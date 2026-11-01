@@ -55,6 +55,22 @@
         "type": "github"
       }
     },
+    "go-up-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752185429,
+        "narHash": "sha256-AnLBX0CJz6xL1ZmAvcewbfORY3Nd//YLIkPpi5S9dak=",
+        "owner": "nullromo",
+        "repo": "go-up.nvim",
+        "rev": "0151656d66cdad1a696ac10169b2400628c7b451",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nullromo",
+        "repo": "go-up.nvim",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -151,6 +167,7 @@
     },
     "root": {
       "inputs": {
+        "go-up-nvim": "go-up-nvim",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
@@ -166,6 +183,7 @@
         "rose-pine-tm-theme": "rose-pine-tm-theme",
         "rose-pine-yazi": "rose-pine-yazi",
         "rose-pine-zellij": "rose-pine-zellij",
+        "smart-splits-zellij": "smart-splits-zellij",
         "vim-zellij-navigator": "vim-zellij-navigator"
       }
     },
@@ -342,6 +360,22 @@
       "original": {
         "owner": "rose-pine",
         "repo": "zellij",
+        "type": "github"
+      }
+    },
+    "smart-splits-zellij": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791398917,
+        "narHash": "sha256-QAKX3jHYd2xHjhs8uf44OB04Q+Gl+wXVZOqS09IcRSk=",
+        "owner": "smart-splits-nvim",
+        "repo": "backend-zellij-lua",
+        "rev": "4e3e588795efb95548dd2ebeaf385a7823821ceb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "smart-splits-nvim",
+        "repo": "backend-zellij-lua",
         "type": "github"
       }
     },

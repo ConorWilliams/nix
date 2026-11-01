@@ -2,8 +2,6 @@
 -- Rust fuzzy matcher, nothing downloaded). It also tells every language
 -- server what it supports, so no LSP glue is needed.
 
-vim.pack.add({ 'https://github.com/rafamadriz/friendly-snippets' }) -- snippets blink reads
-
 require('blink.cmp').setup({
   -- Tab accepts (or jumps through a snippet), as in the old config. C-n/C-p or
   -- Up/Down move, C-e closes, C-space opens it or toggles the docs.

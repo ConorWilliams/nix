@@ -2,7 +2,6 @@
 -- falling back to the language server's own formatting. Formats on save;
 -- <leader>uf toggles that (globally) if a file shouldn't be touched.
 
-vim.pack.add({ 'https://github.com/stevearc/conform.nvim' })
 local conform = require('conform')
 
 conform.setup({

@@ -21,7 +21,6 @@ end
 
 -- render-markdown: headings, lists, code blocks and tables drawn in place
 -- (raw text comes back on the cursor line). <leader>um toggles it.
-vim.pack.add({ 'https://github.com/MeanderingProgrammer/render-markdown.nvim' })
 require('render-markdown').setup({
   latex = { enabled = false },
   -- Lists and tasks stay as typed (- and [ ] / [x]), not swapped for icons.
@@ -40,7 +39,6 @@ vim.keymap.set(
 -- zk: notes. Its language server (links, tags, backlinks) starts in any
 -- folder with a .zk notebook (if zk is installed).
 if vim.fn.executable('zk') == 1 then
-  vim.pack.add({ 'https://github.com/zk-org/zk-nvim' })
   require('zk').setup({
     picker = 'snacks_picker',
   })
