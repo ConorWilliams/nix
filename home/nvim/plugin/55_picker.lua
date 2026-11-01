@@ -12,9 +12,11 @@ vim.pack.add({ 'https://github.com/folke/snacks.nvim' })
 -- .cache, .git etc. stay out.
 local dot_folders = { ['.claude'] = true, ['.github'] = true }
 local hide_dot_folders = function(item, ctx)
-  -- Judge the path below the folder being searched: the explorer gives
-  -- absolute paths, and ~/.config/... shouldn't hide everything.
-  local path = vim.fs.relpath(ctx.filter.cwd, item.file) or item.file
+  -- Judge the path below the folder being searched, so ~/.config/...
+  -- doesn't hide everything. (files/grep give paths relative to the
+  -- picker's folder, the explorer absolute ones; util.path makes both
+  -- absolute, as relpath would resolve a relative one from nvim's cwd.)
+  local path = vim.fs.relpath(ctx.filter.cwd, Snacks.picker.util.path(item)) or item.file
   local parts = vim.split(path, '/', { plain = true })
   local last = item.dir and #parts or #parts - 1 -- folders only, not the file name
   for i = 1, last do
