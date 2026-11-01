@@ -12,7 +12,7 @@ My terminal environment, managed with Nix + Home Manager.
    curl -fsSL https://raw.githubusercontent.com/ConorWilliams/nix/main/bootstrap.sh | bash
    ```
 
-3. Open a new terminal, then do the [logins](#logins) it doesn't.
+3. Open a new terminal!
 
 ## Layout
 

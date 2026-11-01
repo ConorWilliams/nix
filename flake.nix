@@ -17,9 +17,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Claude Code, updated daily by a bot (home/claude.nix).
-    # No `follows` on purpose: this flake is only tested against its own
-    # nixpkgs pin, so we keep the combination it ships.
+    # Claude Code, updated daily by a bot (home/claude.nix). No `follows` on
+    # purpose: this flake is only tested against its own nixpkgs pin, so we
+    # keep the combination it ships.
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
