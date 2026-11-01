@@ -7,6 +7,12 @@
 vim.pack.add({ { src = 'https://github.com/rose-pine/neovim', name = 'rose-pine' } })
 vim.cmd.colorscheme('rose-pine')
 
+-- go-up: scroll above line 1, like you can below the last line, so zz can
+-- centre the top of a file too. As before, it sets scrolloff=0 and
+-- splitkeep=topline (overriding 10_options.lua), which it needs to work well.
+vim.pack.add({ 'https://github.com/nullromo/go-up.nvim' })
+require('go-up').setup()
+
 -- mini.nvim: one repo of small modules (icons here; ai and surround in
 -- 50_editing.lua). Icons for file types, used by which-key and others.
 vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
