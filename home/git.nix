@@ -72,6 +72,14 @@ in
       # lines (included below), and bat's theme for the code itself.
       features = "rose-pine-dawn";
       syntax-theme = "rose-pine-dawn";
+      # ...but the port's added / removed backgrounds are barely visible, so
+      # stronger tints: Rose Pine's love (#b4637a, removed) and pine
+      # (#286983, added) mixed into the Dawn base (#faf4ed), 20% for changed
+      # lines and 35% for the changed words within them.
+      minus-style = "syntax #ecd7d6";
+      minus-emph-style = "syntax bold #e2c1c5";
+      plus-style = "syntax #d0d8d8";
+      plus-emph-style = "syntax bold #b0c3c8";
     };
   };
 

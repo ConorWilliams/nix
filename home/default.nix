@@ -132,7 +132,6 @@
 
   programs.htop.enable = true;
 
-  # Terminal file manager
   programs.yazi = {
     enable = true;
     theme = builtins.fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml");
