@@ -18,6 +18,14 @@ require('go-up').setup()
 vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 require('mini.icons').setup()
 
+-- Statusline at the bottom: mode, git branch and changes, diagnostics,
+-- file name, file type, position.
+require('mini.statusline').setup()
+
+-- Tabline at the top: open buffers as tabs (Shift-h / Shift-l move
+-- between them); tab pages, when there's more than one, show at the right.
+require('mini.tabline').setup({ tabpage_section = 'right' })
+
 -- which-key: pause after a prefix (e.g. <Space>) to see what follows
 vim.pack.add({ 'https://github.com/folke/which-key.nvim' })
 require('which-key').setup({
