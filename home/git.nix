@@ -1,5 +1,10 @@
 # Git: identity, settings, and the tools around it (delta, lazygit, lfs).
-{ ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
   # Remote URLs that mark a repo as work. GitHub ignores case in URLs,
@@ -17,10 +22,13 @@ in
     lfs.enable = true;
 
     # Myrtle identity for any repo with a myrtle remote.
-    includes = map (url: {
-      condition = "hasconfig:remote.*.url:${url}";
-      contents.user.email = "conor@myrtle.ai";
-    }) myrtleRemotes;
+    includes =
+      map (url: {
+        condition = "hasconfig:remote.*.url:${url}";
+        contents.user.email = "conor@myrtle.ai";
+      }) myrtleRemotes
+      # delta's Rose Pine Dawn colours (the official port; see programs.delta)
+      ++ [ { path = "${inputs.rose-pine-delta}/dist/rose-pine.gitconfig"; } ];
 
     settings = {
       # Default identity: personal.
@@ -60,12 +68,36 @@ in
       # All terminals use the light Rosé Pine Dawn theme. Declared rather
       # than auto-detected, because detection fails inside lazygit/zellij.
       light = true;
+      # Rose Pine Dawn: the official port's colours for added / removed
+      # lines (included below), and bat's theme for the code itself.
+      features = "rose-pine-dawn";
+      syntax-theme = "rose-pine-dawn";
     };
   };
 
   # Git TUI, showing diffs through delta.
   programs.lazygit = {
     enable = true;
+    # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE, so the
+    # command is wrapped to read its config (settings below) and then the
+    # official port's theme.
+    package =
+      let
+        configDir =
+          if pkgs.stdenv.hostPlatform.isDarwin && !config.xdg.enable then
+            "${config.home.homeDirectory}/Library/Application Support"
+          else
+            config.xdg.configHome;
+      in
+      pkgs.symlinkJoin {
+        name = "lazygit";
+        paths = [ pkgs.lazygit ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
+            "${configDir}/lazygit/config.yml,${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml"
+        '';
+      };
     settings = {
       git.diffRenderers = [
         {

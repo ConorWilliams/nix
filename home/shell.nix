@@ -1,6 +1,13 @@
 # Shells: bash is the login shell, interactive sessions switch to fish.
 # Aliases (home.shellAliases) and tool integrations apply to both.
-{ ... }:
+{ inputs, ... }:
+
+let
+  # Rose Pine Dawn palette from the official starship port.
+  rosePine =
+    (builtins.fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
+    .palettes.rose-pine-dawn;
+in
 
 {
   programs.bash = {
@@ -31,6 +38,7 @@
     enable = true;
     interactiveShellInit = ''
       set -g fish_greeting # no startup banner
+      fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
     '';
     # Calculator via fish's built-in math: `c 2^10/3`.
     # Quote anything with * or (): `c '(80-100)/80*100'`.
@@ -82,6 +90,17 @@
         disabled = false;
         format = "[\\[$status\\]]($style) ";
       };
+      # Full colour: the modules' standard colour names (red, green...) are
+      # redefined as Rose Pine Dawn's, mapped as in kitty's Rose Pine theme.
+      palette = "rose-pine-dawn";
+      palettes.rose-pine-dawn = rosePine // {
+        red = rosePine.love;
+        green = rosePine.pine;
+        yellow = rosePine.gold;
+        blue = rosePine.foam;
+        purple = rosePine.iris;
+        cyan = rosePine.rose;
+      };
     };
   };
 
@@ -105,6 +124,7 @@
       # Enter runs the picked command straight away; Tab puts it in the
       # prompt to edit first.
       enter_accept = true;
+      theme.name = "rose-pine-dawn"; # from themes below
 
       # Background daemon, started by the shell when needed (no service).
       # Threads needs it; it also syncs every 5 minutes on its own.
@@ -125,4 +145,10 @@
 
   # `z foo` jumps to the most-used directory matching foo; `zi` picks with fzf.
   programs.zoxide.enable = true;
+
+  # Rose Pine Dawn for fish's syntax colours and atuin's search UI: the
+  # official ports' theme files, selected above.
+  xdg.configFile."fish/themes/Rosé Pine Dawn.theme".source =
+    "${inputs.rose-pine-fish}/themes/Rosé Pine Dawn.theme";
+  programs.atuin.themes.rose-pine-dawn = "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
 }

@@ -21,6 +21,48 @@
     # purpose: that flake is only tested against its own nixpkgs pin, so it
     # keeps the combination it ships with.
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # Official Rose Pine ports.
+    rose-pine-tm-theme = {
+      url = "github:rose-pine/tm-theme";
+      flake = false;
+    };
+    rose-pine-fzf = {
+      url = "github:rose-pine/fzf";
+      flake = false;
+    };
+    rose-pine-zellij = {
+      url = "github:rose-pine/zellij";
+      flake = false;
+    };
+    rose-pine-lazygit = {
+      url = "github:rose-pine/lazygit";
+      flake = false;
+    };
+    rose-pine-eza = {
+      url = "github:rose-pine/eza";
+      flake = false;
+    };
+    rose-pine-starship = {
+      url = "github:rose-pine/starship";
+      flake = false;
+    };
+    rose-pine-fish = {
+      url = "github:rose-pine/fish";
+      flake = false;
+    };
+    rose-pine-yazi = {
+      url = "github:rose-pine/yazi";
+      flake = false;
+    };
+    rose-pine-atuin = {
+      url = "github:rose-pine/atuin";
+      flake = false;
+    };
+    rose-pine-delta = {
+      url = "github:rose-pine/delta";
+      flake = false;
+    };
   };
 
   outputs =

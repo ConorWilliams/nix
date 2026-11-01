@@ -1,6 +1,12 @@
 # The base layer: every machine gets this, and on its own it's the config
 # for servers. All command-line tools live here.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   imports = [
@@ -65,7 +71,7 @@
   home.shellAliases = {
     hms = "nh home switch ${config.home.homeDirectory}/nix";
     ls = "eza --icons=auto";
-    ll = "eza -l --icons=auto";
+    ll = "eza -l --icons=auto --git"; # with a git status column
     lt = "eza --tree --icons=auto";
     icat = "kitten icat";
     # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
@@ -99,11 +105,15 @@
     arguments = [ "--smart-case" ];
   };
 
-  # cat with syntax highlighting. "ansi" reuses the terminal's own colours,
-  # so it matches kitty's theme everywhere, including over SSH.
+  # cat with syntax highlighting, in Rose Pine Dawn (kitty's theme): the
+  # official port (a flake input, like the other rose-pine-* below).
   programs.bat = {
     enable = true;
-    config.theme = "ansi";
+    themes.rose-pine-dawn = {
+      src = inputs.rose-pine-tm-theme;
+      file = "dist/rose-pine-dawn.tmTheme";
+    };
+    config.theme = "rose-pine-dawn";
   };
 
   # Fuzzy finder. Shell keys: Ctrl-T pick a file, Alt-C cd into a dir.
@@ -114,13 +124,34 @@
     fileWidget.command = "fd --type f --hidden --exclude .git";
     changeDirWidget.command = "fd --type d --hidden --exclude .git";
     historyWidget.command = ""; # Ctrl-R belongs to atuin (shell.nix)
-    defaultOptions = [ "--color=16" ]; # terminal's own colours, like bat
+    # Rose Pine Dawn: the port is a shell `export FZF_DEFAULT_OPTS="..."`,
+    # so take its --color lines.
+    defaultOptions =
+      let
+        port = builtins.readFile "${inputs.rose-pine-fzf}/dist/rose-pine-dawn.sh";
+        lines = map lib.trim (lib.splitString "\n" port);
+      in
+      # (the last line ends with the export's closing quote)
+      map (lib.removeSuffix "\"") (lib.filter (lib.hasPrefix "--color") lines);
   };
+
+  # LS_COLORS (fd, plain ls, tree, fish's file completions...): vivid's
+  # Rose Pine Dawn theme.
+  programs.vivid = {
+    enable = true;
+    activeTheme = "rose-pine-dawn";
+  };
+
+  # ls colours (eza): Rose Pine Dawn.
+  xdg.configFile."eza/theme.yml".source = "${inputs.rose-pine-eza}/dist/rose-pine-dawn.yml";
 
   # Process viewer.
   programs.htop.enable = true;
 
   # Terminal file manager. Run `y`; quitting leaves the shell in the
   # directory last browsed.
-  programs.yazi.enable = true;
+  programs.yazi = {
+    enable = true;
+    theme = builtins.fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml");
+  };
 }
