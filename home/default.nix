@@ -11,11 +11,11 @@
 {
   imports = [
     ./git.nix
-    ./claude.nix
     ./shell.nix
-    ./neovim.nix
     ./ssh.nix
     ./zellij.nix
+    ./claude.nix
+    ./neovim.nix
   ];
 
   # Compatibility marker for Home Manager's defaults, not a version pin.
