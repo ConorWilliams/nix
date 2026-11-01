@@ -29,7 +29,6 @@ in
         command = "${statusline}/bin/claude-statusline";
       };
       # Claude's own light palette; relies on COLORTERM=truecolor (default.nix)
-      # to look right over SSH/zellij.
       theme = "light";
       tui = "fullscreen";
       autoCompactEnabled = true;
