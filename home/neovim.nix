@@ -76,8 +76,14 @@
     ];
   };
 
-  # Live symlink into the repo (not a store copy): edits apply without a
-  # switch, and vim.pack can write its lockfile. Assumes the repo is at ~/nix.
+  # rumdl (Markdown lint, in nvim): its list-item-spacing rule (MD076) would
+  # insist on one blank-line style per list.
+  xdg.configFile."rumdl/rumdl.toml".text = ''
+    [global]
+    disable = ["MD076"]
+  '';
+
+  # write its lockfile. Assumes the repo is at ~/nix.
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix/home/nvim";
 }
