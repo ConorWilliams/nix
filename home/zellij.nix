@@ -4,9 +4,10 @@
 { inputs, ... }:
 
 let
-  # Ctrl-h/j/k/l move between panes, and inside nvim between its splits
-  # too (smart-splits in nvim/plugin/20_keymaps.lua hands over at the edge).
-  # In every mode, so shell panes lose Ctrl-l (clear) and Ctrl-k (kill line).
+  # Ctrl+arrows move between panes, and inside nvim between its splits too
+  # (smart-splits in nvim/plugin/20_keymaps.lua hands over at the edge).
+  # Bound in normal and locked mode, so shell panes lose Ctrl+Left/Right
+  # word jumps (Alt+Left/Right still do that in fish).
   navigation =
     let
       bind = key: dir: ''
@@ -14,41 +15,27 @@ let
           MessagePlugin "file:${inputs.vim-zellij-navigator}" {
             name "move_focus";
             payload "${dir}";
+            use_arrow_keys "true"; // hand nvim Ctrl+arrows, not Ctrl-h/j/k/l
           };
         }
       '';
     in
-    ''
-      keybinds {
-        shared_among "normal" "locked" {
-          ${bind "h" "left"}
-          ${bind "j" "down"}
-          ${bind "k" "up"}
-          ${bind "l" "right"}
-        }
-      }
-    '';
-  # zellij's default plugin list, with the compact bar's key-hint tooltip
-  # switched on (F1 also toggles it by hand). The whole list is repeated:
-  # a plugins block replaces zellij's defaults.
+    bind "Left" "left" + bind "Down" "down" + bind "Up" "up" + bind "Right" "right";
+
+  # The keybinding preset (copied; see the comment at the top of the file),
+  # with the navigation bindings placed inside its normal/locked block:
+  # zellij only reads the first top-level keybinds block.
+  keybinds = builtins.replaceStrings [ "// NAVIGATION" ] [ navigation ] (
+    builtins.readFile ./zellij/keybinds-unlock-first.kdl
+  );
+
+  # The compact bar's key-hint tooltip (F1 also toggles it by hand). This
+  # adds to zellij's default plugin list rather than replacing it.
   compactBar = ''
     plugins {
-      tab-bar location="zellij:tab-bar"
-      status-bar location="zellij:status-bar"
-      strider location="zellij:strider"
       compact-bar location="zellij:compact-bar" {
         tooltip "F1"
       }
-      session-manager location="zellij:session-manager"
-      welcome-screen location="zellij:session-manager" {
-        welcome_screen true
-      }
-      filepicker location="zellij:strider" {
-        cwd "/"
-      }
-      configuration location="zellij:configuration"
-      plugin-manager location="zellij:plugin-manager"
-      about location="zellij:about"
     }
   '';
 in
@@ -59,11 +46,12 @@ in
     # dark through mosh, and then falls back to a dark theme.
     # (the contents: a path string would be written out as text)
     themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
-    # Modal keys with a leader: see the comment at the top of the file.
+    # Modal keys with a leader: see the comment at the top of
+    # zellij/keybinds-unlock-first.kdl.
     # TODO: zellij 0.45.1 can't select this preset by name, so it's copied.
-    # The next release can: replace the file with
-    #   extraConfig = ''keybinds preset="unlock-first" { }'';
-    extraConfig = builtins.readFile ./zellij/keybinds-unlock-first.kdl + navigation + compactBar;
+    # A later release may: then keybinds preset="unlock-first" plus the
+    # navigation bindings.
+    extraConfig = keybinds + compactBar;
     settings = {
       default_mode = "locked"; # part of the preset: keys go to the shell
       # One slim bar (tabs and mode) instead of the tab bar + hints bar;
