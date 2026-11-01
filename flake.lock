@@ -164,7 +164,8 @@
         "rose-pine-starship": "rose-pine-starship",
         "rose-pine-tm-theme": "rose-pine-tm-theme",
         "rose-pine-yazi": "rose-pine-yazi",
-        "rose-pine-zellij": "rose-pine-zellij"
+        "rose-pine-zellij": "rose-pine-zellij",
+        "vim-zellij-navigator": "vim-zellij-navigator"
       }
     },
     "rose-pine-atuin": {
@@ -361,6 +362,18 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "vim-zellij-navigator": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-uOd2rSDM4Ruwr8JrYd8ucQei2PJyAykpIyR09sKvnYg=",
+        "type": "file",
+        "url": "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm"
       }
     }
   },

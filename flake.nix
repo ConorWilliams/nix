@@ -63,6 +63,13 @@
       url = "github:rose-pine/delta";
       flake = false;
     };
+
+    # zellij plugin behind Ctrl-h/j/k/l moving between nvim splits and
+    # zellij panes (home/zellij.nix). A release file, pinned here.
+    vim-zellij-navigator = {
+      url = "file+https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm";
+      flake = false;
+    };
   };
 
   outputs =

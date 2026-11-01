@@ -150,5 +150,6 @@ in
   # official ports' theme files, selected above.
   xdg.configFile."fish/themes/Rosé Pine Dawn.theme".source =
     "${inputs.rose-pine-fish}/themes/Rosé Pine Dawn.theme";
-  programs.atuin.themes.rose-pine-dawn = "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
+  # (the contents: a path string would be written out as text)
+  programs.atuin.themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
 }

@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "backend-zellij-lua": {
+      "rev": "4e3e588795efb95548dd2ebeaf385a7823821ceb",
+      "src": "https://github.com/smart-splits-nvim/backend-zellij-lua"
+    },
     "blink.cmp": {
       "rev": "78336bc89ee5365633bcf754d93df01678b5c08f",
       "src": "https://github.com/saghen/blink.cmp",
@@ -44,6 +48,11 @@
     "rose-pine": {
       "rev": "ff483051a47e27d84bdef47703538df1ed9f4a47",
       "src": "https://github.com/rose-pine/neovim"
+    },
+    "smart-splits.nvim": {
+      "rev": "5fd4fe53c2df2009e689f61511e3c474a9eccbaf",
+      "src": "https://github.com/smart-splits-nvim/smart-splits.nvim",
+      "version": "3.0.0 - 4.0.0"
     },
     "snacks.nvim": {
       "rev": "882c996cf28183f4d63640de0b4c02ec886d01f2",

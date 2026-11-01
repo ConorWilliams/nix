@@ -8,11 +8,23 @@ local map = vim.keymap.set
 map({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true })
 map({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true })
 
--- Windows
-map('n', '<C-h>', '<C-w>h', { desc = 'Go to left window' })
-map('n', '<C-j>', '<C-w>j', { desc = 'Go to lower window' })
-map('n', '<C-k>', '<C-w>k', { desc = 'Go to upper window' })
-map('n', '<C-l>', '<C-w>l', { desc = 'Go to right window' })
+-- Windows. Ctrl-h/j/k/l move between splits and, at the edge of nvim,
+-- on into the neighbouring zellij pane (zellij hands them over the other
+-- way: home/zellij.nix).
+vim.pack.add({
+  {
+    src = 'https://github.com/smart-splits-nvim/smart-splits.nvim',
+    version = vim.version.range('3'),
+  },
+  'https://github.com/smart-splits-nvim/backend-zellij-lua',
+})
+local splits = require('smart-splits')
+-- Only inside zellij; elsewhere smart-splits would warn it found none.
+splits.setup(vim.env.ZELLIJ and { mux = { backend = 'smart-splits-backend-zellij-lua' } } or {})
+map('n', '<C-h>', splits.move_cursor_left, { desc = 'Go to left window' })
+map('n', '<C-j>', splits.move_cursor_down, { desc = 'Go to lower window' })
+map('n', '<C-k>', splits.move_cursor_up, { desc = 'Go to upper window' })
+map('n', '<C-l>', splits.move_cursor_right, { desc = 'Go to right window' })
 map('n', '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Taller window' })
 map('n', '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Shorter window' })
 map('n', '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Narrower window' })
