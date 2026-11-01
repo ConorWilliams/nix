@@ -4,7 +4,7 @@ My terminal environment, managed with Nix + Home Manager.
 
 ## Layout
 
-```
+```text
 flake.nix            users, roles, mkHome, checks, formatter
 home/common.nix      every machine; imports the files below
   git.nix            git, delta, lazygit, lfs
@@ -35,6 +35,7 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
    mkdir -p ~/.config/nix
    echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
    ```
+
 2. Log in to GitHub and clone. On a **server**, skip the login: your
    forwarded SSH agent already lets git through (`ssh-add -l` should list a
    key), so just `git clone`. On a **desk**, `gh` isn't installed yet, so
@@ -46,7 +47,7 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
    ```
 
    gh has no "no browser" option; over SSH it prints "Failed opening a web
-   browser" and keeps waiting. Open https://github.com/login/device on any
+   browser" and keeps waiting. Open <https://github.com/login/device> on any
    machine and enter the code it showed.
 
    If the clone says `Permission denied (publickey)`, the key upload didn't
@@ -94,7 +95,7 @@ on by itself (or asks you to paste a code back).
 | codex | `codex login --device-auth` | Device code, like gh. |
 | Copilot (desks) | `:LspCopilotSignIn` in nvim | Copies a device code to the clipboard; enter it at GitHub's device page. Until then nvim warns "not signed into GitHub". |
 
-gh's device page is https://github.com/login/device; "Failed opening a web
+gh's device page is <https://github.com/login/device>; "Failed opening a web
 browser" just means it's waiting for you to go there.
 
 ## Day to day
