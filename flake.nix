@@ -67,7 +67,7 @@
       url = "github:rose-pine/rofi";
       flake = false;
     };
-    # (mako's: there's no dunst port; home/gui/ubuntu/default.nix)
+    # (mako's: dunst has only a community port; home/gui/ubuntu/default.nix)
     rose-pine-mako = {
       url = "github:rose-pine/mako";
       flake = false;

@@ -12,8 +12,8 @@ let
   font = "${config.programs.kitty.font.name} 14"; # rofi and notifications
 
   # Rose Pine Dawn notification colours from the official mako port (mako
-  # is Wayland-only; dunst has no port): its key=value lines, normal ones
-  # first, then those for [urgency=high].
+  # is Wayland-only; dunst has only a community port): its key=value
+  # lines, normal ones first, then those for [urgency=high].
   mako =
     let
       port = builtins.readFile "${inputs.rose-pine-mako}/theme/rose-pine-dawn.theme";
