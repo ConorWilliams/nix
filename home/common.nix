@@ -18,6 +18,24 @@
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
 
+  # nh: a friendlier front end for switching. `hms` (defined in flake.nix,
+  # which knows this machine's config name) builds, shows what changed, and
+  # activates. Also cleans up weekly: old generations go once they're more
+  # than 7 days old (the newest 5 always stay), then unused store paths.
+  programs.nh = {
+    enable = true;
+    flake = "${config.home.homeDirectory}/nix";
+    clean = {
+      enable = true;
+      extraArgs = [
+        "--keep"
+        "5"
+        "--keep-since"
+        "7d"
+      ];
+    };
+  };
+
   # No "unread news" reminder on each switch (a desktop pop-up on desks).
   # Read the news any time with `home-manager news`.
   news.display = "silent";

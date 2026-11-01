@@ -81,7 +81,7 @@
 
       # Build one Home Manager config for a given user and role.
       mkHome =
-        user: role:
+        user: name: role:
         let
           pkgs = import nixpkgs {
             inherit (role) system;
@@ -99,6 +99,9 @@
             {
               home.username = user;
               home.homeDirectory = "${homeRoot}/${user}";
+              # Switch to this config. nh would guess <user>@<hostname>,
+              # which is wrong on servers (role "server") and the Mac.
+              home.shellAliases.hms = "nh home switch -c ${user}@${name}";
             }
           ];
         };
@@ -112,7 +115,7 @@
           user:
           nixpkgs.lib.mapAttrsToList (name: role: {
             name = "${user}@${name}";
-            value = mkHome user role;
+            value = mkHome user name role;
           }) roles
         ) users
       );

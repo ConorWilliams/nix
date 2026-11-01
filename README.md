@@ -101,11 +101,12 @@ browser" just means it's waiting for you to go there.
 ## Day to day
 
 ```sh
-home-manager switch --flake .#conix@hubble # apply changes (this machine's name)
+hms                                        # apply changes: build, show the diff, activate
 nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump just claude
 nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
+nh clean user --keep 5 --keep-since 7d     # what the weekly cleanup timer runs
 ```
 
 ## Notes
@@ -133,8 +134,9 @@ nix flake check --all-systems --no-build   # check every config, Mac too (~7s)
   apps work needs `targets.genericLinux.gpu`: sudo, plus pinning the exact
   NVIDIA driver version (hubble's display is on the 4090) and re-pinning
   after every driver update. Not an option on work-managed machines.
-- **Servers:** add `nix.gc` (a systemd user timer, so needs
-  `loginctl enable-linger`). `home.sessionVariables` only reach login
+- **Servers:** the weekly cleanup is a systemd user timer, so it only
+  runs while you're logged in (it catches up at the next login) unless
+  `loginctl enable-linger` is set. `home.sessionVariables` only reach login
   shells.
 - **Neovim:** `~/.config/nvim` is a live link to `~/nix/nvim` (edits apply
   without a switch; vim.pack writes its lockfile there), so it relies on
