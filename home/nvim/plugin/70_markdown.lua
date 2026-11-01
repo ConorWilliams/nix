@@ -42,11 +42,24 @@ if vim.fn.executable('zk') == 1 then
   require('zk').setup({
     picker = 'snacks_picker',
   })
-  vim.keymap.set('n', '<leader>z', '<cmd>ZkNotes<cr>', { desc = 'Find note' })
-  vim.keymap.set(
-    'n',
-    '<leader>Z',
-    "<cmd>ZkNew { dir = vim.fn.expand('%:p:h'), title = vim.fn.input('Title: ') }<cr>",
-    { desc = 'New note (in this dir)' }
-  )
+  -- Inside a notebook: <leader>n makes a note (in the current file's
+  -- folder), and <leader><space> finds notes instead of files
+  -- (55_picker.lua; <leader>ff always finds files).
+  local zk_util = require('zk.util')
+  local in_notebook = function() return zk_util.notebook_root(zk_util.resolve_notebook_path(0)) end
+  vim.keymap.set('n', '<leader>n', function()
+    if not in_notebook() then return vim.notify('Not in a zk notebook') end
+    local dir = vim.fn.expand('%:p:h')
+    require('zk').new({
+      dir = dir ~= '' and dir or vim.fn.getcwd(),
+      title = vim.fn.input('Title: '),
+    })
+  end, { desc = 'New note (zk notebook)' })
+  vim.keymap.set('n', '<leader><space>', function()
+    if in_notebook() then
+      vim.cmd('ZkNotes')
+    else
+      Snacks.picker.files()
+    end
+  end, { desc = 'Find files (notes in a zk notebook)' })
 end
