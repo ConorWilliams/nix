@@ -53,10 +53,17 @@ nix flake check --all-systems --no-build   # check every config, Mac too
 
 ### Straight into zellij
 
+With SSH:
+
 ```sh
-zzh host         # new zellij session on host, over ssh
+zzh host         # new zellij session
 zzh host main    # join "main" on host, creating it if needed
-zosh host main   # the same over mosh
+```
+
+Or with mosh:
+
+```sh
+zosh host main
 ```
 
 Full commands:
