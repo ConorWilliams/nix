@@ -13,19 +13,18 @@ map('<leader>qS', persistence.select, 'Pick a session')
 map('<leader>ql', function() persistence.load({ last = true }) end, 'Restore last session')
 map('<leader>qd', persistence.stop, "Don't save this session")
 
--- mini.starter: shown when nvim starts without files. Type to filter the
--- items, Enter to pick one (or it picks itself once only one is left).
+-- mini.starter: shown when nvim starts without files. Typing filters items
+-- by the start of their name and runs the one left, so each name begins
+-- with its key: s restores the session, q quits.
 local starter = require('mini.starter')
 local restore = function()
   -- Only offered when this folder has a saved session
   if vim.fn.filereadable(persistence.current()) == 0 then return {} end
-  return { { section = 'Session', name = 'Restore session', action = persistence.load } }
+  return { { section = '', name = 's  Restore session', action = persistence.load } }
 end
 starter.setup({
   evaluate_single = true,
-  items = { restore, starter.sections.builtin_actions() }, -- + new buffer, quit
-  content_hooks = {
-    starter.gen_hook.adding_bullet(),
-    starter.gen_hook.aligning('center', 'center'),
-  },
+  items = { restore, { section = '', name = 'q  Quit', action = 'qall' } },
+  footer = '', -- no usage hints
+  content_hooks = { starter.gen_hook.aligning('center', 'center') },
 })
