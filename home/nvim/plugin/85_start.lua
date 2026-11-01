@@ -13,41 +13,36 @@ map('<leader>qS', persistence.select, 'Pick a session')
 map('<leader>ql', function() persistence.load({ last = true }) end, 'Restore last session')
 map('<leader>qd', persistence.stop, "Don't save this session")
 
--- mini.starter: shown when nvim starts without files. Typing filters items
--- by the start of their name and runs the one left, so each name begins
--- with its key: f finds a file, s restores the session, q quits.
-local starter = require('mini.starter')
-local restore = function()
-  -- Only offered when this folder has a saved session
-  if vim.fn.filereadable(persistence.current()) == 0 then return {} end
-  return { { section = '', name = 's  Restore session', action = persistence.load } }
+-- Start screen (snacks dashboard, LazyVim's look): shown when nvim starts
+-- without files. Snacks reads this at startup, so it can be set here rather
+-- than in the setup() call in 55_picker.lua.
+-- The header is Neovim's own logo, from its intro screen
+-- (src/nvim/version.c), coloured the same way: Special up to the first
+-- diagonal, String from there on.
+local logo_line = function(left, right)
+  return { align = 'center', text = { { left, hl = 'Special' }, { right, hl = 'String' } } }
 end
--- Neovim's own logo, from its intro screen (src/nvim/version.c), coloured
--- the same way: Special up to the first diagonal, String from there on.
-local logo = { '│ ╲ ││', '││╲╲││', '││ ╲ │' }
-local colour_logo = function(content)
-  for _, line in ipairs(content) do
-    local unit = line[1]
-    local split = unit and unit.type == 'header' and unit.string:find('╲', 1, true)
-    if split then
-      local part = function(text, hl)
-        return vim.tbl_extend('force', unit, { string = text, hl = hl })
-      end
-      line[1] = part(unit.string:sub(1, split - 1), 'Special')
-      table.insert(line, 2, part(unit.string:sub(split), 'String'))
-    end
-  end
-  return content
-end
-
-starter.setup({
-  evaluate_single = true,
-  header = table.concat(logo, '\n'),
-  items = {
-    { section = '', name = 'f  Find file', action = function() Snacks.picker.files() end },
-    restore,
-    { section = '', name = 'q  Quit', action = 'qall' },
+Snacks.config.dashboard = {
+  enabled = true,
+  sections = {
+    logo_line('│ ', '╲ ││'),
+    logo_line('││', '╲╲││'),
+    logo_line('││ ', '╲ │'),
+    { padding = 1 },
+    { section = 'keys', gap = 1 },
   },
-  footer = '', -- no usage hints
-  content_hooks = { colour_logo, starter.gen_hook.aligning('center', 'center') },
-})
+  preset = {
+    keys = {
+      { icon = ' ', key = 'f', desc = 'Find File', action = function() Snacks.picker.files() end },
+      {
+        icon = ' ',
+        key = 's',
+        desc = 'Restore Session',
+        action = persistence.load,
+        -- only when this folder has a saved session
+        enabled = vim.fn.filereadable(persistence.current()) == 1,
+      },
+      { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
+    },
+  },
+}
