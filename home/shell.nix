@@ -35,6 +35,32 @@
     # Calculator via fish's built-in math: `c 2^10/3`.
     # Quote anything with * or (): `c '(80-100)/80*100'`.
     functions.c = "math $argv";
+
+    # zellij on another machine: `zzh brahe` starts a new session there,
+    # `zzh brahe main` joins "main" (creating it if needed). `zosh` is the
+    # same over mosh (no scrollback or images, but survives sleep).
+    functions.zzh = {
+      description = "zellij on a host over ssh: new session, or join/create one";
+      wraps = "ssh"; # complete hostnames like ssh
+      body = ''
+        if set -q argv[2]
+          ssh -t $argv[1] zellij attach -c $argv[2]
+        else
+          ssh -t $argv[1] zellij
+        end
+      '';
+    };
+    functions.zosh = {
+      description = "zellij on a host over mosh: new session, or join/create one";
+      wraps = "mosh";
+      body = ''
+        if set -q argv[2]
+          mosh --ssh=ssh $argv[1] -- zellij attach -c $argv[2]
+        else
+          mosh --ssh=ssh $argv[1] -- zellij
+        end
+      '';
+    };
   };
 
   # Prompt, identical in bash and fish on every machine:

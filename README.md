@@ -53,6 +53,8 @@ nix flake check --all-systems --no-build   # check every config, Mac too
 
 ### Straight into zellij
 
+Full commands:
+
 ```sh
 ssh -t brahe zellij attach -c main
 ```
