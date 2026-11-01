@@ -63,9 +63,9 @@
         };
       };
 
-      # Every other machine (the work servers) gets the base layer. Their
-      # hostnames stay out of this public repo: the config is named after
-      # the user alone, which nh and home-manager fall back to.
+      # Every other machine (the work servers) gets the base layer, with no
+      # need to list them: the config is named after the user alone, which
+      # nh and home-manager fall back to when <user>@<hostname> isn't found.
       server = {
         system = "x86_64-linux";
         module = ./home;
