@@ -73,7 +73,7 @@
     ];
   };
 
-  # rumdl (Markdown lint, in nvim): its list-item-spacing rule (MD076) would
+  # rumdl (Markdown lint, in nvim): its list-item-spacing rule would
   # insist on one blank-line style per list.
   xdg.configFile."rumdl/rumdl.toml".text = ''
     [global]
