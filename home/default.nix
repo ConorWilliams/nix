@@ -41,6 +41,23 @@
   # No "unread news" reminder on each switch.
   news.display = "silent";
 
+  # Only the locales in use, not all of them (~220 MB less in every
+  # closure).
+  i18n.glibcLocales = pkgs.glibcLocales.override {
+    allLocales = false;
+    locales = [
+      "en_GB.UTF-8/UTF-8"
+      "en_US.UTF-8/UTF-8"
+    ];
+  };
+
+  # Programs installed with `uv tool install` (and the like) land here.
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
+  # kitty's terminfo where ncurses looks by default, so programs (incl.
+  # over SSH, and under sudo with a preserved HOME) can drive kitty.
+  home.file.".terminfo".source = "${pkgs.kitty.terminfo}/share/terminfo";
+
   # Plain command-line tools with no config of their own. Tools with config
   # or shell integration get a `programs.<name>` block below or in their own
   # file.
@@ -48,13 +65,12 @@
     fd
     dust
     duf
-    eza
     uv
     mosh
     tokei
     rsync
     kitty.kitten # kitty's helper (icat etc.), without the GUI app
-    kitty.terminfo # lets programs drive kitty properly, including over SSH
+    htop
     zk
     codex
     # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
@@ -68,10 +84,7 @@
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
-    hms = "nh home switch ${config.home.homeDirectory}/nix";
-    ls = "eza --icons=auto";
-    ll = "eza -l --icons=auto --git"; # with a git status column
-    lt = "eza --tree --icons=auto";
+    hms = "nh home switch"; # the flake comes from NH_FLAKE (programs.nh)
     icat = "kitten icat";
     # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
     # about Ubuntu's /etc/ssh/ssh_config; use the system's ssh instead.
@@ -81,13 +94,6 @@
   home.sessionVariables = {
     # Tell programs the terminal supports 24-bit colour.
     COLORTERM = "truecolor";
-    # Find kitty's terminfo (above).
-    TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
-  };
-
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false; # Home Manager's old implicit defaults
   };
 
   programs.gh = {
@@ -121,8 +127,14 @@
         port = builtins.readFile "${inputs.rose-pine-fzf}/dist/rose-pine-dawn.sh";
         lines = map lib.trim (lib.splitString "\n" port);
       in
-      # (the last line ends with the export's closing quote)
-      map (lib.removeSuffix "\"") (lib.filter (lib.hasPrefix "--color") lines);
+      let
+        # (the last line ends with the export's closing quote)
+        colors = map (lib.removeSuffix "\"") (lib.filter (lib.hasPrefix "--color") lines);
+      in
+      # Fail the build rather than silently losing the colours if the port
+      # ever changes its file's layout.
+      assert lib.assertMsg (colors != [ ]) "rose-pine-fzf: no --color lines found";
+      colors;
   };
 
   # LS_COLORS (fd, plain ls, tree, fish's file completions...)
@@ -131,13 +143,37 @@
     activeTheme = "rose-pine-dawn";
   };
 
-  # ls colours (eza)
+  # eza (ls, ll, la, lt, lla), with icons and a git column. Wrapped so it
+  # always reads its theme from ~/.config/eza (macOS would look in
+  # ~/Library) and ignores LS_COLORS (vivid's), which would otherwise
+  # override the official Rose Pine port below.
+  programs.eza = {
+    enable = true;
+    icons = "auto";
+    git = true;
+    package = pkgs.symlinkJoin {
+      name = "eza";
+      paths = [ pkgs.eza ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/eza --unset LS_COLORS \
+          --set EZA_CONFIG_DIR "${config.xdg.configHome}/eza"
+      '';
+    };
+  };
   xdg.configFile."eza/theme.yml".source = "${inputs.rose-pine-eza}/dist/rose-pine-dawn.yml";
 
-  programs.htop.enable = true;
-
+  # Rose Pine Dawn: the port's flavor (UI colours and the code-preview
+  # theme), named for light and dark alike (detection fails over mosh and
+  # inside zellij), plus its icon colours.
   programs.yazi = {
     enable = true;
-    theme = fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml");
+    flavors.rose-pine-dawn = "${inputs.rose-pine-yazi}/flavors/rose-pine-dawn.yazi";
+    theme = fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml") // {
+      flavor = {
+        light = "rose-pine-dawn";
+        dark = "rose-pine-dawn";
+      };
+    };
   };
 }

@@ -158,12 +158,18 @@
       formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 
       # Lets `nix flake check` test every home config.
-      checks = nixpkgs.lib.genAttrs systems (
-        system:
-        nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (
-          nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system) self.homeConfigurations
-        )
-      );
+      checks =
+        nixpkgs.lib.recursiveUpdate
+          (nixpkgs.lib.genAttrs systems (
+            system:
+            nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (
+              nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system) self.homeConfigurations
+            )
+          ))
+          {
+            # ...and the Mac's system settings (nix-darwin).
+            aarch64-darwin.darwin-mac = self.darwinConfigurations.mac.system;
+          };
 
       # The Mac's system settings only.
       # TODO: rename to the Mac's real hostname once it's set up.

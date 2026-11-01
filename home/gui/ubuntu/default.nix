@@ -6,6 +6,10 @@ in
 {
   imports = [ ../. ]; # the GUI layer
 
+  # Non-NixOS Linux: lets the desktop (e.g. rofi's app list) find apps and
+  # icons installed by Nix, and programs find Ubuntu's terminfo too.
+  targets.genericLinux.enable = true;
+
   # Desktop notifications (notify-send, Slack...): nothing shows them under
   # i3, so dunst from Nix, started by the first notification.
   services.dunst.enable = true;
@@ -33,7 +37,7 @@ in
       # mkOptionDefault: add to i3's default keys rather than replace them.
       keybindings = lib.mkOptionDefault {
         "${mod}+o" = "exec kitty yazi";
-        "${mod}+n" = "exec i3lock -d -c000000";
+        "${mod}+n" = "exec i3lock -c 000000";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
         "--release ${mod}+p" =
@@ -47,7 +51,7 @@ in
           notification = false;
         }
         {
-          command = "xss-lock --transfer-sleep-lock -- i3lock --nofork";
+          command = "xss-lock --transfer-sleep-lock -- i3lock --nofork -c 000000";
           notification = false;
         }
       ];

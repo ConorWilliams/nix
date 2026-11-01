@@ -14,12 +14,17 @@ in
     # Runs in every bash, before the "not interactive? stop here" check.
     bashrcExtra = ''
       if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh # multi-user Nix
+      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh" # single-user Nix (no sudo)
       fi
     '';
     # Runs only in interactive bash
+    # Not for `bash -ic 'cmd'` (tools probing the environment) or nix-shell
+    # / nix develop (they need bash for the dev environment).
     initExtra = ''
-      if [[ $(ps -o comm= -p $PPID) != *fish* ]]; then
+      if [[ $(ps -o comm= -p $PPID) != *fish* && -z ''${BASH_EXECUTION_STRING:-} && -z ''${IN_NIX_SHELL:-} ]]; then
+        shopt -q login_shell && exec fish --login
         exec fish
       fi
     '';
