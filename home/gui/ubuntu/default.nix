@@ -40,6 +40,9 @@ in
       modifier = mod;
       terminal = "kitty";
       menu = "rofi -show run";
+      # Borders only, no title bar on top of each window.
+      window.titlebar = false;
+      floating.titlebar = false;
 
       # mkOptionDefault: add to i3's default keys rather than replace them.
       keybindings = lib.mkOptionDefault {
