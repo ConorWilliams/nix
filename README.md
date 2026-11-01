@@ -82,11 +82,10 @@ git authenticates to GitHub through gh, over HTTPS: no SSH keys on GitHub's
 side and nothing forwarded to servers. Desks log gh in with the browser;
 each server gets its own [fine-grained token][pat], limited to the repos it
 needs, with Contents read/write and an expiry. The bootstrap script asks
-for it; to renew one, run `gh auth login --with-token` and paste the new
-token. Since nothing is forwarded, git and gh keep working in zellij after
-you disconnect, under mosh too.
+for it; to renew one, run:
 
-A fine-grained token covers one owner (MyrtleSoftware or ConorWilliams),
-and pushing `.github/workflows/` needs its Workflows permission.
+```sh
+gh auth login --with-token
+```
 
 [pat]: https://github.com/settings/personal-access-tokens
