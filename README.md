@@ -30,53 +30,30 @@ right one by itself. Users: `conor`/`conix`.
 
 ## Set up a new machine
 
-1. Install Nix (Determinate installer). For a new user on a machine that
-   already has Nix: `sudo useradd -m -s /bin/bash <user>`. If Nix says
-   "experimental Nix feature 'flakes' is disabled" (the official nixos.org
-   installer leaves them off), turn them on for your user:
+1. Have Nix (multi-user). If it's missing:
+   `sh <(curl -L https://nixos.org/nix/install) --daemon`, then open a new
+   shell. For a new user on a machine that already has Nix:
+   `sudo useradd -m -s /bin/bash <user>`, and run the rest as that user
+   (Nix refuses a repo owned by someone else).
+2. Run the bootstrap script (also safe to re-run later to update):
 
    ```sh
-   mkdir -p ~/.config/nix
-   echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+   curl -fsSL https://raw.githubusercontent.com/ConorWilliams/nix/main/bootstrap.sh | bash
    ```
 
-2. Log in to GitHub and clone. On a **server**, skip the login: your
-   forwarded SSH agent already lets git through (`ssh-add -l` should list a
-   key), so just `git clone`. On a **desk**, `gh` isn't installed yet, so
-   borrow it:
-
-   ```sh
-   nix run nixpkgs#gh -- auth login --web --git-protocol ssh
-   git clone git@github.com:ConorWilliams/nix.git ~/nix
-   ```
-
-   gh has no "no browser" option; over SSH it prints "Failed opening a web
-   browser" and keeps waiting. Open <https://github.com/login/device> on any
-   machine and enter the code it showed.
-
-   If the clone says `Permission denied (publickey)`, the key upload didn't
-   happen: `nix run nixpkgs#gh -- ssh-key add ~/.ssh/id_ed25519.pub`.
-   Clone as the user itself: Nix refuses a repo owned by someone else.
-3. Activate (`-b backup` renames the starter `.bashrc`/`.profile`):
-
-   ```sh
-   nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@<hostname>
-   ```
-
-   On a server, use `~/nix#conix` instead.
-
-4. Log in again (bash now starts fish), then do the per-machine logins
-   below.
-5. Desks (hubble, luna) also need things from outside Nix, since Nix-built
-   GUI apps can't use Ubuntu's graphics drivers:
-
-   ```sh
-   sudo apt install i3   # the login screen's "i3" session, and i3lock
-   curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin  # kitty
-   ```
-
-   GUI apps stay with apt/snap: google-chrome, thunderbird, code (apt);
-   slack, obsidian (snap). Then log out and pick the "i3" session.
+   It turns on flakes if needed, clones (or pulls) `~/nix`, and picks the
+   config: `<user>@<hostname>` if `flake.nix` lists the machine, else plain
+   `<user>` (the server layer). On Ubuntu desks it offers `apt install i3`
+   (the login screen's "i3" session, and i3lock) and kitty's own installer:
+   Nix-built GUI apps can't use Ubuntu's graphics drivers. Then it switches
+   Home Manager (`-b backup` renames the starter `.bashrc`/`.profile`) and
+   offers the gh and atuin logins. Once GitHub SSH works, the repo's remote
+   moves from HTTPS to SSH. It never installs or upgrades Nix itself, and
+   asks before any sudo.
+3. Open a new terminal (bash now starts fish) and do the other logins
+   below. On a new desk, log out and pick the "i3" session. GUI apps stay
+   with apt/snap: google-chrome, thunderbird, code (apt); slack, obsidian
+   (snap).
 
 The Mac also has system settings, applied separately:
 
@@ -94,7 +71,7 @@ on by itself (or asks you to paste a code back).
 | What | Command | Notes |
 | --- | --- | --- |
 | git (servers) | nothing | The SSH agent is forwarded to short hostnames (`home/ssh.nix`), so servers use your desk's key and hold none. Connect with plain `ssh` from a machine whose agent has a key. |
-| git + gh (desks) | `gh auth login --web --git-protocol ssh` | Creates and uploads this machine's SSH key. |
+| git + gh (desks) | `gh auth login --web --git-protocol ssh` | Creates and uploads this machine's SSH key. If git then says `Permission denied (publickey)`, the upload didn't happen: `gh ssh-key add ~/.ssh/id_ed25519.pub`. |
 | gh (servers) | `gh auth login --web --skip-ssh-key` | Token only, for `gh pr`, `gh run` etc.; git itself uses the forwarded agent. |
 | atuin | `atuin login`, then `atuin daemon restart`, then `atuin sync` | No `-u`: that's the old password login. Then paste the atuin key (password manager). The restart matters: the daemon started before login with a temporary key and keeps using it until restarted. |
 | Claude | `claude`, then log in | First run asks for a theme: pick Light (the declared one). No browser: press `c` to copy the URL, open it, paste the code back. Stored in `~/.claude/.credentials.json`. |
