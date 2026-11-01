@@ -10,20 +10,7 @@ vim.pack.add({
 require('blink.cmp').setup({
   -- Tab accepts (or jumps through a snippet), as in the old config. C-n/C-p or
   -- Up/Down move, C-e closes, C-space opens it or toggles the docs.
-  keymap = {
-    preset = 'super-tab',
-    -- super-tab's Tab, plus accepting a Copilot suggestion (80_ai.lua) when
-    -- there's no menu or snippet; otherwise a plain Tab.
-    ['<Tab>'] = {
-      function(cmp)
-        if cmp.snippet_active() then return cmp.accept() end
-        return cmp.select_and_accept()
-      end,
-      'snippet_forward',
-      function() return vim.lsp.inline_completion.get() end,
-      'fallback',
-    },
-  },
+  keymap = { preset = 'super-tab' }, -- (Copilot has its own key: 80_ai.lua)
   completion = {
     documentation = { auto_show = true, auto_show_delay_ms = 200 },
     accept = { auto_brackets = { enabled = true } }, -- add () after functions
