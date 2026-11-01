@@ -64,10 +64,10 @@
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
     hms = "nh home switch ${config.home.homeDirectory}/nix";
-    ls = "eza --icons=auto"; # sorting flags differ: eza -s modified / -s size, not -t / -S
+    ls = "eza --icons=auto";
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
-    icat = "kitten icat"; # show an image; works over ssh, not over mosh
+    icat = "kitten icat";
     # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
     # about Ubuntu's /etc/ssh/ssh_config; use the system's ssh instead.
     mosh = "mosh --ssh=ssh";
