@@ -32,7 +32,7 @@
       ...
     }:
     let
-      # Every system we build for.
+      # Every system to build for
       systems = [
         "x86_64-linux"
         "aarch64-darwin"
@@ -42,7 +42,7 @@
       users = [ "conix" ];
 
       # Machines with a config of their own, by hostname, pointing at their
-      # layer in home/ (each layer file imports the one above it):
+      # layer in home/:
       #   server -> gui -> ubuntu -> hubble, luna
       #                 -> mac
       hosts = {
@@ -54,28 +54,26 @@
           system = "x86_64-linux";
           module = ./home/gui/ubuntu/luna.nix;
         };
-        # TODO: rename to the Mac's real hostname once it's set up.
+        # TODO: rename to the Mac's real hostname once it's set up
         mac = {
           system = "aarch64-darwin";
           module = ./home/gui/mac;
         };
       };
 
-      # Every other machine (the work servers) gets the base layer, with no
-      # need to list them: the config is named after the user alone, which
-      # nh and home-manager fall back to when <user>@<hostname> isn't found.
+      # Every other machine (remote servers) gets the base layer
       server = {
         system = "x86_64-linux";
         module = ./home;
       };
 
-      # Build one Home Manager config for a user on a machine.
+      # Build one Home Manager config for a user on a machine
       mkHome =
         user: machine:
         let
           pkgs = import nixpkgs {
             inherit (machine) system;
-            # Unfree packages we accept, by name (everything else stays refused).
+            # Unfree packages to accept.
             config.allowUnfreePredicate =
               pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "copilot-language-server" ];
           };
