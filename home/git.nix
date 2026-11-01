@@ -17,8 +17,6 @@ in
 {
   programs.git = {
     enable = true;
-
-    # Large files (model weights, datasets) stored outside git history.
     lfs.enable = true;
 
     # Myrtle identity for any repo with a myrtle remote.
@@ -62,8 +60,8 @@ in
     enableGitIntegration = true;
     options = {
       navigate = true; # n / N jump between files
-      # All terminals use the light Rosé Pine Dawn theme. Declared rather
-      # than auto-detected, because detection fails inside lazygit/zellij.
+      # All terminals use the light Rosé Pine Dawn theme. Declared because
+      # detection fails inside lazygit/zellij.
       light = true;
     };
   };
@@ -98,8 +96,6 @@ in
           colorArg = "always";
         }
       ];
-      # `e` on a file: inside nvim (<leader>gg) it opens in that nvim,
-      # elsewhere in a new one.
       os.editPreset = "nvim-remote";
       gui.nerdFontsVersion = "3"; # file icons
     };
