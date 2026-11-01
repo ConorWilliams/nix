@@ -18,8 +18,9 @@ require('go-up').setup()
 vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 require('mini.icons').setup()
 
--- Statusline at the bottom, kept light: mode, git branch, file name
--- (+ [+] when modified), then search count while searching and line:col.
+-- Statusline at the bottom, kept light: mode, git branch, diagnostics
+-- counts, file name (+ [+] when modified), then search count while
+-- searching and line:col.
 local statusline = require('mini.statusline')
 statusline.setup({
   content = {
@@ -27,7 +28,10 @@ statusline.setup({
       local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
       return statusline.combine_groups({
         { hl = mode_hl, strings = { mode } },
-        { hl = 'MiniStatuslineDevinfo', strings = { statusline.section_git({}) } },
+        {
+          hl = 'MiniStatuslineDevinfo',
+          strings = { statusline.section_git({}), statusline.section_diagnostics({}) },
+        },
         '%<', -- truncate from here when narrow
         { hl = 'MiniStatuslineFilename', strings = { '%f%m%r' } }, -- path from cwd
         '%=', -- the rest goes on the right
