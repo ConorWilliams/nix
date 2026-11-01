@@ -43,48 +43,40 @@
         "conix"
       ];
 
-      # What each machine gets, and what it runs on. Every work server shares
-      # one role. A machine-only tweak goes in a small home/<name>.nix added
-      # to its list.
-      roles = {
+      # Machines with a config of their own, by hostname, pointing at their
+      # layer in home/ (each layer file imports the one above it):
+      #   server -> gui -> ubuntu -> hubble, luna
+      #                 -> mac
+      hosts = {
         hubble = {
           system = "x86_64-linux";
-          modules = [
-            ./home/common.nix
-            ./home/desk.nix
-            ./home/desk-linux.nix
-            ./home/hubble.nix
-          ];
+          module = ./home/server/gui/ubuntu/hubble.nix;
         };
         luna = {
           system = "x86_64-linux";
-          modules = [
-            ./home/common.nix
-            ./home/desk.nix
-            ./home/desk-linux.nix
-            ./home/luna.nix
-          ];
+          module = ./home/server/gui/ubuntu/luna.nix;
         };
-        server = {
-          system = "x86_64-linux";
-          modules = [ ./home/common.nix ];
-        };
+        # TODO: rename to the Mac's real hostname once it's set up.
         mac = {
           system = "aarch64-darwin";
-          modules = [
-            ./home/common.nix
-            ./home/desk.nix
-            ./home/desk-mac.nix
-          ];
+          module = ./home/server/gui/mac;
         };
       };
 
-      # Build one Home Manager config for a given user and role.
+      # Every other machine (the work servers) gets the base layer. Their
+      # hostnames stay out of this public repo: the config is named after
+      # the user alone, which nh and home-manager fall back to.
+      server = {
+        system = "x86_64-linux";
+        module = ./home/server;
+      };
+
+      # Build one Home Manager config for a user on a machine.
       mkHome =
-        user: name: role:
+        user: machine:
         let
           pkgs = import nixpkgs {
-            inherit (role) system;
+            inherit (machine) system;
             # Unfree packages we accept, by name (everything else stays refused).
             config.allowUnfreePredicate =
               pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "copilot-language-server" ];
@@ -95,28 +87,34 @@
           inherit pkgs;
           # Makes `inputs` available to every module, e.g. home/claude.nix.
           extraSpecialArgs = { inherit inputs; };
-          modules = role.modules ++ [
+          modules = [
+            machine.module
             {
               home.username = user;
               home.homeDirectory = "${homeRoot}/${user}";
-              # Switch to this config. nh would guess <user>@<hostname>,
-              # which is wrong on servers (role "server") and the Mac.
-              home.shellAliases.hms = "nh home switch -c ${user}@${name}";
             }
           ];
         };
     in
     {
-      # Your home directory, on every machine. Every user × role, named
-      # "<user>@<role>". Activate one with:
-      #   home-manager switch --flake .#conix@hubble
+      # Your home directory, on every machine: "<user>@<hostname>" for the
+      # hosts above, plain "<user>" for everything else (the servers). `hms`
+      # (nh) picks the right one by itself; with home-manager directly:
+      #   home-manager switch --flake ~/nix#conix@luna   (a desk)
+      #   home-manager switch --flake ~/nix#conix        (a server)
       homeConfigurations = builtins.listToAttrs (
         nixpkgs.lib.concatMap (
           user:
-          nixpkgs.lib.mapAttrsToList (name: role: {
-            name = "${user}@${name}";
-            value = mkHome user name role;
-          }) roles
+          [
+            {
+              name = user;
+              value = mkHome user server;
+            }
+          ]
+          ++ nixpkgs.lib.mapAttrsToList (host: machine: {
+            name = "${user}@${host}";
+            value = mkHome user machine;
+          }) hosts
         ) users
       );
 

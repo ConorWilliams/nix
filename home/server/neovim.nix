@@ -24,9 +24,12 @@
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
       ty
-      # Markdown (zk's server comes with zk, in desk.nix)
+      # Markdown (zk's server comes with zk, in default.nix)
       marksman
       rumdl
+      # GitHub Copilot (nvim/plugin/80_ai.lua). Unfree; allowed by name in
+      # flake.nix. Each machine needs its own :LspCopilotSignIn.
+      copilot-language-server
     ];
 
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers

@@ -5,24 +5,28 @@ My terminal environment, managed with Nix + Home Manager.
 ## Layout
 
 ```text
-flake.nix            users, roles, mkHome, checks, formatter
-home/common.nix      every machine; imports the files below
-  git.nix            git, delta, lazygit, lfs
-  shell.nix          bash -> fish, starship, atuin, zoxide
-  claude.nix         Claude Code: settings, status line (claude/)
-  ssh.nix            SSH client: agent forwarding to work hosts
-  zellij.nix         zellij: theme, modal keys (zellij/)
-  neovim.nix         neovim: tools from Nix, Lua config linked live (nvim/)
-home/desk.nix        machines you sit at, any OS: kitty config, font, codex, zk
-home/desk-linux.nix  Linux desks: i3, scrot, xclip, arandr
-home/desk-mac.nix    the Mac
-home/hubble.nix      hubble-only tweaks (mouse speed)
-home/luna.nix        luna-only tweaks (font size)
-darwin/mac.nix       Mac system settings only
+flake.nix                  users, hosts -> layer, mkHome, checks, formatter
+home/server/default.nix    server layer: every machine; all CLI tools
+  git.nix                  git, delta, lazygit, lfs
+  shell.nix                bash -> fish, starship, atuin, zoxide
+  claude.nix               Claude Code: settings, status line (claude/)
+  ssh.nix                  SSH client: agent forwarding to work hosts
+  zellij.nix               zellij: theme, modal keys (zellij/)
+  neovim.nix               neovim: tools from Nix, Lua config linked live (nvim/)
+  gui/default.nix          GUI layer: desks on any OS: kitty config, font
+    ubuntu/default.nix     Ubuntu layer: i3, scrot, xclip, arandr
+      hubble.nix           hubble: mouse speed
+      luna.nix             luna: font size, touchpad
+    mac/default.nix        Mac layer (empty for now)
+nvim/                      neovim's Lua config (~/.config/nvim links here)
+darwin/mac.nix             Mac system settings only
 ```
 
-Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
-`hubble`, `luna` (laptop), `mac`, and `server` (shared by every work server).
+Each layer imports the one above it: server -> gui -> ubuntu -> hubble,
+luna; gui -> mac. Configs are named `<user>@<hostname>` for the machines
+listed in `flake.nix` (`hubble`, `luna`, `mac`), and plain `<user>` for
+every other machine, which gets the server layer. `hms` (nh) picks the
+right one by itself. Users: `conor`/`conix`.
 
 ## Set up a new machine
 
@@ -56,8 +60,10 @@ Configs are named `<user>@<machine>`: users `conor`/`conix`; machines
 3. Activate (`-b backup` renames the starter `.bashrc`/`.profile`):
 
    ```sh
-   nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@<machine>
+   nix run --inputs-from ~/nix home-manager -- switch -b backup --flake ~/nix#conix@<hostname>
    ```
+
+   On a server, use `~/nix#conix` instead.
 
 4. Log in again (bash now starts fish), then do the per-machine logins
    below.

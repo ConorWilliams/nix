@@ -33,7 +33,7 @@ vim.keymap.set(
 )
 
 -- zk: notes. Its language server (links, tags, backlinks) starts in any
--- folder with a .zk notebook. zk is only installed on desks.
+-- folder with a .zk notebook (if zk is installed).
 if vim.fn.executable('zk') == 1 then
   vim.pack.add({ 'https://github.com/zk-org/zk-nvim' })
   require('zk').setup({

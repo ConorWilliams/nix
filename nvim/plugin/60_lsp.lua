@@ -1,5 +1,5 @@
 -- Language servers. The servers themselves come from Nix (extraPackages in
--- home/neovim.nix). nvim-lspconfig only supplies default configs (command,
+-- home/server/neovim.nix). nvim-lspconfig only supplies default configs (command,
 -- filetypes, root markers) as lsp/<name>.lua files; our tweaks per server
 -- live in after/lsp/<name>.lua and are merged on top.
 

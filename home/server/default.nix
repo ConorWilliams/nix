@@ -1,4 +1,7 @@
-# Everything shared by every machine: hubble, luna, mac and the servers.
+# The base layer: every machine gets this, and on its own it's the config
+# for the work servers. All command-line tools live here.
+#   server -> gui -> ubuntu -> hubble, luna
+#                 -> mac
 { config, pkgs, ... }:
 
 {
@@ -18,9 +21,9 @@
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
 
-  # nh: a friendlier front end for switching. `hms` (defined in flake.nix,
-  # which knows this machine's config name) builds, shows what changed, and
-  # activates. Also cleans up weekly: old generations go once they're more
+  # nh: a friendlier front end for switching. `hms` builds this machine's
+  # config (<user>@<hostname>, else plain <user>: see flake.nix), shows
+  # what changed, and activates. Also cleans up weekly: old generations go once they're more
   # than 7 days old (the newest 5 always stay), then unused store paths.
   programs.nh = {
     enable = true;
@@ -63,10 +66,15 @@
     })
     kitty.kitten # kitty's helper (icat etc.), without the 600 MiB GUI app
     kitty.terminfo # lets programs drive kitty properly, including over SSH
+    zk # Markdown notes (zettelkasten)
+    # OpenAI's coding CLI, from nixpkgs: a few days behind, but prebuilt.
+    # Pulls in ~1 GiB (GStreamer, for voice features).
+    codex
   ];
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
+    hms = "nh home switch";
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
     icat = "kitten icat"; # show an image; works over ssh, not over mosh

@@ -1,5 +1,5 @@
 -- GitHub Copilot via Neovim 0.12's built-in inline completion: no plugin,
--- just the copilot language server (desks only; see home/desk.nix) and
+-- just the copilot language server (see home/server/neovim.nix) and
 -- nvim-lspconfig's config for it. Suggestions show as grey ghost text.
 -- Tab accepts one (when the completion menu is closed; 65_completion.lua),
 -- Alt-] / Alt-[ cycle alternatives. First time: :LspCopilotSignIn.

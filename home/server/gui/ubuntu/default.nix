@@ -1,12 +1,14 @@
-# Linux desks only (hubble, luna): window manager and GUI app config.
-# GUI apps themselves come from apt/snap (see README): Nix-built GUI apps
-# can't use Ubuntu's graphics drivers.
+# Ubuntu layer: Linux desks (hubble, luna). Window manager and GUI app
+# config on top of the GUI layer. GUI apps themselves come from apt/snap
+# (see README): Nix-built GUI apps can't use Ubuntu's graphics drivers.
 { lib, pkgs, ... }:
 
 let
   mod = "Mod1"; # Alt. AeroSpace on the Mac mirrors these keys.
 in
 {
+  imports = [ ../. ]; # the GUI layer
+
   # kitty comes from its own installer (see README), into ~/.local/kitty.app.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 

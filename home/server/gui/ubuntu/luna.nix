@@ -10,6 +10,8 @@ let
   };
 in
 {
+  imports = [ ./. ]; # the Ubuntu layer (default.nix here)
+
   programs.kitty.font.size = 18; # smaller screen than hubble's
 
   xsession.windowManager.i3.config.startup = [
