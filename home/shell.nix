@@ -1,5 +1,4 @@
 # Shells: bash is the login shell, interactive sessions switch to fish.
-# Aliases (home.shellAliases) and tool integrations apply to both.
 { inputs, ... }:
 
 let
@@ -13,20 +12,12 @@ in
   programs.bash = {
     enable = true;
     # Runs in every bash, before the "not interactive? stop here" check.
-    # `ssh host <command>` (and mosh, which starts mosh-server that way)
-    # gets a non-interactive bash, and Ubuntu's /etc/bash.bashrc only loads
-    # Nix for interactive ones; load it here so the host's own Nix tools
-    # (mosh-server, zellij...) are found. nix-daemon.sh guards against
-    # being loaded twice.
     bashrcExtra = ''
       if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       fi
     '';
-    # Runs only in interactive bash (Home Manager puts it after its
-    # "not interactive? stop here" check), so `ssh host cmd`, scp and mosh
-    # stay plain bash. Skipped when bash was started from fish, so typing
-    # `bash` inside fish still gives bash.
+    # Runs only in interactive bash
     initExtra = ''
       if [[ $(ps -o comm= -p $PPID) != *fish* ]]; then
         exec fish
@@ -40,13 +31,10 @@ in
       set -g fish_greeting # no startup banner
       fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
     '';
-    # Calculator via fish's built-in math: `c 2^10/3`.
-    # Quote anything with * or (): `c '(80-100)/80*100'`.
+
+    # Calculator shortcut
     functions.c = "math $argv";
 
-    # zellij on another machine: `zzh brahe` starts a new session there,
-    # `zzh brahe main` joins "main" (creating it if needed). `zosh` is the
-    # same over mosh (no scrollback or images, but survives sleep).
     functions.zzh = {
       description = "zellij on a host over ssh: new session, or join/create one";
       wraps = "ssh"; # complete hostnames like ssh
@@ -58,6 +46,7 @@ in
         end
       '';
     };
+
     functions.zosh = {
       description = "zellij on a host over mosh: new session, or join/create one";
       wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
@@ -71,9 +60,7 @@ in
     };
   };
 
-  # Prompt, identical in bash and fish on every machine:
-  #   nix on  main [!] ❯           (local)
-  #   conix@kepler nix on  main ❯  (over SSH)
+  # Prompt, identical in bash and fish on every machine
   programs.starship = {
     enable = true;
     settings = {
@@ -104,14 +91,9 @@ in
     };
   };
 
-  # Shell history in a local SQLite database. Ctrl-R opens a full-screen
-  # search over all history from every machine; Up searches this machine's
-  # history only (press Ctrl-R inside either to change the filter).
-  # Synced every 5 minutes to Atuin's hosted server (api.atuin.sh), end-to-end
-  # encrypted. Login is per machine and never in Nix: `atuin login`.
   programs.atuin = {
     enable = true;
-    # Don't bind `?` to Atuin AI (a hosted AI that would see shell context).
+    # Don't bind `?` to Atuin AI.
     flags = [ "--disable-ai" ];
     settings = {
       auto_sync = true;
@@ -134,8 +116,7 @@ in
       };
 
       # Threads: capture Claude Code (and Codex) sessions from their
-      # transcript files, synced like history. `atuin threads` to search,
-      # `atuin resume` to continue one, on any machine.
+      # transcript files, synced like history.
       threads = {
         capture = true;
         capture_tools = true; # include tool input/output and edit diffs
@@ -150,6 +131,5 @@ in
   # official ports' theme files, selected above.
   xdg.configFile."fish/themes/Rosé Pine Dawn.theme".source =
     "${inputs.rose-pine-fish}/themes/Rosé Pine Dawn.theme";
-  # (the contents: a path string would be written out as text)
   programs.atuin.themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
 }
