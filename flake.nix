@@ -93,11 +93,6 @@
         };
     in
     {
-      # The home directory, on every machine: "<user>@<hostname>" for the
-      # hosts above, plain "<user>" for everything else (the servers). `hms`
-      # (nh) picks the right one by itself; with home-manager directly:
-      #   home-manager switch --flake ~/nix#conix@luna   (a desk)
-      #   home-manager switch --flake ~/nix#conix        (a server)
       homeConfigurations = builtins.listToAttrs (
         nixpkgs.lib.concatMap (
           user:
@@ -114,11 +109,10 @@
         ) users
       );
 
-      # `nix fmt` formats every .nix file in the repo with nixfmt.
+      # `nix fmt`
       formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 
-      # Lets `nix flake check` test every home config (by default it doesn't).
-      # Each config is checked under the system it runs on.
+      # Lets `nix flake check` test every home config.
       checks = nixpkgs.lib.genAttrs systems (
         system:
         nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (
@@ -126,8 +120,7 @@
         )
       );
 
-      # The Mac's system settings only (Homebrew casks, macOS defaults),
-      # by hostname like `hosts`. Applied by bootstrap.sh, then `dms`.
+      # The Mac's system settings only.
       # TODO: rename to the Mac's real hostname once it's set up.
       darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/mac.nix ];
