@@ -31,8 +31,22 @@ require('blink.cmp').setup({
   },
   signature = { enabled = true }, -- parameter hints while typing a call
   sources = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
+  -- Completion in the : command line (LazyVim's settings, plus arrows).
+  -- Tab / S-Tab or Up / Down move through the menu (Up / Down still walk
+  -- the command history when no menu is open), C-y accepts, C-e closes.
   cmdline = {
-    keymap = { preset = 'cmdline' },
-    completion = { menu = { auto_show = true } },
+    keymap = {
+      preset = 'cmdline',
+      ['<Down>'] = { 'select_next', 'fallback' },
+      ['<Up>'] = { 'select_prev', 'fallback' },
+      ['<Right>'] = false, -- arrows left / right move the cursor, as usual
+      ['<Left>'] = false,
+    },
+    completion = {
+      list = { selection = { preselect = false } },
+      -- pop up by itself for : commands, not for / searches
+      menu = { auto_show = function() return vim.fn.getcmdtype() == ':' end },
+      ghost_text = { enabled = true }, -- the top match shown faintly
+    },
   },
 })
