@@ -9,6 +9,7 @@
 #   3. Picks the config: <user>@<hostname> if flake.nix lists this machine,
 #      else plain <user> (the server layer).
 #   4. Ubuntu desks: offers `apt install i3` (sudo) and kitty's installer.
+#      The Mac: offers to apply its system settings (nix-darwin, sudo).
 #   5. Switches Home Manager (-b backup moves files in the way to *.backup).
 #   6. Offers the gh and atuin logins, then moves the repo's remote to SSH
 #      once a GitHub key works.
@@ -88,6 +89,18 @@ main() {
       echo "kitty installed"
     elif ask "Install kitty with its own installer (into ~/.local/kitty.app)?"; then
       curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n
+    fi
+  fi
+
+  # The Mac: system settings (nix-darwin) first. Always the pinned version
+  # via nix run, so the same command works the first time and every time.
+  if [[ $(uname -s) == Darwin ]]; then
+    say "Mac system settings"
+    if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
+      echo "flake.nix has no darwinConfigurations.$host (name it after this Mac); skipping."
+    elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
+      sudo "$(type -P nix)" --extra-experimental-features 'nix-command flakes' \
+        run --inputs-from "$dir" nix-darwin#darwin-rebuild -- switch --flake "$dir#$host"
     fi
   fi
 

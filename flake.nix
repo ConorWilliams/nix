@@ -128,9 +128,9 @@
         )
       );
 
-      # The Mac's system settings only (Homebrew casks, macOS defaults).
-      # Rarely changed. Activate with:
-      #   sudo darwin-rebuild switch --flake .#mac
+      # The Mac's system settings only (Homebrew casks, macOS defaults),
+      # by hostname like `hosts`. Applied by bootstrap.sh, then `dms`.
+      # TODO: rename to the Mac's real hostname once it's set up.
       darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/mac.nix ];
       };

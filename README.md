@@ -14,19 +14,8 @@ My terminal environment, managed with Nix + Home Manager.
 
 3. Open a new terminal, then do the [logins](#logins) it doesn't.
 
-The Mac also has system settings, applied separately
-
-First time (to setup):
-
-```sh
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/nix#mac
-```
-
-After that (to rebuild), just run:
-
-```sh
-sudo darwin-rebuild switch --flake ~/nix#mac
-```
+On the Mac, the script also offers to apply the system settings
+(nix-darwin, `darwin/mac.nix`). After that, `dms` applies changes to them.
 
 ## Layout
 
@@ -76,6 +65,7 @@ work-managed machines. On the Mac, GUI apps will be Homebrew casks in
 
 ```sh
 hms                                        # apply changes: build, show the diff, activate
+dms                                        # the Mac: apply system settings (darwin/mac.nix)
 nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump just claude
 nix fmt                                    # format all .nix files
