@@ -1,4 +1,3 @@
-# luna only: tweaks for the laptop.
 { ... }:
 
 let
@@ -10,9 +9,9 @@ let
   };
 in
 {
-  imports = [ ./. ]; # the Ubuntu layer (default.nix here)
+  imports = [ ./. ]; # the Ubuntu layer.
 
-  programs.kitty.font.size = 18; # smaller screen than hubble's
+  programs.kitty.font.size = 18; # smaller screen.
 
   xsession.windowManager.i3.config.startup = [
     (touchpad "Scrolling Pixel Distance" "30") # half the default scroll speed

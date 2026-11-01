@@ -1,8 +1,7 @@
-# hubble only: tweaks for this machine's hardware.
 { ... }:
 
 {
-  imports = [ ./. ]; # the Ubuntu layer (default.nix here)
+  imports = [ ./. ]; # the Ubuntu layer.
 
   # Speed up hubble's Logitech mouse (added to the i3 startup list).
   xsession.windowManager.i3.config.startup = [
