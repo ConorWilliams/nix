@@ -1,7 +1,7 @@
 -- Picker: snacks.nvim's fuzzy finder for files, grep, buffers, symbols,
 -- help, ... and its file explorer, with your old layout. snacks is a
--- collection of modules; only the picker and explorer are switched on
--- here (bufdelete is a plain function).
+-- collection of modules; only the picker, explorer and smooth scrolling
+-- are switched on here (bufdelete is a plain function).
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.
 
@@ -47,6 +47,7 @@ local fullscreen = {
 
 require('snacks').setup({
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
+  scroll = {}, -- smooth scrolling, as in LazyVim (touchpad, C-d, C-u, ...)
   picker = {
     enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
     layout = {
@@ -115,6 +116,11 @@ map('<leader>sq', pick.qflist, 'Quickfix list')
 map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
 map('<leader>uC', pick.colorschemes, 'Colour schemes')
+
+map('<leader>uS', function()
+  vim.g.snacks_scroll = vim.g.snacks_scroll == false
+  vim.notify('Smooth scrolling: ' .. (vim.g.snacks_scroll and 'on' or 'off'))
+end, 'Toggle smooth scrolling')
 
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
