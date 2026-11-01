@@ -5,7 +5,7 @@
 // - the Alt bindings for moving focus are gone (Ctrl+arrows does that, via
 //   the NAVIGATION line below, filled in by home/zellij.nix), along with
 //   those i3 takes on the desks (Alt f, n, o, p, -) and their pairs (Alt +,
-//   =, i).
+//   =, i), and Alt [ / ] (swap layouts), which nvim uses for Copilot.
 keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
@@ -159,8 +159,6 @@ keybinds clear-defaults=true {
     }
     shared_among "normal" "locked" {
         // NAVIGATION
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
         bind "Alt Shift p" { ToggleGroupMarking; }
     }
     shared_except "locked" "renametab" "renamepane" {
