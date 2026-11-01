@@ -45,8 +45,8 @@ vim.lsp.inline_completion.enable()
 local cycle = function(count)
   return function() vim.lsp.inline_completion.select({ count = count }) end
 end
-vim.keymap.set({ 'i', 'n' }, '<M-]>', cycle(1), { desc = 'Next Copilot suggestion' })
-vim.keymap.set({ 'i', 'n' }, '<M-[>', cycle(-1), { desc = 'Prev Copilot suggestion' })
+vim.keymap.set('i', '<M-]>', cycle(1), { desc = 'Next Copilot suggestion' })
+vim.keymap.set('i', '<M-[>', cycle(-1), { desc = 'Prev Copilot suggestion' })
 
 -- Right arrow: take the suggestion if one is showing, else move right
 vim.keymap.set('i', '<Right>', function()

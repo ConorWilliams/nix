@@ -87,10 +87,9 @@ local shape = function() return vim.o.columns > 2 * vim.o.lines and 'wide' or 't
 require('snacks').setup({
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
   scroll = {}, -- animated C-d, C-u, zz, jumps (as in LazyVim; not the mouse)
-  picker = {
-    enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
+  picker = { -- also takes over vim.ui.select (code actions, zk, ...)
     layouts = layouts,
-    layout = { cycle = true, preset = 'tall' }, -- the explorer picks by shape (below)
+    layout = { preset = 'tall' }, -- the explorer picks by shape (below)
     matcher = { frecency = true }, -- rank often/recently opened files higher
     win = { input = { keys = { ['<Esc>'] = { 'close', mode = { 'n', 'i' } } } } },
     sources = {

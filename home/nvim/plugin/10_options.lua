@@ -39,4 +39,3 @@ vim.o.virtualedit = 'block' -- Visual block can go past line ends
 vim.o.ignorecase = true -- Case-insensitive search...
 vim.o.smartcase = true -- ...unless the pattern has capitals
 vim.o.inccommand = 'split' -- Live preview of :s substitutions
-vim.o.spelllang = 'en'

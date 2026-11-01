@@ -14,11 +14,10 @@ require('blink.cmp').setup({
   },
   signature = { enabled = true }, -- parameter hints while typing a call
   -- Completion in the : command line, like insert mode: the first match is
-  -- selected and Tab accepts it. Up / Down move through the menu (and still
+  -- selected (and shown faintly) and Tab accepts it. Up / Down move through the menu (and still
   -- walk the command history when no menu is open), C-e closes it.
   cmdline = {
     keymap = {
-      preset = 'cmdline',
       ['<Tab>'] = { 'select_and_accept', 'show' },
       ['<Down>'] = { 'select_next', 'fallback' },
       ['<Up>'] = { 'select_prev', 'fallback' },
@@ -26,10 +25,8 @@ require('blink.cmp').setup({
       ['<Left>'] = false,
     },
     completion = {
-      list = { selection = { preselect = true } },
       -- pop up by itself for : commands, not for / searches
       menu = { auto_show = function() return vim.fn.getcmdtype() == ':' end },
-      ghost_text = { enabled = true }, -- the top match shown faintly
     },
   },
 })
