@@ -159,7 +159,9 @@
         "rose-pine-eza": "rose-pine-eza",
         "rose-pine-fish": "rose-pine-fish",
         "rose-pine-fzf": "rose-pine-fzf",
+        "rose-pine-i3": "rose-pine-i3",
         "rose-pine-lazygit": "rose-pine-lazygit",
+        "rose-pine-rofi": "rose-pine-rofi",
         "rose-pine-starship": "rose-pine-starship",
         "rose-pine-tm-theme": "rose-pine-tm-theme",
         "rose-pine-yazi": "rose-pine-yazi",
@@ -231,6 +233,22 @@
         "type": "github"
       }
     },
+    "rose-pine-i3": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782331234,
+        "narHash": "sha256-Guned/iDP/kNrquZmzLvou85Lox+eFf8Lz3EQVvjZuI=",
+        "owner": "rose-pine",
+        "repo": "i3",
+        "rev": "0908c59ac93984fe2300b713b23ab8d3a507c97e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "i3",
+        "type": "github"
+      }
+    },
     "rose-pine-lazygit": {
       "flake": false,
       "locked": {
@@ -244,6 +262,22 @@
       "original": {
         "owner": "rose-pine",
         "repo": "lazygit",
+        "type": "github"
+      }
+    },
+    "rose-pine-rofi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763303832,
+        "narHash": "sha256-skGYxur4OGeQxJdMXN/UlophX47oSFeHaEadie7VB08=",
+        "owner": "rose-pine",
+        "repo": "rofi",
+        "rev": "43262caa3130d225a8b616fe594fd5867caa500b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "rofi",
         "type": "github"
       }
     },

@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
   mod = "Mod1"; # Alt.
@@ -22,7 +27,6 @@ in
 
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
   home.packages = with pkgs; [
-    rofi
     dex # starts the desktop's autostart apps (startup line below)
     xss-lock # locks the screen on suspend (lid close)
     scrot
@@ -58,6 +62,19 @@ in
           notification = false;
         }
       ];
+    };
+    # Rose Pine Dawn window borders and titles: the official port (i3
+    # config lines; later lines win over Home Manager's default colours).
+    extraConfig = builtins.readFile "${inputs.rose-pine-i3}/themes/rose-pine-dawn.theme";
+  };
+
+  # rofi (Alt+d), in Rose Pine Dawn: the official port, with the terminal's
+  # font instead of the port's (which isn't installed).
+  programs.rofi = {
+    enable = true;
+    theme = {
+      "@import" = "${inputs.rose-pine-rofi}/rose-pine-dawn.rasi";
+      "*".font = "CaskaydiaCove Nerd Font 14";
     };
   };
 }
