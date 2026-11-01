@@ -48,6 +48,10 @@
     mosh
     tokei
     rsync
+    kitty.kitten # kitty's helper (icat etc.), without the GUI app
+    kitty.terminfo # lets programs drive kitty properly, including over SSH
+    zk
+    codex
     # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
     (fuc.overrideAttrs {
       cargoBuildFeatures = [
@@ -55,15 +59,12 @@
         "cpz/progress"
       ];
     })
-    kitty.kitten # kitty's helper (icat etc.), without the GUI app
-    kitty.terminfo # lets programs drive kitty properly, including over SSH
-    zk
-    codex
   ];
 
   # Shell aliases, for every shell Home Manager manages (fish, bash).
   home.shellAliases = {
-    hms = "nh home switch ${config.home.homeDirectory}/nix"; # path given: works before NH_FLAKE reaches the shell
+    hms = "nh home switch ${config.home.homeDirectory}/nix";
+    ls = "eza --icons=auto"; # sorting flags differ: eza -s modified / -s size, not -t / -S
     ll = "eza -l --icons=auto";
     lt = "eza --tree --icons=auto";
     icat = "kitten icat"; # show an image; works over ssh, not over mosh
