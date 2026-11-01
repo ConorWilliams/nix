@@ -42,7 +42,9 @@ local fullscreen = {
     title = '{title} {live} {flags}',
     title_pos = 'center',
   },
-  { win = 'preview', height = 0.6, border = 'none' },
+  -- A top border, though it's never seen: snacks overlaps each window's top
+  -- row with the bottom border above, which hid line 1 of every preview.
+  { win = 'preview', height = 0.6, border = 'top' },
 }
 
 require('snacks').setup({
