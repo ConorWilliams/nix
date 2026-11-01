@@ -5,8 +5,6 @@ let
   # Remote URLs that mark a repo as work. GitHub ignores case in URLs,
   # but git's matching doesn't, so both spellings are listed.
   myrtleRemotes = [
-    "git@github.com:MyrtleSoftware/**"
-    "git@github.com:myrtlesoftware/**"
     "https://github.com/MyrtleSoftware/**"
     "https://github.com/myrtlesoftware/**"
   ];
@@ -32,14 +30,6 @@ in
       };
 
       init.defaultBranch = "main";
-
-      # GitHub over HTTPS, authenticated by gh's token (no SSH keys or agent
-      # forwarding needed, so servers just hold a limited, expiring token).
-      # SSH-style URLs, in old clones or pasted, are rewritten to HTTPS.
-      url."https://github.com/".insteadOf = [
-        "git@github.com:"
-        "ssh://git@github.com/"
-      ];
 
       diff = {
         algorithm = "histogram"; # clearer diffs when code moves around

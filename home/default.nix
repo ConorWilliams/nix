@@ -94,10 +94,10 @@
     TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
   };
 
-  # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix;
-  # use "Login with a web browser" and open the printed URL on any machine.
-  # git authenticates to GitHub through gh (its token, over HTTPS): see
-  # git.nix. Home Manager registers gh as git's credential helper.
+  # GitHub CLI. Login (`gh auth login`) is per machine and never in Nix
+  # (bootstrap.sh offers it). git authenticates to GitHub through gh's
+  # token: Home Manager makes gh git's credential helper for github.com,
+  # so remotes are https://github.com/... (no SSH keys on GitHub).
   programs.gh = {
     enable = true;
     settings.git_protocol = "https"; # gh repo clone etc. use HTTPS too
