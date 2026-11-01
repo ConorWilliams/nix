@@ -47,7 +47,7 @@ local fullscreen = {
 
 require('snacks').setup({
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
-  scroll = {}, -- smooth scrolling, as in LazyVim (touchpad, C-d, C-u, ...)
+  scroll = {}, -- animated C-d, C-u, zz, jumps (as in LazyVim; not the mouse)
   picker = {
     enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
     layout = {

@@ -30,6 +30,7 @@ vim.o.showmode = false -- The statusline shows the mode
 vim.o.winborder = 'rounded' -- Borders on floating windows (hover, etc.)
 vim.o.pumheight = 10 -- At most 10 completion items visible
 vim.o.smoothscroll = true
+vim.o.mousescroll = 'ver:1,hor:2' -- Touchpad/wheel: 1 line per step (smoother than 3)
 
 -- Editing
 vim.o.expandtab = true
