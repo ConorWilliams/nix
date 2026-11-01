@@ -7,7 +7,7 @@ let
   # Ctrl+arrows move between panes, and inside nvim between its splits too
   # (smart-splits in nvim/plugin/20_keymaps.lua hands over at the edge).
   # Bound in normal and locked mode, so shell panes lose Ctrl+Left/Right
-  # word jumps (Alt+Left/Right still do that in fish).
+  # word jumps (fish has vim keys for that: w, b...).
   navigation =
     let
       bind = key: dir: ''

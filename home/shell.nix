@@ -62,6 +62,13 @@ in
     interactiveShellInit = ''
       set -g fish_greeting # no startup banner
       fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
+      # Vim keys: starts in insert mode, Esc for normal mode. The cursor
+      # shape shows the mode, as in nvim (starship's ❯ turns to ❮ too).
+      set -g fish_key_bindings fish_vi_key_bindings
+      set -g fish_cursor_default block
+      set -g fish_cursor_insert line
+      set -g fish_cursor_replace_one underscore
+      set -g fish_cursor_visual block
     '';
 
     # Calculator shortcut
