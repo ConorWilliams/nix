@@ -50,3 +50,41 @@ nix flake check --all-systems --no-build   # check every config, Mac too
 ```
 
 ## SSH
+
+Work servers are reached by short names (`ssh brahe`), with no dot.
+
+### ssh or mosh
+
+|                                    | ssh | mosh |
+| ---------------------------------- | --- | ---- |
+| survives sleep and network changes | no  | yes  |
+| scrollback and mouse wheel         | yes | no   |
+| images (`icat`)                    | yes | no   |
+| agent forwarding (git on server)   | yes | no   |
+
+mosh suits long sessions from the laptop; use ssh when you need to push from
+the server or see images. Without scrollback, mosh turns the mouse wheel into
+Up, which opens atuin: run zellij inside it for scrollback (below).
+
+### Straight into zellij
+
+```sh
+ssh -t brahe zellij attach -c main    # attach to "main", creating it if needed
+mosh brahe -- zellij attach -c main
+```
+
+ssh needs `-t`: without a terminal zellij crashes, leaving a half-started
+session with no `TERM` (remove it with `zellij delete-session main --force`).
+
+### Credentials
+
+Servers hold no keys of their own. Desks run an SSH agent that loads your
+key the first time ssh uses it, and `home/ssh.nix` forwards that agent to
+every dotless host, so git on a server signs with your desk's key
+(`ssh-add -l` on the server lists it). Only over ssh, and only while you're
+connected; anyone with root on the server can use it in that time.
+
+A zellij session keeps the agent of the connection that first started it,
+so after you disconnect and reattach, git inside it can't reach your agent
+(new panes included). Use a shell outside zellij for that, or start a new
+session.
