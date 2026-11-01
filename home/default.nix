@@ -40,14 +40,14 @@
   # or shell integration get a `programs.<name>` block below or in their own
   # file.
   home.packages = with pkgs; [
-    fd # fast find
-    dust # du as a tree
-    duf # df as a table
-    eza # modern ls
-    uv # Python packages, projects and interpreters
-    mosh # SSH that survives sleep and network changes
-    tokei # count lines of code
-    rsync # remote copy, with progress bar
+    fd
+    dust
+    duf
+    eza
+    uv
+    mosh
+    tokei
+    rsync
     # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
     (fuc.overrideAttrs {
       cargoBuildFeatures = [
@@ -57,7 +57,7 @@
     })
     kitty.kitten # kitty's helper (icat etc.), without the GUI app
     kitty.terminfo # lets programs drive kitty properly, including over SSH
-    zk # Markdown notes (zettelkasten)
+    zk
     codex
   ];
 
