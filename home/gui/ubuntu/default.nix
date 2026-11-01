@@ -9,6 +9,11 @@ in
 {
   imports = [ ../. ]; # the GUI layer
 
+  # An SSH agent, started with your session. Needed for ssh.nix's agent
+  # forwarding (git on servers signing with this desk's key); GNOME used to
+  # provide one, i3 doesn't. The Mac has one built in.
+  services.ssh-agent.enable = true;
+
   # kitty comes from its own installer (see README), into ~/.local/kitty.app.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 

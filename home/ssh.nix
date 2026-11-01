@@ -13,6 +13,10 @@
       # key on the machine you came from and servers hold no keys of their
       # own. `!*.*` excludes any name with a dot (github.com, IP addresses).
       "* !*.*".ForwardAgent = true;
+
+      # Load a key into the agent the first time ssh uses it, so there's
+      # something to forward without running ssh-add by hand.
+      "*".AddKeysToAgent = "yes";
     };
   };
 }
