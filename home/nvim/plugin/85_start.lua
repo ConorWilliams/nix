@@ -33,16 +33,21 @@ Snacks.config.dashboard = {
   },
   preset = {
     keys = {
-      { icon = ' ', key = 'f', desc = 'Find File', action = function() Snacks.picker.files() end },
       {
-        icon = ' ',
+        icon = vim.fn.nr2char(0xf002) .. ' ',
+        key = 'f',
+        desc = 'Find File',
+        action = function() Snacks.picker.files() end,
+      },
+      {
+        icon = vim.fn.nr2char(0xf1da) .. ' ',
         key = 's',
         desc = 'Restore Session',
         action = persistence.load,
         -- only when this folder has a saved session
         enabled = vim.fn.filereadable(persistence.current()) == 1,
       },
-      { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
+      { icon = vim.fn.nr2char(0xf426) .. ' ', key = 'q', desc = 'Quit', action = ':qa' },
     },
   },
 }

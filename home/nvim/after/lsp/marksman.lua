@@ -3,6 +3,7 @@
 -- by note ID, and marksman's title-based ones would duplicate gd results
 -- and completions.
 return {
+  filetypes = { 'markdown' }, -- (lspconfig's markdown.mdx isn't a filetype nvim knows)
   root_dir = function(bufnr, on_dir)
     local file = vim.api.nvim_buf_get_name(bufnr)
     if vim.fs.root(file, '.zk') then return end -- don't start here

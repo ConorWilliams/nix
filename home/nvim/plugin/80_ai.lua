@@ -7,6 +7,29 @@
 if vim.fn.executable('copilot-language-server') == 0 then return end
 
 vim.lsp.config('copilot', {
+  -- Only code, only inside git repos, and never secrets (.env*, ~/.ssh):
+  -- copilot is sent the whole buffer.
+  filetypes = {
+    'python',
+    'lua',
+    'nix',
+    'sh',
+    'bash',
+    'fish',
+    'c',
+    'cpp',
+    'rust',
+    'cmake',
+    'toml',
+    'yaml',
+    'json',
+  },
+  root_dir = function(bufnr, on_dir)
+    local file = vim.api.nvim_buf_get_name(bufnr)
+    if vim.fs.basename(file):match('^%.env') or file:match('/%.ssh/') then return end
+    local root = vim.fs.root(bufnr, '.git')
+    if root then on_dir(root) end
+  end,
   handlers = {
     -- The server reports problems such as not being signed in
     didChangeStatus = function(err, res)
@@ -27,7 +50,5 @@ vim.keymap.set({ 'i', 'n' }, '<M-[>', cycle(-1), { desc = 'Prev Copilot suggesti
 
 -- Right arrow: take the suggestion if one is showing, else move right
 vim.keymap.set('i', '<Right>', function()
-  if not vim.lsp.inline_completion.get() then
-    vim.api.nvim_feedkeys(vim.keycode('<Right>'), 'ni', false)
-  end
-end, { desc = 'Accept Copilot suggestion (or move right)' })
+  if not vim.lsp.inline_completion.get() then return '<Right>' end
+end, { expr = true, desc = 'Accept Copilot suggestion (or move right)' })

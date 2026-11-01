@@ -8,9 +8,9 @@ local map = vim.keymap.set
 map({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true })
 map({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true })
 
--- Windows. Ctrl-h/j/k/l move between splits and, at the edge of nvim,
--- on into the neighbouring zellij pane (zellij hands them over the other
--- way: home/zellij.nix).
+-- Windows. Ctrl+arrows move between splits and, at the edge of nvim, on
+-- into the neighbouring zellij pane (zellij hands them over the other way:
+-- home/zellij.nix). Resize with the built-in C-w + - < >.
 vim.pack.add({
   {
     src = 'https://github.com/smart-splits-nvim/smart-splits.nvim',
@@ -19,16 +19,14 @@ vim.pack.add({
   'https://github.com/smart-splits-nvim/backend-zellij-lua',
 })
 local splits = require('smart-splits')
--- Only inside zellij; elsewhere smart-splits would warn it found none.
-splits.setup(vim.env.ZELLIJ and { mux = { backend = 'smart-splits-backend-zellij-lua' } } or {})
-map('n', '<C-h>', splits.move_cursor_left, { desc = 'Go to left window' })
-map('n', '<C-j>', splits.move_cursor_down, { desc = 'Go to lower window' })
-map('n', '<C-k>', splits.move_cursor_up, { desc = 'Go to upper window' })
-map('n', '<C-l>', splits.move_cursor_right, { desc = 'Go to right window' })
-map('n', '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Taller window' })
-map('n', '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Shorter window' })
-map('n', '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Narrower window' })
-map('n', '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Wider window' })
+splits.setup({
+  -- (no warning outside zellij, where there's simply nothing to hand over to)
+  mux = { backend = 'smart-splits-backend-zellij-lua', warn_if_unusable = false },
+})
+map('n', '<C-Left>', splits.move_cursor_left, { desc = 'Go to left window' })
+map('n', '<C-Down>', splits.move_cursor_down, { desc = 'Go to lower window' })
+map('n', '<C-Up>', splits.move_cursor_up, { desc = 'Go to upper window' })
+map('n', '<C-Right>', splits.move_cursor_right, { desc = 'Go to right window' })
 map('n', '<leader>-', '<C-w>s', { desc = 'Split below' })
 map('n', '<leader>|', '<C-w>v', { desc = 'Split right' })
 map('n', '<leader>wd', '<C-w>c', { desc = 'Delete window' })
@@ -63,9 +61,10 @@ map('n', 'gcO', 'O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add commen
 map({ 'n', 'x', 'o' }, 'n', "'Nn'[v:searchforward]", { expr = true, desc = 'Next match' })
 map({ 'n', 'x', 'o' }, 'N', "'nN'[v:searchforward]", { expr = true, desc = 'Prev match' })
 
--- Diagnostics by severity ([d ]d for all of them are built in)
+-- Diagnostics by severity ([d ]d for all of them are built in; each jump
+-- shows the diagnostic in a float: 60_lsp.lua)
 local jump = function(count, severity)
-  return function() vim.diagnostic.jump({ count = count, severity = severity, float = true }) end
+  return function() vim.diagnostic.jump({ count = count, severity = severity }) end
 end
 map('n', ']e', jump(1, 'ERROR'), { desc = 'Next error' })
 map('n', '[e', jump(-1, 'ERROR'), { desc = 'Prev error' })

@@ -33,6 +33,9 @@
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers
     # and their matching queries, all from the binary cache (no compiler).
     plugins = [
+      # Completion (nvim/plugin/65_completion.lua): built by nixpkgs with its
+      # Rust fuzzy matcher, rather than downloaded on each machine.
+      pkgs.vimPlugins.blink-cmp
       (pkgs.vimPlugins.nvim-treesitter.withPlugins (
         p: with p; [
           # Neovim's own languages (it ships some parsers, but these match the queries)

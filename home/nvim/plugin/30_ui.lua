@@ -2,9 +2,10 @@
 -- first), records its exact commit in nvim-pack-lock.json, and loads it.
 -- Update later with :lua vim.pack.update(), which shows a diff to accept.
 
--- Colour scheme. Follows 'background', which nvim detects from the
--- terminal, so kitty's light theme gets the Dawn variant.
+-- Colour scheme: Rose Pine Dawn, always (detecting the terminal's
+-- background fails over mosh and inside zellij).
 vim.pack.add({ { src = 'https://github.com/rose-pine/neovim', name = 'rose-pine' } })
+require('rose-pine').setup({ variant = 'dawn' })
 vim.cmd.colorscheme('rose-pine')
 
 -- Command line and messages: Neovim 0.12's built-in redesign (ui2,
@@ -24,10 +25,11 @@ require('go-up').setup()
 -- 50_editing.lua). Icons for file types, used by which-key and others.
 vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 require('mini.icons').setup()
+MiniIcons.mock_nvim_web_devicons() -- for plugins that expect nvim-web-devicons
 
 -- Statusline at the bottom, kept light: mode, git branch, diagnostics
--- counts, file name (+ [+] when modified), then search count while
--- searching and line:col.
+-- counts, file name (+ [+] when modified), then macro recording (@q; ui2
+-- with cmdheight=0 doesn't show it), search count and line:col.
 local statusline = require('mini.statusline')
 statusline.setup({
   content = {
@@ -42,10 +44,22 @@ statusline.setup({
         '%<', -- truncate from here when narrow
         { hl = 'MiniStatuslineFilename', strings = { '%f%m%r' } }, -- path from cwd
         '%=', -- the rest goes on the right
-        { hl = mode_hl, strings = { statusline.section_searchcount({}), '%l:%v' } },
+        {
+          hl = mode_hl,
+          strings = {
+            vim.fn.reg_recording() ~= '' and ('@' .. vim.fn.reg_recording()) or '',
+            statusline.section_searchcount({}),
+            '%l:%v',
+          },
+        },
       })
     end,
   },
+})
+
+vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {
+  group = vim.api.nvim_create_augroup('config-recording', {}),
+  callback = function() vim.schedule(vim.cmd.redrawstatus) end,
 })
 
 -- Tabline at the top: open buffers as tabs (Shift-h / Shift-l move

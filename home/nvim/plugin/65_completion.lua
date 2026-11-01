@@ -1,11 +1,8 @@
--- Completion with blink.cmp. Pinned to 1.x releases: a release tag lets it
--- download its prebuilt Rust fuzzy matcher (nothing to compile). It also
--- tells every language server what it supports, so no LSP glue is needed.
+-- Completion with blink.cmp, from nixpkgs (home/neovim.nix: built with its
+-- Rust fuzzy matcher, nothing downloaded). It also tells every language
+-- server what it supports, so no LSP glue is needed.
 
-vim.pack.add({
-  { src = 'https://github.com/saghen/blink.cmp', version = vim.version.range('1.*') },
-  'https://github.com/rafamadriz/friendly-snippets', -- snippet collection blink reads
-})
+vim.pack.add({ 'https://github.com/rafamadriz/friendly-snippets' }) -- snippets blink reads
 
 require('blink.cmp').setup({
   -- Tab accepts (or jumps through a snippet), as in the old config. C-n/C-p or
@@ -13,11 +10,9 @@ require('blink.cmp').setup({
   keymap = { preset = 'super-tab' }, -- (Copilot has its own key: 80_ai.lua)
   completion = {
     documentation = { auto_show = true, auto_show_delay_ms = 200 },
-    accept = { auto_brackets = { enabled = true } }, -- add () after functions
     menu = { draw = { treesitter = { 'lsp' } } }, -- highlight items like code
   },
   signature = { enabled = true }, -- parameter hints while typing a call
-  sources = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
   -- Completion in the : command line, like insert mode: the first match is
   -- selected and Tab accepts it. Up / Down move through the menu (and still
   -- walk the command history when no menu is open), C-e closes it.

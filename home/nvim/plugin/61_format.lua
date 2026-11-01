@@ -36,9 +36,6 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   end,
 })
 
--- gq uses conform too
-vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-
 vim.keymap.set({ 'n', 'x' }, '<leader>cf', conform.format, { desc = 'Format' })
 vim.keymap.set('n', '<leader>uf', function()
   vim.g.autoformat = vim.g.autoformat == false

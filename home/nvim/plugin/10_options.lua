@@ -20,16 +20,13 @@ vim.o.breakindent = true -- ...and indent wrapped lines
 vim.o.list = true -- Show tabs and trailing spaces
 vim.o.listchars = 'tab:> ,trail:·,nbsp:␣,extends:…,precedes:…'
 vim.o.fillchars = 'eob: ' -- No ~ on empty lines past the end of the buffer
-vim.o.scrolloff = 4 -- Keep context lines above and below the cursor
 vim.o.sidescrolloff = 8
 vim.o.splitright = true
 vim.o.splitbelow = true
-vim.o.splitkeep = 'screen' -- Don't scroll text when opening splits
 vim.o.laststatus = 3 -- One global statusline
 vim.o.showmode = false -- The statusline shows the mode
 vim.o.winborder = 'rounded' -- Borders on floating windows (hover, etc.)
 vim.o.pumheight = 10 -- At most 10 completion items visible
-vim.o.smoothscroll = true
 vim.o.mousescroll = 'ver:1,hor:2' -- Touchpad/wheel: 1 line per step (smoother than 3)
 
 -- Editing
@@ -43,8 +40,3 @@ vim.o.ignorecase = true -- Case-insensitive search...
 vim.o.smartcase = true -- ...unless the pattern has capitals
 vim.o.inccommand = 'split' -- Live preview of :s substitutions
 vim.o.spelllang = 'en'
-
--- Folds: by indent, everything open by default
-vim.o.foldmethod = 'indent'
-vim.o.foldlevel = 99
-vim.o.foldtext = '' -- Show the folded line with its highlighting
