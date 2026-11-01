@@ -1,7 +1,7 @@
 -- Picker: snacks.nvim's fuzzy finder for files, grep, buffers, symbols,
 -- help, ... and its file explorer, with the custom full-screen layout. snacks is a
--- collection of modules; only the picker, explorer and smooth scrolling
--- are switched on here (bufdelete is a plain function).
+-- collection of modules; only the picker, explorer, smooth scrolling and
+-- bigfile are switched on here (bufdelete is a plain function).
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.
 
@@ -85,6 +85,10 @@ local shape = function() return vim.o.columns > 2 * vim.o.lines and 'wide' or 't
 require('snacks').setup({
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
   scroll = {}, -- animated C-d, C-u, zz, jumps (as in LazyVim; not the mouse)
+  -- Files over 1.5 MB or with very long lines (minified JSON, logs) open
+  -- plain: no treesitter, language servers or completion. :set ft=... to
+  -- get them back.
+  bigfile = {},
   picker = { -- also takes over vim.ui.select (code actions, zk, ...)
     layouts = layouts,
     layout = { preset = 'tall' }, -- the explorer picks by shape (below)
