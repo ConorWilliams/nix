@@ -130,6 +130,15 @@ in
     };
   };
 
+  # direnv: entering a folder with an .envrc loads its environment (`use
+  # flake` for a project's dev shell, cached by nix-direnv), and leaving
+  # unloads it, all in the same fish. `direnv allow` once per project.
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    config.global.hide_env_diff = true; # no list of every variable changed
+  };
+
   programs.atuin = {
     enable = true;
     # Don't bind `?` to Atuin AI.
