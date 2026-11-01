@@ -38,10 +38,8 @@
         "aarch64-darwin"
       ];
 
-      users = [
-        "conor"
-        "conix"
-      ];
+      # Users that get configs (every config is generated for each of them).
+      users = [ "conix" ];
 
       # Machines with a config of their own, by hostname, pointing at their
       # layer in home/ (each layer file imports the one above it):
