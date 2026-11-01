@@ -1,0 +1,19 @@
+# Runs on every push and pull request: main is what `curl | bash` installs,
+# so a broken config or a leaked secret should never get there unnoticed.
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, for the secret scan
+      - uses: cachix/install-nix-action@v31
+      # Every config evaluates, for every system (the Mac included).
+      - run: nix flake check --all-systems --no-build
+      - run: shellcheck bootstrap.sh
+      # No secrets anywhere in the history.
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
