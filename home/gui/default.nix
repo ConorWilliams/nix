@@ -1,6 +1,5 @@
-# GUI layer: machines with a screen, on any OS (hubble, luna, mac). Adds the
+# GUI layer: machines with a screen, on any OS. Adds the
 # terminal's config and fonts on top of the server layer.
-# OS-specific bits go in ubuntu/ and mac/.
 { lib, pkgs, ... }:
 
 {
@@ -14,7 +13,7 @@
     package = null;
     font = {
       name = "CaskaydiaCove Nerd Font";
-      size = lib.mkDefault 20; # ubuntu/luna.nix overrides it
+      size = lib.mkDefault 20;
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
