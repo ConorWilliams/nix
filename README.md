@@ -4,7 +4,8 @@ My terminal environment, managed with Nix + Home Manager.
 
 ## Quick start
 
-1. Install `nix`: <https://nixos.org/download/>
+1. Install `nix`: <https://nixos.org/download/> on Linux; on the Mac,
+   [Determinate's installer](https://determinate.systems/nix-installer/).
 
 2. Run the (idempotent) bootstrap script:
 
@@ -35,8 +36,12 @@ My terminal environment, managed with Nix + Home Manager.
 
 Each layer imports the one above it, so a machine only names its last layer.
 
-GUI apps on Ubuntu stay with apt/snap, nix-built GUI apps can't use Ubuntu's
-graphics drivers. On the Mac, GUI apps are Homebrew casks in `darwin/mac.nix`.
+On Ubuntu, GUI apps that need the graphics drivers (browsers, Slack...) stay
+with apt/snap, as Nix-built ones can't use Ubuntu's drivers; kitty comes from
+its own installer, and i3, rofi and dunst from Nix. On the Mac, GUI apps
+(kitty included) are Homebrew casks in `darwin/mac.nix`; the first nix-darwin
+switch may ask for `/etc/zshrc` and `/etc/bashrc` to be renamed to
+`*.before-nix-darwin`.
 
 ## Day to day
 
@@ -48,6 +53,12 @@ nix flake update llm-agents                # bump only claude
 nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too
 ```
+
+In nvim, `:lua vim.pack.update()` updates plugins: review, `:w` to accept,
+then commit `home/nvim/nvim-pack-lock.json` (do it on a desk; other machines
+follow the lockfile). Copilot needs `:LspCopilotSignIn` once per machine.
+In zellij, Ctrl+arrows move between panes and nvim splits; the first press
+asks to allow the navigator plugin (answer `y`).
 
 ## SSH
 

@@ -1,6 +1,5 @@
 # The Mac's system settings. The home directory is NOT managed here;
 # that's homeConfigurations."<user>@mac", the same as every other machine.
-# Stub: evaluates, but nothing is configured yet.
 { ... }:
 
 {
@@ -11,16 +10,19 @@
 
   # The user that per-user system settings (Homebrew, macOS defaults)
   # apply to.
-  system.primaryUser = "conor"; # TODO: confirm the Mac's username
+  system.primaryUser = "conix"; # TODO: the Mac's account name, once known
 
-  # The Determinate installer manages Nix itself, so nix-darwin shouldn't.
+  # Nix is installed with Determinate's installer, which manages it, so
+  # nix-darwin shouldn't.
   nix.enable = false;
 
-  # ── Later (after a few weeks on Linux) ────────────────────────────
-  # homebrew = {
-  #   enable = true;
-  #   onActivation.cleanup = "none"; # never uninstall existing apps
-  #   casks = [ "google-chrome" ];
-  # };
-  # system.defaults = { ... };
+  # GUI apps via Homebrew casks (bootstrap.sh installs Homebrew itself).
+  homebrew = {
+    enable = true;
+    onActivation.cleanup = "none"; # never uninstall apps added by hand
+    casks = [
+      "kitty" # the terminal; Home Manager writes its config (gui layer)
+    ];
+  };
+  # system.defaults = { ... };  (macOS settings, later)
 }

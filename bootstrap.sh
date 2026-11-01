@@ -23,20 +23,22 @@ main() {
   fi
   echo "Nix $(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)"
 
-  # The official installer leaves flakes off; turn them on for this user.
-  nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
-  if ! nix config show experimental-features | grep -qw flakes; then
+  # The official installer leaves flakes off; turn them on for this user
+  # (asking the real nix: the wrapper below always passes the flag).
+  if ! command nix config show experimental-features 2>/dev/null | grep -qw flakes; then
     mkdir -p ~/.config/nix
-    echo 'experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
+    echo 'extra-experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
     echo "Turned on flakes in ~/.config/nix/nix.conf"
   fi
+  # ...and for this run, whatever nix.conf says.
+  nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
   # git from Nix if the system has none
   git() { if type -P git >/dev/null; then command git "$@"; else nix run nixpkgs#git -- "$@"; fi; }
 
   say "Repo: $dir"
   if [[ -d $dir/.git ]]; then
-    git -C "$dir" pull --ff-only
+    git -C "$dir" pull --ff-only || echo "Couldn't fast-forward $dir (local changes or commits?); using it as it is."
   else
     git clone "$repo" "$dir" # HTTPS: public, so no login needed yet
   fi
@@ -49,6 +51,12 @@ main() {
     if c ? \"$user@$host\" then \"$user@$host\" else if c ? \"$user\" then \"$user\" else \"\"")
   if [[ -z $config ]]; then
     echo "No config for user '$user' (the users are listed in flake.nix)."
+    exit 1
+  fi
+  # The plain-<user> (server) config is Linux x86_64; anything else (the
+  # Mac) needs its own entry under hosts in flake.nix.
+  if [[ $config == "$user" && $(uname -sm) != "Linux x86_64" ]]; then
+    echo "No config for this machine ($host, $(uname -sm)): add it to hosts in flake.nix."
     exit 1
   fi
   desk=false
@@ -72,9 +80,15 @@ main() {
     fi
   fi
 
-  # The Mac: system settings (nix-darwin) first.
+  # The Mac: Homebrew (nix-darwin installs apps such as kitty with it, but
+  # doesn't install Homebrew itself), then the system settings.
   if [[ $(uname -s) == Darwin ]]; then
     say "Mac system settings"
+    if type -P brew >/dev/null || [[ -x /opt/homebrew/bin/brew ]]; then
+      echo "Homebrew installed"
+    elif ask "Install Homebrew (for the Mac's apps, e.g. kitty; uses sudo)?"; then
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/tty
+    fi
     if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
       echo "flake.nix has no darwinConfigurations.$host (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
@@ -94,7 +108,7 @@ main() {
     echo "gh logged in"
   elif $desk; then
     if ask "Log in to GitHub (gh, in a browser)?"; then
-      gh auth login --web --git-protocol https --skip-ssh-key </dev/tty
+      gh auth login --web --git-protocol https --skip-ssh-key </dev/tty || echo "gh login failed; rerun: gh auth login"
     fi
   elif ask "Log in to GitHub (gh) with a fine-grained token for this server?"; then
     echo "Create one at https://github.com/settings/personal-access-tokens:"
@@ -102,8 +116,11 @@ main() {
     local token
     read -rsp "Paste it (not shown): " token </dev/tty
     echo
-    printf '%s\n' "$token" | gh auth login --with-token
-    gh auth status | grep -i 'logged in' || true
+    if printf '%s\n' "$token" | gh auth login --with-token; then
+      gh auth status | grep -i 'logged in' || true
+    else
+      echo "gh login failed; rerun: gh auth login --with-token"
+    fi
   fi
 
   if atuin status 2>/dev/null | grep -q '^Username:'; then
@@ -116,6 +133,9 @@ main() {
 
   say "Done"
   echo "Open a new terminal (or log in again) to start fish with everything."
+  if [[ $(uname -s) == Darwin ]]; then
+    echo "On the Mac, kitty starts fish itself (the login shell stays zsh)."
+  fi
   if $desk && [[ $(uname -s) == Linux ]]; then
     echo "First time on this desk: log out and pick the \"i3\" session."
   fi

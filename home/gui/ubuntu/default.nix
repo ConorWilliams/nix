@@ -9,6 +9,9 @@ in
   # Non-NixOS Linux: lets the desktop (e.g. rofi's app list) find apps and
   # icons installed by Nix, and programs find Ubuntu's terminfo too.
   targets.genericLinux.enable = true;
+  # ...but not its GPU drivers for Nix programs (GUI apps stay with apt;
+  # README), which would also print a setup notice on every switch.
+  targets.genericLinux.gpu.enable = false;
 
   # Desktop notifications (notify-send, Slack...): nothing shows them under
   # i3, so dunst from Nix, started by the first notification.
