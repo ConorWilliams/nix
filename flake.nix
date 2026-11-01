@@ -6,7 +6,7 @@
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      # Use our nixpkgs rather than home-manager's own copy,
+      # Use this flake's nixpkgs rather than home-manager's own copy,
       # so there is exactly one package set.
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -18,8 +18,8 @@
     };
 
     # Claude Code, updated daily by a bot (home/claude.nix). No `follows` on
-    # purpose: this flake is only tested against its own nixpkgs pin, so we
-    # keep the combination it ships.
+    # purpose: that flake is only tested against its own nixpkgs pin, so it
+    # keeps the combination it ships with.
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 

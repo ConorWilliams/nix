@@ -8,7 +8,7 @@
     defaultEditor = true; # sets EDITOR=nvim
 
     # HM always generates a little init.lua (provider settings); load it via
-    # the wrapper instead so ~/.config/nvim can be our own directory.
+    # the wrapper instead so ~/.config/nvim can be this repo's nvim/.
     sideloadInitLua = true;
 
     # Language servers and formatters, on nvim's PATH only (appended, so a
