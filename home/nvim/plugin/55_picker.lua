@@ -1,17 +1,23 @@
 -- Picker: snacks.nvim's fuzzy finder for files, grep, buffers, symbols,
--- help, ... with your old layout. snacks is a collection of modules; only
--- the picker is switched on here (bufdelete is a plain function).
+-- help, ... and its file explorer, with your old layout. snacks is a
+-- collection of modules; only the picker and explorer are switched on
+-- here (bufdelete is a plain function).
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.
 
 vim.pack.add({ 'https://github.com/folke/snacks.nvim' })
 
--- Hidden files: dotfiles (.env, .gitignore, ...) are shown, but of the
--- dot-folders only these, so .venv, .cache, .git etc. stay out.
+-- Hidden files, for files, grep and the explorer alike: dotfiles (.env,
+-- .gitignore, ...) are shown, but of the dot-folders only these, so .venv,
+-- .cache, .git etc. stay out.
 local dot_folders = { ['.claude'] = true, ['.github'] = true }
-local hide_dot_folders = function(item)
-  local parts = vim.split(item.file, '/', { plain = true })
-  for i = 1, #parts - 1 do -- folders only: the last part is the file
+local hide_dot_folders = function(item, ctx)
+  -- Judge the path below the folder being searched: the explorer gives
+  -- absolute paths, and ~/.config/... shouldn't hide everything.
+  local path = vim.fs.relpath(ctx.filter.cwd, item.file) or item.file
+  local parts = vim.split(path, '/', { plain = true })
+  local last = item.dir and #parts or #parts - 1 -- folders only, not the file name
+  for i = 1, last do
     local part = parts[i]
     if part:sub(1, 1) == '.' and part ~= '.' and part ~= '..' and not dot_folders[part] then
       return false -- drop it
@@ -19,36 +25,50 @@ local hide_dot_folders = function(item)
   end
 end
 
+-- Full screen: list, input, then a preview below
+local fullscreen = {
+  backdrop = false,
+  width = 0,
+  height = 0,
+  min_width = 80,
+  min_height = 30,
+  border = 'none',
+  box = 'vertical',
+  { win = 'list', border = 'rounded' },
+  {
+    win = 'input',
+    height = 1,
+    border = 'rounded',
+    title = '{title} {live} {flags}',
+    title_pos = 'center',
+  },
+  { win = 'preview', height = 0.6, border = 'none' },
+}
+
 require('snacks').setup({
+  explorer = {}, -- also opens directories (`nvim .`) instead of netrw
   picker = {
     enabled = true, -- also takes over vim.ui.select (code actions, zk, ...)
     layout = {
       cycle = true,
       reverse = true, -- input at the bottom, best match next to it
-      layout = { -- full screen: list, input, then a preview below
-        backdrop = false,
-        width = 0,
-        height = 0,
-        min_width = 80,
-        min_height = 30,
-        border = 'none',
-        box = 'vertical',
-        { win = 'list', border = 'rounded' },
-        {
-          win = 'input',
-          height = 1,
-          border = 'rounded',
-          title = '{title} {live} {flags}',
-          title_pos = 'center',
-        },
-        { win = 'preview', height = 0.6, border = 'none' },
-      },
+      layout = fullscreen,
     },
     matcher = { frecency = true }, -- rank often/recently opened files higher
     win = { input = { keys = { ['<Esc>'] = { 'close', mode = { 'n', 'i' } } } } },
     sources = {
       files = { hidden = true, transform = hide_dot_folders },
       grep = { hidden = true, transform = hide_dot_folders },
+      -- Explorer: full screen with a preview (not the sidebar), closes once
+      -- a file is opened. a add, d delete (to trash), r rename (tells the
+      -- language servers, so imports follow), c copy, m move, y/p yank and
+      -- paste, h/l close/open a folder.
+      explorer = {
+        hidden = true,
+        transform = hide_dot_folders,
+        auto_close = true,
+        layout = { layout = fullscreen, preview = true, reverse = false },
+      },
     },
   },
 })
@@ -95,6 +115,14 @@ map('<leader>sq', pick.qflist, 'Quickfix list')
 map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
 map('<leader>uC', pick.colorschemes, 'Colour schemes')
+
+-- Explorer
+map('<leader>e', function() Snacks.explorer() end, 'Explorer')
+map(
+  '<leader>E',
+  function() Snacks.explorer({ cwd = Snacks.git.get_root() }) end,
+  'Explorer (git root)'
+)
 
 -- Buffers: delete without closing the window
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
