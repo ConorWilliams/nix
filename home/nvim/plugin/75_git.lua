@@ -37,13 +37,9 @@ gs.setup({
 
 local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs, { desc = desc }) end
 
--- lazygit (config from home/git.nix, colours from the colour scheme).
--- snacks writes the colours to ~/.cache/nvim but doesn't create it.
-vim.fn.mkdir(vim.fn.stdpath('cache'), 'p')
--- ...except the selected line / hunk: snacks uses the colour scheme's
--- Visual (a faint grey in Rose Pine Dawn); keep lazygit's own blue, as in
--- the terminal.
-Snacks.config.lazygit = { config = { gui = { theme = { selectedLineBgColor = { 'blue' } } } } }
+-- lazygit in a float, exactly as in the terminal: its config (home/git.nix)
+-- is left alone, rather than snacks recolouring it to the colour scheme.
+Snacks.config.lazygit = { configure = false }
 map('<leader>gg', function() Snacks.lazygit({ cwd = Snacks.git.get_root() }) end, 'Lazygit')
 map('<leader>gG', function() Snacks.lazygit() end, 'Lazygit (cwd)')
 

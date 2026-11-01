@@ -66,11 +66,17 @@ in
   # Git TUI, showing diffs through delta.
   programs.lazygit = {
     enable = true;
-    settings.git.diffRenderers = [
-      {
-        command = "delta --paging=never";
-        colorArg = "always";
-      }
-    ];
+    settings = {
+      git.diffRenderers = [
+        {
+          command = "delta --paging=never";
+          colorArg = "always";
+        }
+      ];
+      # `e` on a file: inside nvim (<leader>gg) it opens in that nvim,
+      # elsewhere in a new one.
+      os.editPreset = "nvim-remote";
+      gui.nerdFontsVersion = "3"; # file icons
+    };
   };
 }
