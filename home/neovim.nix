@@ -11,8 +11,7 @@
     # the wrapper instead so ~/.config/nvim can be this repo's nvim/.
     sideloadInitLua = true;
 
-    # Language servers and formatters, on nvim's PATH only (appended, so a
-    # project's own versions win). Configured in nvim/plugin/60_lsp.lua.
+    # Language servers and formatters, on nvim's PATH only.
     extraPackages = with pkgs; [
       lua-language-server
       stylua
@@ -27,14 +26,12 @@
       # Markdown (zk's server comes with zk, in default.nix)
       marksman
       rumdl
-      # GitHub Copilot (nvim/plugin/80_ai.lua). Unfree; allowed by name in
-      # flake.nix. Each machine needs its own :LspCopilotSignIn.
+      # GitHub Copilot
       copilot-language-server
     ];
 
     # Treesitter from Nix rather than vim.pack: the plugin, prebuilt parsers
     # and their matching queries, all from the binary cache (no compiler).
-    # nvim/plugin/40_treesitter.lua turns it on per buffer.
     plugins = [
       (pkgs.vimPlugins.nvim-treesitter.withPlugins (
         p: with p; [
@@ -55,7 +52,7 @@
           toml
           yaml
           json
-          # C++ at work
+          # C++
           c
           cpp
           cmake
