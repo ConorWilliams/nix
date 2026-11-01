@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -7,6 +8,7 @@
 
 let
   mod = "Mod1"; # Alt.
+  lock = "i3lock -c 000000"; # black screen
 in
 {
   imports = [ ../. ]; # the GUI layer
@@ -47,7 +49,7 @@ in
       # mkOptionDefault: add to i3's default keys rather than replace them.
       keybindings = lib.mkOptionDefault {
         "${mod}+o" = "exec kitty yazi";
-        "${mod}+n" = "exec i3lock -c 000000";
+        "${mod}+n" = "exec ${lock}";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
         "--release ${mod}+p" =
@@ -61,7 +63,7 @@ in
           notification = false;
         }
         {
-          command = "xss-lock --transfer-sleep-lock -- i3lock --nofork -c 000000";
+          command = "xss-lock --transfer-sleep-lock -- ${lock} --nofork";
           notification = false;
         }
       ];
@@ -77,7 +79,7 @@ in
     enable = true;
     theme = {
       "@import" = "${inputs.rose-pine-rofi}/rose-pine-dawn.rasi";
-      "*".font = "CaskaydiaCove Nerd Font 14";
+      "*".font = "${config.programs.kitty.font.name} 14";
     };
   };
 }

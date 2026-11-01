@@ -115,27 +115,29 @@
     config.theme = "rose-pine-dawn";
   };
 
-  programs.fzf = {
-    enable = true;
-    defaultCommand = "fd --type f --hidden --exclude .git";
-    fileWidget.command = "fd --type f --hidden --exclude .git";
-    changeDirWidget.command = "fd --type d --hidden --exclude .git";
-    historyWidget.command = ""; # Ctrl-R belongs to atuin (shell.nix)
-    # Rose Pine Dawn.
-    defaultOptions =
-      let
-        port = builtins.readFile "${inputs.rose-pine-fzf}/dist/rose-pine-dawn.sh";
-        lines = map lib.trim (lib.splitString "\n" port);
-      in
-      let
-        # (the last line ends with the export's closing quote)
-        colors = map (lib.removeSuffix "\"") (lib.filter (lib.hasPrefix "--color") lines);
-      in
-      # Fail the build rather than silently losing the colours if the port
-      # ever changes its file's layout.
-      assert lib.assertMsg (colors != [ ]) "rose-pine-fzf: no --color lines found";
-      colors;
-  };
+  programs.fzf =
+    let
+      fd = "fd --hidden --exclude .git";
+    in
+    {
+      enable = true;
+      defaultCommand = "${fd} --type f";
+      fileWidget.command = "${fd} --type f";
+      changeDirWidget.command = "${fd} --type d";
+      historyWidget.command = ""; # Ctrl-R belongs to atuin (shell.nix)
+      # Rose Pine Dawn.
+      defaultOptions =
+        let
+          port = builtins.readFile "${inputs.rose-pine-fzf}/dist/rose-pine-dawn.sh";
+          lines = map lib.trim (lib.splitString "\n" port);
+          # (the last line ends with the export's closing quote)
+          colors = map (lib.removeSuffix "\"") (lib.filter (lib.hasPrefix "--color") lines);
+        in
+        # Fail the build rather than silently losing the colours if the port
+        # ever changes its file's layout.
+        assert lib.assertMsg (colors != [ ]) "rose-pine-fzf: no --color lines found";
+        colors;
+    };
 
   # LS_COLORS (fd, plain ls, tree, fish's file completions...)
   programs.vivid = {

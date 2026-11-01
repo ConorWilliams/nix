@@ -83,7 +83,8 @@
   '';
 
   # Live symlink into the repo (not a store copy): edits apply without a
-  # switch, and vim.pack can write its lockfile. Assumes the repo is at ~/nix.
+  # switch, and vim.pack can write its lockfile. The repo is where nh
+  # expects it (~/nix, home/default.nix).
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix/home/nvim";
+    config.lib.file.mkOutOfStoreSymlink "${config.programs.nh.flake}/home/nvim";
 }
