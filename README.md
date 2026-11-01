@@ -17,21 +17,15 @@ My terminal environment, managed with Nix + Home Manager.
 ## Layout
 
 ```text
-flake.nix                users, hosts -> layer, checks, formatter
-bootstrap.sh             set up or update a machine
+flake.nix                users, hosts -> layer
+bootstrap.sh
 home/default.nix         server layer: every machine; all CLI tools
-  git.nix                git, delta, lazygit, lfs
-  shell.nix              bash -> fish, starship, atuin, zoxide
-  claude.nix             Claude Code: settings, status line (claude/)
-  ssh.nix                SSH client: agent forwarding to work hosts
-  zellij.nix             zellij: theme, modal keys (zellij/)
-  neovim.nix             neovim: tools from Nix, Lua config linked live (nvim/)
-  gui/default.nix        GUI layer: desks on any OS: kitty config, font
-    ubuntu/default.nix   Ubuntu layer: i3, scrot, xclip, arandr
-      hubble.nix         hubble: mouse speed
-      luna.nix           luna: font size, touchpad
-    mac/default.nix      Mac layer (empty for now)
-darwin/mac.nix           Mac system settings (nix-darwin, sudo): not a layer
+  gui/default.nix        GUI layer: desks on any OS
+    ubuntu/default.nix   Ubuntu layer
+      hubble.nix
+      luna.nix
+    mac/default.nix      Mac layer
+darwin/mac.nix           Mac system settings: not a layer
 ```
 
 Each layer imports the one above it (server -> gui -> ubuntu -> hubble,
