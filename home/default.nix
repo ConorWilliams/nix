@@ -12,7 +12,6 @@
   imports = [
     ./git.nix
     ./shell.nix
-    ./ssh.nix
     ./zellij.nix
     ./claude.nix
     ./neovim.nix
@@ -84,6 +83,11 @@
     COLORTERM = "truecolor";
     # Find kitty's terminfo (above).
     TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:";
+  };
+
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false; # Home Manager's old implicit defaults
   };
 
   programs.gh = {
