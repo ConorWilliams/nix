@@ -1,13 +1,11 @@
-# Claude Code, its settings and status line. Logins stay per machine.
-# (codex is a plain package in default.nix.)
+# Claude Code, its settings and status line.
 { pkgs, inputs, ... }:
 
 let
-  # numtide/llm-agents.nix: updated daily, so claude is at most ~a day old.
-  # Its package already disables claude's own auto-updater.
+  # numtide/llm-agents.nix: updated daily
   llm = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
-  # Status line script, with its own pinned jq and git.
+  # Status line script.
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
     runtimeInputs = with pkgs; [
@@ -21,11 +19,9 @@ in
 {
   programs.claude-code = {
     enable = true;
-    package = llm.claude-code; # update with `nix flake update llm-agents`
+    package = llm.claude-code;
 
     # Merge the settings below into ~/.claude/settings.json on each switch.
-    # Changes made inside Claude (/config, /model...) work until the next
-    # switch; keys not declared here (model, effort, autoMode...) stay local.
     mutableSettings = true;
     settings = {
       statusLine = {
@@ -37,7 +33,7 @@ in
       theme = "light";
       tui = "fullscreen";
       autoCompactEnabled = true;
-      idleCompaction = false; # don't compact sessions left idle
+      idleCompaction = false;
       permissions.defaultMode = "auto";
       skipAutoPermissionPrompt = true; # no one-time auto-mode notice per machine
     };
