@@ -137,6 +137,15 @@ in
         "${mod}+n" = "exec ${lock}";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
+        # Volume, mute and brightness keys (under GNOME its settings daemon
+        # handles them; it doesn't run under i3). Brightness asks logind, so
+        # no root; on a desk without a backlight it does nothing.
+        "XF86AudioRaiseVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+        "XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+        "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+        "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+        "XF86MonBrightnessUp" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
+        "XF86MonBrightnessDown" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
         "--release ${mod}+p" =
           "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
       };
