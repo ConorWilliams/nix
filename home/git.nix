@@ -83,11 +83,14 @@ in
         git -C "$dir" fetch --quiet origin
 
         # It also copied every remote branch as a local one; keep only the
-        # default branch (tracking origin), as a normal clone would.
-        branch=$(git -C "$dir" symbolic-ref --short HEAD)
-        git -C "$dir" for-each-ref --format='%(refname:short)' refs/heads | while read -r b; do
-          [[ $b == "$branch" ]] || git -C "$dir" branch --quiet -D "$b"
-        done
+        # default branch (tracking origin), as a normal clone would. Full ref
+        # names throughout: short ones become "heads/x" when a tag is also
+        # called x. (One update-ref for all: repos can have thousands.)
+        branch=$(git -C "$dir" symbolic-ref HEAD)
+        branch=''${branch#refs/heads/}
+        git -C "$dir" for-each-ref --format='delete %(refname)' refs/heads |
+          grep -vxF "delete refs/heads/$branch" |
+          git -C "$dir" update-ref --stdin
         git -C "$dir" branch --quiet --set-upstream-to="origin/$branch" "$branch"
 
         git -C "$dir" worktree add --quiet "$branch" "$branch"
