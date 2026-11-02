@@ -19,7 +19,6 @@
   # GUI apps via Homebrew casks (bootstrap.sh installs Homebrew itself).
   homebrew = {
     enable = true;
-    onActivation.cleanup = "none"; # never uninstall apps added by hand
     casks = [
       "kitty" # the terminal; Home Manager writes its config (gui layer)
     ];
