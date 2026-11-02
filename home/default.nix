@@ -29,6 +29,13 @@
   programs.nix-index.enable = true;
   programs.nix-index-database.comma.enable = true;
 
+  # The bare name "nixpkgs" (comma, `nix shell nixpkgs#foo`) means this
+  # flake's pinned nixpkgs, not the latest unstable online: nothing to
+  # download, the same versions as what's installed, and updated with
+  # `nix flake update`. For the newest, name it in full:
+  # `nix shell github:NixOS/nixpkgs/nixpkgs-unstable#foo`.
+  nix.registry.nixpkgs.flake = inputs.nixpkgs;
+
   # nh: a friendlier front end for switching.
   programs.nh = {
     enable = true;
