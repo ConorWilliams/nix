@@ -59,23 +59,12 @@ in
 
   # Home Manager's session variables (PATH additions, EDITOR, NH_FLAKE...)
   # are loaded once and marked done, and everything started later inherits
-  # that mark. On Ubuntu desktops it even outlives logouts (the systemd user
-  # manager keeps it), so they'd be skipped until a reboot. Two places load
-  # them afresh, recording which generation they loaded (the same record):
-  # - desktop login (~/.xprofile, read after ~/.profile, before i3): always,
-  #   as the login resets PATH but keeps the mark; so i3 and all it
-  #   launches get them;
-  # - fish (conf.d runs before config.fish, which loads them): when they're
-  #   from another generation, i.e. after a switch. (Not every time: each
-  #   load adds the PATH entries again.)
-  # (only where i3 is set up: other machines have no desktop login to read it)
-  home.file.".xprofile" = lib.mkIf config.xsession.windowManager.i3.enable {
-    text = /* bash */ ''
-      unset __HM_SESS_VARS_SOURCED
-      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
-      export __hm_session_vars=${config.home.sessionVariablesPackage}
-    '';
-  };
+  # that mark, so a switch's new ones wouldn't reach running sessions (on
+  # Ubuntu desktops not even after logging out: home/gui/ubuntu loads them
+  # afresh at login). So fish (conf.d runs before config.fish, which loads
+  # them) reloads them when they're from another generation, recorded in
+  # __hm_session_vars. (Not every time: each load adds the PATH entries
+  # again.)
   xdg.configFile."fish/conf.d/hm-session-vars.fish".text = /* fish */ ''
     if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
       set -e __HM_SESS_VARS_SOURCED
