@@ -171,19 +171,16 @@
         };
     in
     {
-      homeConfigurations = builtins.listToAttrs (
-        nixpkgs.lib.concatMap (
+      # Per user: <user> (a server) and <user>@<host> for each host.
+      homeConfigurations = nixpkgs.lib.mergeAttrsList (
+        map (
           user:
-          [
-            {
-              name = user;
-              value = mkHome user server;
-            }
-          ]
-          ++ nixpkgs.lib.mapAttrsToList (host: machine: {
-            name = "${user}@${host}";
-            value = mkHome user machine;
-          }) hosts
+          {
+            ${user} = mkHome user server;
+          }
+          // nixpkgs.lib.mapAttrs' (
+            host: machine: nixpkgs.lib.nameValuePair "${user}@${host}" (mkHome user machine)
+          ) hosts
         ) users
       );
 
