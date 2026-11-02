@@ -37,6 +37,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+-- Inline type hints (e.g. ty's inferred types), off until toggled.
+vim.keymap.set('n', '<leader>uh', function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+  vim.notify('Inlay hints: ' .. (vim.lsp.inlay_hint.is_enabled() and 'on' or 'off'))
+end, { desc = 'Toggle inlay hints' })
+
 -- How diagnostics are shown
 vim.diagnostic.config({
   severity_sort = true, -- Errors above warnings when several share a line
