@@ -116,8 +116,11 @@ in
         # Inside a desk's zellij: connect from a kitty window of its own, so
         # the server's zellij isn't nested in this one (whose Alt-g would
         # catch the server's). There it runs again, outside zellij.
-        if set -q ZELLIJ; and set -q DISPLAY; and command -q kitty
-          kitty --detach fish -c (string join ' ' -- zzh (string escape -- $argv))
+        # (zellij's variables are cleared there, and ZZH_OWN_WINDOW stops it ever
+        # opening another window: it would otherwise inherit ZELLIJ and loop.)
+        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
+          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
+            kitty --detach fish -c (string join ' ' -- zzh (string escape -- $argv))
           return
         end
         if set -q argv[2]
@@ -135,8 +138,11 @@ in
         # Inside a desk's zellij: connect from a kitty window of its own, so
         # the server's zellij isn't nested in this one (whose Alt-g would
         # catch the server's). There it runs again, outside zellij.
-        if set -q ZELLIJ; and set -q DISPLAY; and command -q kitty
-          kitty --detach fish -c (string join ' ' -- zosh (string escape -- $argv))
+        # (zellij's variables are cleared there, and ZZH_OWN_WINDOW stops it ever
+        # opening another window: it would otherwise inherit ZELLIJ and loop.)
+        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
+          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
+            kitty --detach fish -c (string join ' ' -- zosh (string escape -- $argv))
           return
         end
         if set -q argv[2]
