@@ -37,7 +37,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
--- Inline type hints (e.g. ty's inferred types), off until toggled.
+-- Inline type hints (e.g. ty's inferred types): on; <leader>uh toggles.
+vim.lsp.inlay_hint.enable()
 vim.keymap.set('n', '<leader>uh', function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
   vim.notify('Inlay hints: ' .. (vim.lsp.inlay_hint.is_enabled() and 'on' or 'off'))
