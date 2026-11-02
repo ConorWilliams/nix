@@ -110,11 +110,8 @@
       ...
     }:
     let
-      # Every system to build for
-      systems = [
-        "x86_64-linux"
-        "aarch64-darwin"
-      ];
+      # Every system to build for: the machines'.
+      systems = nixpkgs.lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
       # Users that get configs (every config is generated for each of them).
       users = [ "conix" ];
