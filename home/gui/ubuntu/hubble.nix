@@ -1,10 +1,22 @@
-{ ... }:
+{ lib, ... }:
 
 {
   imports = [ ./. ]; # the Ubuntu layer.
 
-  # Speed up hubble's Logitech mouse (added to the i3 startup list).
+  # i3 startup list (added to the Ubuntu layer's).
   xsession.windowManager.i3.config.startup = [
+    # The three desk monitors, as set up in arandr: all portrait, the 4K in
+    # the middle, a 1440p either side (565 px lower), the right one primary.
+    {
+      command = lib.concatStringsSep " " [
+        "xrandr"
+        "--output HDMI-1-0 --mode 2560x1440 --pos 0x565 --rotate left"
+        "--output HDMI-1-1 --mode 3840x2160 --pos 1440x0 --rotate left"
+        "--output DP-1 --primary --mode 2560x1440 --pos 3600x565 --rotate left"
+      ];
+      notification = false;
+    }
+    # Speed up the Logitech mouse.
     {
       command = ''xinput --set-prop "Logitech USB Receiver Mouse" "libinput Accel Speed" 1'';
       always = true;
