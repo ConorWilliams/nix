@@ -40,7 +40,8 @@ map('x', '<A-j>', ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc 
 map('x', '<A-k>', ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = 'Move up' })
 
 -- Editing
-map({ 'i', 'n', 'x', 's' }, '<C-s>', '<cmd>w<cr><esc>', { desc = 'Save file' })
+-- (normal mode only: insert mode's C-s is nvim's signature help)
+map('n', '<C-s>', '<cmd>w<cr>', { desc = 'Save file' })
 map('n', '<esc>', '<cmd>nohlsearch<cr><esc>', { desc = 'Clear search highlight' })
 map('x', '<', '<gv') -- Keep the selection after indenting
 map('x', '>', '>gv')
