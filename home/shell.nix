@@ -18,8 +18,8 @@ let
     { commandVar, isLogin }:
     /* bash */ ''
       if [[ $(ps -o comm= -p $PPID) != *fish* && -z ''${${commandVar}:-} && -z ''${IN_NIX_SHELL:-} ]]; then
-        ${isLogin} && exec ${config.programs.fish.package}/bin/fish --login
-        exec ${config.programs.fish.package}/bin/fish
+        ${isLogin} && exec ${lib.getExe config.programs.fish.package} --login
+        exec ${lib.getExe config.programs.fish.package}
       fi
     '';
 
