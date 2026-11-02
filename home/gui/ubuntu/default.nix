@@ -130,6 +130,22 @@ in
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
+  # Desktop login (/etc/gdm3/Xsession reads this after ~/.profile, before
+  # i3). The systemd user manager outlives logouts, and keeps what a GNOME
+  # login gave it: GNOME's session (a dead SESSION_MANAGER, which programs
+  # then try to reach) and desktop name, so services it starts (dunst, the
+  # portals...) acted as if under GNOME, and this login inherited some of
+  # it. So drop GNOME's session here and in the manager, then give the
+  # manager this login's environment (i3's desktop name, this generation's
+  # variables), as GNOME does at its own login.
+  home.file.".xprofile".text = /* bash */ ''
+    unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE \
+      __HM_SESS_VARS_SOURCED
+    systemctl --user unset-environment SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID \
+      GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED
+    dbus-update-activation-environment --systemd --all
+  '';
+
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
   home.packages = with pkgs; [
     dex # starts the desktop's autostart apps (startup line below)
