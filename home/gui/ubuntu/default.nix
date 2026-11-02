@@ -10,6 +10,7 @@
 let
   mod = "Mod1"; # Alt.
   lock = "i3lock -c 000000"; # black screen
+  refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
   # Rose Pine Dawn notification colours from the official mako port (mako
@@ -151,9 +152,11 @@ in
         # Volume, mute and brightness keys (under GNOME its settings daemon
         # handles them; it doesn't run under i3). Brightness asks logind, so
         # no root; on a desk without a backlight it does nothing.
-        "XF86AudioRaiseVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
-        "XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
-        "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+        # The volume ones also refresh the bar at once (USR1), rather than at
+        # its next 5-second update.
+        "XF86AudioRaiseVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
+        "XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
+        "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && ${refreshBar}";
         "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
         "XF86MonBrightnessUp" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
         "XF86MonBrightnessDown" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
@@ -184,8 +187,8 @@ in
     extraConfig = builtins.readFile "${inputs.rose-pine-i3}/themes/rose-pine-dawn.theme";
   };
 
-  # The bar's status line: memory, the battery (where there is one) and
-  # the time. (Ubuntu's default, for laptops, also shows Wi-Fi, IPv6,
+  # The bar's status line: volume, memory, the battery (where there is
+  # one) and the time. (Ubuntu's default, for laptops, also shows Wi-Fi, IPv6,
   # network, disk and load.)
   programs.i3status = {
     enable = true;
@@ -195,6 +198,15 @@ in
       interval = 5;
     };
     modules = {
+      # The default output's volume (PulseAudio, or PipeWire's stand-in).
+      "volume master" = {
+        position = 0;
+        settings = {
+          device = "pulse";
+          format = "vol %volume";
+          format_muted = "muted (%volume)";
+        };
+      };
       memory = {
         position = 1;
         settings = {
