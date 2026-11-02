@@ -3,7 +3,17 @@
 
 -- Colour scheme: Rose Pine Dawn, always (detecting the terminal's
 -- background fails over mosh and inside zellij).
-require('rose-pine').setup({ variant = 'dawn' })
+require('rose-pine').setup({
+  variant = 'dawn',
+  highlight_groups = {
+    -- Tab bar (below): the current file's tab in solid pine; unsaved
+    -- changes show as a * after the name, not as differently coloured tabs.
+    MiniTablineCurrent = { fg = 'base', bg = 'pine', bold = true },
+    MiniTablineModifiedCurrent = { link = 'MiniTablineCurrent' },
+    MiniTablineModifiedVisible = { link = 'MiniTablineVisible' },
+    MiniTablineModifiedHidden = { link = 'MiniTablineHidden' },
+  },
+})
 vim.cmd.colorscheme('rose-pine')
 
 -- Command line and messages: Neovim 0.12's built-in redesign (ui2,
@@ -60,7 +70,13 @@ vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {
 
 -- Tabline at the top: open buffers as tabs (Shift-h / Shift-l move
 -- between them); tab pages, when there's more than one, show at the right.
-require('mini.tabline').setup({ tabpage_section = 'right' })
+require('mini.tabline').setup({
+  tabpage_section = 'right',
+  -- name* when the file has unsaved changes
+  format = function(buf, label)
+    return MiniTabline.default_format(buf, label .. (vim.bo[buf].modified and '*' or ''))
+  end,
+})
 
 -- which-key: pause after a prefix (e.g. <Space>) to see what follows
 require('which-key').setup({
