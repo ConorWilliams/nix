@@ -11,8 +11,8 @@
       command = lib.concatStringsSep " " [
         "xrandr"
         "--output HDMI-1-0 --mode 2560x1440 --pos 0x565 --rotate left"
-        "--output HDMI-1-1 --mode 3840x2160 --pos 1440x0 --rotate left"
-        "--output DP-1 --primary --mode 2560x1440 --pos 3600x565 --rotate left"
+        "--output HDMI-1-1 --primary --mode 3840x2160 --pos 1440x0 --rotate left"
+        "--output DP-1 --mode 2560x1440 --pos 3600x565 --rotate left"
       ];
       notification = false;
     }
