@@ -10,6 +10,10 @@ vim.api.nvim_create_autocmd('FileType', {
     if not (lang and vim.treesitter.language.add(lang)) then return end
 
     vim.treesitter.start(ev.buf, lang)
+    -- Spell check files' text: with treesitter that's only what the
+    -- language marks as prose (comments, and strings in some), never code.
+    -- Not previews, popups or help, which aren't files (buftype set).
+    if vim.bo[ev.buf].buftype == '' then vim.opt_local.spell = true end
     if vim.treesitter.query.get(lang, 'indents') then
       vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
     end
