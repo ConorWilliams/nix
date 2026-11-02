@@ -5,6 +5,9 @@
 -- asked for, with these keys (LazyVim's) or from the start screen.
 local persistence = require('persistence')
 persistence.setup()
+-- Not terminals (restoring would re-run e.g. a hidden lazygit) or empty
+-- windows; as in LazyVim.
+vim.opt.sessionoptions:remove({ 'terminal', 'blank' })
 
 local map = function(lhs, rhs, desc) vim.keymap.set('n', lhs, rhs, { desc = desc }) end
 map('<leader>qs', persistence.load, 'Restore session (this folder)')
