@@ -160,6 +160,12 @@ in
           command = "xss-lock --transfer-sleep-lock -- ${lock} --nofork";
           notification = false;
         }
+        # Password prompts for programs asking for admin rights (updates,
+        # mounting disks...): GNOME starts this agent, i3 doesn't.
+        {
+          command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+          notification = false;
+        }
       ];
     };
     # Rose Pine Dawn window borders and titles: the official port (i3
