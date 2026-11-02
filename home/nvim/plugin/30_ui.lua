@@ -12,6 +12,8 @@ require('rose-pine').setup({
     MiniTablineModifiedCurrent = { link = 'MiniTablineCurrent' },
     MiniTablineModifiedVisible = { link = 'MiniTablineVisible' },
     MiniTablineModifiedHidden = { link = 'MiniTablineHidden' },
+    -- Statusline (below): a macro being recorded
+    StatusRecording = { fg = 'base', bg = 'love', bold = true },
   },
 })
 vim.cmd.colorscheme('rose-pine')
@@ -33,9 +35,9 @@ require('go-up').setup()
 require('mini.icons').setup()
 MiniIcons.mock_nvim_web_devicons() -- for plugins that expect nvim-web-devicons
 
--- Statusline at the bottom, kept light: mode, git branch, diagnostics
--- counts, file name (+ [+] when modified), then macro recording (@q; ui2
--- with cmdheight=0 doesn't show it), search count and line:col.
+-- Statusline at the bottom, kept light: mode, a red REC @q while a macro
+-- records (ui2 with cmdheight=0 doesn't show it), git branch, diagnostics
+-- counts, file name (+ [+] when modified), then search count and line:col.
 local statusline = require('mini.statusline')
 statusline.setup({
   content = {
@@ -43,6 +45,10 @@ statusline.setup({
       local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
       return statusline.combine_groups({
         { hl = mode_hl, strings = { mode } },
+        {
+          hl = 'StatusRecording',
+          strings = { vim.fn.reg_recording() ~= '' and ('REC @' .. vim.fn.reg_recording()) or '' },
+        },
         {
           hl = 'MiniStatuslineDevinfo',
           strings = { statusline.section_git({}), statusline.section_diagnostics({}) },
@@ -53,7 +59,6 @@ statusline.setup({
         {
           hl = mode_hl,
           strings = {
-            vim.fn.reg_recording() ~= '' and ('@' .. vim.fn.reg_recording()) or '',
             statusline.section_searchcount({}),
             '%l:%v',
           },
