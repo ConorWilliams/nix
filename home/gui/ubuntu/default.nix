@@ -154,8 +154,10 @@ in
         # no root; on a desk without a backlight it does nothing.
         # The volume ones also refresh the bar at once (USR1), rather than at
         # its next 5-second update.
-        "XF86AudioRaiseVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
-        "XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
+        "XF86AudioRaiseVolume" =
+          "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
+        "XF86AudioLowerVolume" =
+          "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
         "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && ${refreshBar}";
         "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
         "XF86MonBrightnessUp" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
