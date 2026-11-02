@@ -23,7 +23,8 @@ end
 -- (raw text comes back on the cursor line). <leader>um toggles it.
 require('render-markdown').setup({
   latex = { enabled = false },
-  -- Lists and tasks stay as typed (- and [ ] / [x]), not swapped for icons.
+  -- Task boxes stay as typed ([ ] / [x]), not swapped for icons (list
+  -- dashes do become bullets).
   checkbox = { enabled = false },
   -- Draw a code block's ``` lines as thin edges instead of hiding them
   -- (the default), so its start and end stay visible.
