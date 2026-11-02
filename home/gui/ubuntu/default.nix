@@ -131,19 +131,21 @@ in
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
   # Desktop login (/etc/gdm3/Xsession reads this after ~/.profile, before
-  # i3). The systemd user manager outlives logouts, and keeps what a GNOME
-  # login gave it: GNOME's session (a dead SESSION_MANAGER, which programs
-  # then try to reach) and desktop name, so services it starts (dunst, the
-  # portals...) acted as if under GNOME, and this login inherited some of
-  # it. So drop GNOME's session here and in the manager, then give the
-  # manager this login's environment (i3's desktop name, this generation's
-  # variables), as GNOME does at its own login.
+  # i3). Each login starts from the systemd user manager's environment, and
+  # the manager outlives logouts, keeping whatever was put there: a GNOME
+  # login puts all of its own (a dead SESSION_MANAGER, which programs then
+  # try to reach; GNOME's desktop name, which services the manager starts,
+  # like dunst and the portals, then act on; and the "already loaded" marks
+  # of Home Manager's variables and Nix's setup, which made later logins
+  # skip them). So drop GNOME's session here, clear those from the manager,
+  # and tell it this desktop's name. (Not everything, as GNOME does: this
+  # login's marks would then reach the next.)
   home.file.".xprofile".text = /* bash */ ''
-    unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE \
-      __HM_SESS_VARS_SOURCED
+    unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE
     systemctl --user unset-environment SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID \
-      GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED
-    dbus-update-activation-environment --systemd --all
+      GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
+    dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP \
+      XDG_SESSION_TYPE DESKTOP_SESSION GDMSESSION
   '';
 
   # Not GNOME's geoclue demo agent (an autostart app outside GNOME): it
