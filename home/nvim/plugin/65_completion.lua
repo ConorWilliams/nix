@@ -3,7 +3,7 @@
 -- server what it supports, so no LSP glue is needed.
 
 require('blink.cmp').setup({
-  -- Tab accepts (or jumps through a snippet), as in the old config. C-n/C-p or
+  -- Tab accepts (or jumps through a snippet). C-n/C-p or
   -- Up/Down move, C-e closes, C-space opens it or toggles the docs.
   keymap = { preset = 'super-tab' }, -- (Copilot has its own key: 80_ai.lua)
   completion = {

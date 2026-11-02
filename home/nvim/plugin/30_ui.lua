@@ -26,12 +26,13 @@ vim.o.cmdheight = 0
 require('vim._core.ui2').enable({ msg = { targets = 'msg' } })
 
 -- go-up: scroll above line 1, as is possible below the last line, so zz can
--- centre the top of a file too. As before, it sets scrolloff=0 and
--- splitkeep=topline, which it needs to work well.
+-- centre the top of a file too. It sets scrolloff=0 and splitkeep=topline,
+-- which it needs to work well.
 require('go-up').setup()
 
--- mini.nvim: one repo of small modules (icons here; ai and surround in
--- 50_editing.lua). Icons for file types, used by which-key and others.
+-- mini.nvim: one repo of small modules (icons, statusline, hipatterns and
+-- tabline here; ai and surround in 50_editing.lua). Icons for file types,
+-- used by which-key and others.
 require('mini.icons').setup()
 
 -- Statusline at the bottom, kept light: mode, a red REC @q while a macro

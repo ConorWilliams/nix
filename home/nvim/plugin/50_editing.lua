@@ -1,7 +1,7 @@
 -- Editing: text objects, surround and jumping. Keys as in LazyVim.
 
 -- mini.nvim is a library of small independent modules; each does nothing
--- until its setup() is called. (mini.icons is set up in 30_ui.lua.)
+-- until its setup() is called. (The UI ones are set up in 30_ui.lua.)
 
 -- mini.ai: more a/i text objects, e.g. ciq (inside any quote), dab (around
 -- any bracket), via (an argument), cif (a function call's contents). They
