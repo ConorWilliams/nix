@@ -58,7 +58,9 @@ local switch_worktree = function(dir)
   -- stopped (<leader>qd) or with no files open: the start screen would
   -- replace a saved session with an empty one.
   local persistence = require('persistence')
-  if persistence.active() then vim.api.nvim_exec_autocmds('VimLeavePre', { group = 'persistence' }) end
+  if persistence.active() then
+    vim.api.nvim_exec_autocmds('VimLeavePre', { group = 'persistence' })
+  end
   vim.cmd('silent! %argdelete') -- (sessions save it: `nvim file` would follow along)
   -- ! so a terminal with a running job can't stop the switch halfway (E89,
   -- as in a bare nvim); unsaved files were dealt with above.
