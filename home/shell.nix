@@ -77,8 +77,8 @@ in
         . "$HOME/.nix-profile/etc/profile.d/nix.sh" # single-user Nix (no sudo)
       fi
       # Home Manager's variables, for commands over ssh (`ssh host cmd`,
-      # zzh's zellij), which only get this far. (Safe to load again:
-      # session-vars.nix.)
+      # zzh's zellij), which only get this far. (The file loads once per
+      # session: elsewhere it's already loaded, and this does nothing.)
       . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
     '';
     # Runs only in interactive bash; first (Home Manager loads completion

@@ -13,7 +13,6 @@
     inputs.nix-index-database.homeModules.nix-index
     ./git.nix
     ./shell.nix
-    ./session-vars.nix
     ./zellij.nix
     ./claude.nix
     ./neovim.nix
