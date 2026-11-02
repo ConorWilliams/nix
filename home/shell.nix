@@ -23,6 +23,43 @@ let
       fi
     '';
 
+  # zzh/zosh: zellij on a host (`zzh host [session]`), over ssh or mosh;
+  # only how they connect differs.
+  zellijOn =
+    {
+      name,
+      description,
+      wraps,
+      connect,
+    }:
+    {
+      inherit description wraps;
+      body = /* fish */ ''
+        # Inside a desk's zellij: connect from a kitty window of its own, so
+        # the server's zellij isn't nested in this one (whose Alt-g would
+        # catch the server's). There it runs again, outside zellij. (zellij's
+        # variables are cleared there, and ZZH_OWN_WINDOW stops it ever
+        # opening another window: it would otherwise inherit ZELLIJ and loop.)
+        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
+          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
+            kitty --detach fish -c (string join ' ' -- ${name} (string escape -- $argv))
+          return
+        end
+
+        set -l zellij zellij # a new session,
+        set -q argv[2]; and set zellij zellij attach -c $argv[2] # or join/create one
+        ${connect}
+
+        # In its own window, an error (e.g. no zellij on the host) would close
+        # it before it could be read: wait for Enter first.
+        set -l code $status
+        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
+          read -P "${name}: exited with status $code; press Enter to close " -l reply
+        end
+        return $code
+      '';
+    };
+
   # Rose Pine Dawn palette from the official starship port.
   rosePine =
     (fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
@@ -109,62 +146,17 @@ in
       '';
     };
 
-    functions.zzh = {
+    functions.zzh = zellijOn {
+      name = "zzh";
       description = "zellij on a host over ssh: new session, or join/create one";
       wraps = "ssh"; # complete hostnames like ssh
-      body = /* fish */ ''
-        # Inside a desk's zellij: connect from a kitty window of its own, so
-        # the server's zellij isn't nested in this one (whose Alt-g would
-        # catch the server's). There it runs again, outside zellij.
-        # (zellij's variables are cleared there, and ZZH_OWN_WINDOW stops it ever
-        # opening another window: it would otherwise inherit ZELLIJ and loop.)
-        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
-          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
-            kitty --detach fish -c (string join ' ' -- zzh (string escape -- $argv))
-          return
-        end
-        if set -q argv[2]
-          ssh -t $argv[1] zellij attach -c $argv[2]
-        else
-          ssh -t $argv[1] zellij
-        end
-        # In its own window, an error (e.g. no zellij on the host) would close
-        # it before it could be read: wait for Enter first.
-        set -l code $status
-        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
-          read -P "zzh: exited with status $code; press Enter to close " -l reply
-        end
-        return $code
-      '';
+      connect = "ssh -t $argv[1] $zellij";
     };
-
-    functions.zosh = {
+    functions.zosh = zellijOn {
+      name = "zosh";
       description = "zellij on a host over mosh: new session, or join/create one";
       wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
-      body = /* fish */ ''
-        # Inside a desk's zellij: connect from a kitty window of its own, so
-        # the server's zellij isn't nested in this one (whose Alt-g would
-        # catch the server's). There it runs again, outside zellij.
-        # (zellij's variables are cleared there, and ZZH_OWN_WINDOW stops it ever
-        # opening another window: it would otherwise inherit ZELLIJ and loop.)
-        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
-          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
-            kitty --detach fish -c (string join ' ' -- zosh (string escape -- $argv))
-          return
-        end
-        if set -q argv[2]
-          mosh $argv[1] -- zellij attach -c $argv[2]
-        else
-          mosh $argv[1] -- zellij
-        end
-        # In its own window, an error (e.g. no zellij on the host) would close
-        # it before it could be read: wait for Enter first.
-        set -l code $status
-        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
-          read -P "zosh: exited with status $code; press Enter to close " -l reply
-        end
-        return $code
-      '';
+      connect = "mosh $argv[1] -- $zellij";
     };
   };
 
