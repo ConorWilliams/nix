@@ -38,7 +38,7 @@ in
       };
       "tztime local" = {
         position = 2;
-        settings.format = "%a %-d %b %H:%M"; # Mon 2 Nov 14:52
+        settings.format = "%Y-%m-%d %a %H:%M"; # 2026-11-02 Mon 14:52
       };
     };
   };
