@@ -22,6 +22,12 @@ My terminal environment, managed with Nix + Home Manager.
 ├── bootstrap.sh
 ├── home
 │   ├── default.nix          # server layer: every machine; all CLI tools
+│   ├── shell.nix            #   fish (bash/zsh hand over to it), prompt, history
+│   ├── session-vars.nix     #   when shells reload Home Manager's variables
+│   ├── git.nix              #   git, delta, lazygit, git clone-wt
+│   ├── zellij.nix, zellij/  #   zellij and its keys
+│   ├── neovim.nix, nvim/    #   nvim: packages from Nix, config in Lua
+│   ├── claude.nix, claude/  #   Claude Code and its status line
 │   └── gui
 │       ├── default.nix      # GUI layer: desks on any OS
 │       ├── ubuntu
