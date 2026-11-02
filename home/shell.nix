@@ -68,11 +68,14 @@ in
   # - fish (conf.d runs before config.fish, which loads them): when they're
   #   from another generation, i.e. after a switch. (Not every time: each
   #   load adds the PATH entries again.)
-  home.file.".xprofile".text = /* bash */ ''
-    unset __HM_SESS_VARS_SOURCED
-    . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
-    export __hm_session_vars=${config.home.sessionVariablesPackage}
-  '';
+  # (only where i3 is set up: other machines have no desktop login to read it)
+  home.file.".xprofile" = lib.mkIf config.xsession.windowManager.i3.enable {
+    text = /* bash */ ''
+      unset __HM_SESS_VARS_SOURCED
+      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+      export __hm_session_vars=${config.home.sessionVariablesPackage}
+    '';
+  };
   xdg.configFile."fish/conf.d/hm-session-vars.fish".text = /* fish */ ''
     if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
       set -e __HM_SESS_VARS_SOURCED
