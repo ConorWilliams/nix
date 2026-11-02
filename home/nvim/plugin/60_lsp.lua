@@ -11,6 +11,7 @@ vim.lsp.enable({
   'ruff', -- Python lint and format
   'marksman', -- Markdown links, headings, references
   'rumdl', -- Markdown lint and format
+  'copilot', -- inline suggestions (80_ai.lua)
 })
 
 -- Keys for buffers with a server attached, as in LazyVim. Built in already:
