@@ -12,9 +12,6 @@ conform.setup({
     bash = { 'shfmt' },
     fish = { 'fish_indent' },
   },
-  formatters = {
-    shfmt = { prepend_args = { '-i', '2' } }, -- 2-space indent, not tabs
-  },
   default_format_opts = { lsp_format = 'fallback' },
   format_on_save = function()
     if vim.g.autoformat == false then return end
