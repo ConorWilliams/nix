@@ -11,10 +11,6 @@ let
   mod = "Mod1"; # Alt.
   lock = "i3lock -c 000000"; # black screen
   font = "${config.programs.kitty.font.name} 14"; # rofi and notifications
-  # kitty from its installer, by full path: Ubuntu may have its own (apt's
-  # is 0.21, from 2021, which nvim's keyboard handling misreads: Enter and
-  # Backspace arrive twice), and i3's PATH can find that one first.
-  kitty = "${config.home.homeDirectory}/.local/kitty.app/bin/kitty";
 
   # Rose Pine Dawn notification colours from the official mako port (mako
   # is Wayland-only; dunst has only a community port): its key=value
@@ -129,7 +125,7 @@ in
       bars =
         map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
           (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
-      terminal = kitty;
+      terminal = "kitty";
       menu = "rofi -show run";
       # Borders only, no title bar on top of each window.
       window.titlebar = false;
@@ -137,7 +133,7 @@ in
 
       # mkOptionDefault: add to i3's default keys rather than replace them.
       keybindings = lib.mkOptionDefault {
-        "${mod}+o" = "exec ${kitty} yazi";
+        "${mod}+o" = "exec kitty yazi";
         "${mod}+n" = "exec ${lock}";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
