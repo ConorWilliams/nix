@@ -144,6 +144,13 @@ in
       GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
     dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP \
       XDG_SESSION_TYPE DESKTOP_SESSION GDMSESSION
+    # If this login inherited those marks (the manager had them), ~/.profile
+    # skipped Nix's setup and Home Manager's variables: load them now.
+    if [ -z "''${NH_FLAKE-}" ]; then
+      unset __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+    fi
   '';
 
   # Not GNOME's geoclue demo agent (an autostart app outside GNOME): it
