@@ -54,8 +54,11 @@ local switch_worktree = function(dir)
     if choice ~= 1 then return end
     vim.cmd('wall')
   end
+  -- Saved as on exit (persistence's own VimLeavePre autocmd), so not when
+  -- stopped (<leader>qd) or with no files open: the start screen would
+  -- replace a saved session with an empty one.
   local persistence = require('persistence')
-  persistence.save()
+  if persistence.active() then vim.api.nvim_exec_autocmds('VimLeavePre', { group = 'persistence' }) end
   vim.cmd('silent! %argdelete') -- (sessions save it: `nvim file` would follow along)
   vim.cmd('silent %bwipeout')
   vim.cmd.cd(dir)
