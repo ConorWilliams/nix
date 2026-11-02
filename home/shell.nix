@@ -128,6 +128,13 @@ in
         else
           ssh -t $argv[1] zellij
         end
+        # In its own window, an error (e.g. no zellij on the host) would close
+        # it before it could be read: wait for Enter first.
+        set -l code $status
+        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
+          read -P "zzh: exited with status $code; press Enter to close " -l reply
+        end
+        return $code
       '';
     };
 
@@ -150,6 +157,13 @@ in
         else
           mosh $argv[1] -- zellij
         end
+        # In its own window, an error (e.g. no zellij on the host) would close
+        # it before it could be read: wait for Enter first.
+        set -l code $status
+        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
+          read -P "zosh: exited with status $code; press Enter to close " -l reply
+        end
+        return $code
       '';
     };
   };
