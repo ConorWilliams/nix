@@ -120,11 +120,8 @@ in
       description = "sudo, finding programs on this shell's PATH (Nix's too)";
       wraps = "sudo";
       body = /* fish */ ''
-        set -l exe
-        if set -q argv[1]; and not string match -q -- '-*' $argv[1]
-          set exe (command -s -- $argv[1])
-        end
-        if set -q exe[1]
+        # (an option such as -u is no program, so it fails `command -s` too)
+        if set -q argv[1]; and set -l exe (command -s -- $argv[1])
           command sudo $exe $argv[2..]
         else
           command sudo $argv
