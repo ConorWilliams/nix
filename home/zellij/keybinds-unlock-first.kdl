@@ -1,14 +1,16 @@
 // Zellij's "unlock-first" (non-colliding) keybinding preset: start locked,
-// Ctrl-g unlocks into normal mode, then a single letter picks a mode
+// Alt g unlocks into normal mode, then a single letter picks a mode
 // (p pane, t tab, r resize, s scroll, o session, m move...). As written by
 // zellij 0.45's first-run setup screen, except:
 // - the Alt bindings for moving focus are gone (Ctrl+arrows does that, via
 //   the NAVIGATION line below, filled in by home/zellij.nix), along with
 //   those i3 takes on the desks (Alt f, n, o, p, -) and their pairs (Alt +,
-//   =, i), and Alt [ / ] (swap layouts), which nvim uses for Copilot.
+//   =, i), and Alt [ / ] (swap layouts), which nvim uses for Copilot;
+// - Alt g locks and unlocks, not the preset's Ctrl g, which nvim's pickers
+//   use (live grep <-> fuzzy filter).
 keybinds clear-defaults=true {
     locked {
-        bind "Ctrl g" { SwitchToMode "normal"; }
+        bind "Alt g" { SwitchToMode "normal"; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -162,7 +164,7 @@ keybinds clear-defaults=true {
         bind "Alt Shift p" { ToggleGroupMarking; }
     }
     shared_except "locked" "renametab" "renamepane" {
-        bind "Ctrl g" { SwitchToMode "locked"; }
+        bind "Alt g" { SwitchToMode "locked"; }
         bind "Ctrl q" { Quit; }
     }
     shared_except "locked" "entersearch" {

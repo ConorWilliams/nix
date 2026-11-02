@@ -55,7 +55,7 @@ in
     settings = {
       default_mode = "locked"; # part of the preset: keys go to the shell
       # One slim bar (tabs and mode) instead of the tab bar + hints bar;
-      # the key hints pop up as a tooltip outside locked mode (after Ctrl-g).
+      # the key hints pop up as a tooltip outside locked mode (after Alt-g).
       default_layout = "compact";
       theme = "rose-pine-dawn";
       # Having a config file at all also skips the first-run setup screen.
