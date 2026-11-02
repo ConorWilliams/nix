@@ -43,6 +43,24 @@ vim.keymap.set('n', '<leader>uh', function()
   vim.notify('Inlay hints: ' .. (vim.lsp.inlay_hint.is_enabled() and 'on' or 'off'))
 end, { desc = 'Toggle inlay hints' })
 
+-- Language servers' progress (indexing, loading the workspace...) as
+-- progress messages, which ui2 shows in its message window (from :h
+-- LspProgress).
+vim.api.nvim_create_autocmd('LspProgress', {
+  group = vim.api.nvim_create_augroup('config-lsp-progress', {}),
+  callback = function(ev)
+    local value = ev.data.params.value
+    vim.api.nvim_echo({ { value.message or 'done' } }, false, {
+      id = 'lsp.' .. ev.data.params.token,
+      kind = 'progress',
+      source = 'vim.lsp',
+      title = value.title,
+      status = value.kind ~= 'end' and 'running' or 'success',
+      percent = value.percentage,
+    })
+  end,
+})
+
 -- How diagnostics are shown
 vim.diagnostic.config({
   severity_sort = true, -- Errors above warnings when several share a line
