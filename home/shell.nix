@@ -125,6 +125,7 @@ in
       username.format = "[$user]($style)@";
       hostname.format = "[$hostname]($style) ";
       directory.truncation_length = 3; # at most 3 path segments
+      git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
       python.format = "[($virtualenv )]($style)"; # active venv name only
       # Show the exit code when a command fails, as a red [127].
       status = {
