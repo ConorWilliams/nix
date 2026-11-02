@@ -33,7 +33,6 @@ require('go-up').setup()
 -- mini.nvim: one repo of small modules (icons here; ai and surround in
 -- 50_editing.lua). Icons for file types, used by which-key and others.
 require('mini.icons').setup()
-MiniIcons.mock_nvim_web_devicons() -- for plugins that expect nvim-web-devicons
 
 -- Statusline at the bottom, kept light: mode, a red REC @q while a macro
 -- records (ui2 with cmdheight=0 doesn't show it), git branch, diagnostics
