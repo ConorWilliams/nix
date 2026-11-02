@@ -16,6 +16,7 @@ in
   xsession.windowManager.i3.config = {
     window.border = 5;
     floating.border = 5;
+    fonts.size = 16.0; # the bar's, 2 up from the Ubuntu layer's
   };
 
   # The bar's status line: just memory and the time (Ubuntu's default, for

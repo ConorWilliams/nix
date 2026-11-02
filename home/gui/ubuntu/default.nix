@@ -118,7 +118,7 @@ in
       # the notifications use (i3's default, monospace 8, is tiny on 4K).
       fonts = {
         names = [ config.programs.kitty.font.name ];
-        size = 14.0;
+        size = lib.mkDefault 14.0;
       };
       # The bar has its own font setting: Home Manager's default bar, with
       # that font.
