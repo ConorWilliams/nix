@@ -76,6 +76,10 @@ in
       elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/nix.sh" # single-user Nix (no sudo)
       fi
+      # Home Manager's variables, for commands over ssh (`ssh host cmd`,
+      # zzh's zellij), which only get this far. (Safe to load again:
+      # session-vars.nix.)
+      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
     '';
     # Runs only in interactive bash; first (Home Manager loads completion
     # at order 100 and fzf at 200), as fish sets those up for itself.
