@@ -94,21 +94,6 @@ in
     });
   };
 
-  # Home Manager's session variables (PATH additions, EDITOR, NH_FLAKE...)
-  # are loaded once and marked done, and everything started later inherits
-  # that mark, so a switch's new ones wouldn't reach running sessions (on
-  # Ubuntu desktops not even after logging out: home/gui/ubuntu loads them
-  # afresh at login). So fish (conf.d runs before config.fish, which loads
-  # them) reloads them when they're from another generation, recorded in
-  # __hm_session_vars. (Not every time: each load adds the PATH entries
-  # again.)
-  xdg.configFile."fish/conf.d/hm-session-vars.fish".text = /* fish */ ''
-    if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
-      set -e __HM_SESS_VARS_SOURCED
-      set -gx __hm_session_vars ${config.home.sessionVariablesPackage}
-    end
-  '';
-
   programs.fish = {
     enable = true;
     interactiveShellInit = /* fish */ ''
