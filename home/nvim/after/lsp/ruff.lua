@@ -6,6 +6,8 @@ end
 
 return {
   cmd = require('config.venv')('ruff', { 'server' }),
+  -- As in ty.lua: a uv workspace's top first, so its .venv's ruff is used.
+  root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   on_attach = function(client, buf)
     -- Leave hover to ty, which knows the types
     client.server_capabilities.hoverProvider = false
