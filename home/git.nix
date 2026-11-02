@@ -51,8 +51,50 @@ in
       tag.sort = "version:refname"; # v1.10 sorts after v1.9
       column.ui = "auto"; # list branches/tags in columns
       help.autocorrect = "prompt"; # `git stauts` -> "did you mean status?"
+
+      # Worktrees and their repo point at each other with relative paths, so
+      # a project folder still works after it's moved or copied.
+      worktree.useRelativePaths = true;
     };
   };
+
+  # `git clone-wt <url> [dir]`: a repo set up for worktrees. The repo itself
+  # (bare, no files) goes in <dir>/.bare, and each checkout is a folder
+  # beside it, starting with <dir>/<default branch>; lazygit then offers
+  # <dir>/<branch> for new ones. (A git subcommand runs as its own process,
+  # so it can't cd the shell: it prints where to go.)
+  home.packages = [
+    (pkgs.writeShellApplication {
+      name = "git-clone-wt";
+      runtimeInputs = [ config.programs.git.package ];
+      text = ''
+        if [[ $# -lt 1 ]]; then
+          echo "usage: git clone-wt <url> [dir]" >&2
+          exit 1
+        fi
+        url=$1
+        name=''${url##*[/:]}
+        dir=''${2:-''${name%.git}}
+
+        git clone --bare "$url" "$dir/.bare"
+        echo "gitdir: ./.bare" >"$dir/.git" # so git works from <dir> too
+        # A bare clone fetches no remote branches (origin/*) by default.
+        git -C "$dir" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        git -C "$dir" fetch --quiet origin
+
+        # It also copied every remote branch as a local one; keep only the
+        # default branch (tracking origin), as a normal clone would.
+        branch=$(git -C "$dir" symbolic-ref --short HEAD)
+        git -C "$dir" for-each-ref --format='%(refname:short)' refs/heads | while read -r b; do
+          [[ $b == "$branch" ]] || git -C "$dir" branch --quiet -D "$b"
+        done
+        git -C "$dir" branch --quiet --set-upstream-to="origin/$branch" "$branch"
+
+        git -C "$dir" worktree add --quiet "$branch" "$branch"
+        echo "Ready: cd $dir/$branch"
+      '';
+    })
+  ];
 
   # Pager for git diff/log/show/blame and `git add -p`.
   programs.delta = {

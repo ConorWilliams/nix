@@ -60,6 +60,11 @@ per machine.
 In zellij, Ctrl+arrows move between panes and nvim splits; the first press
 asks to allow the navigator plugin (answer `y`).
 
+For worktrees, `git clone-wt <url>` clones a repo as `<name>/.bare` plus a
+`<name>/<default branch>` checkout. lazygit (Worktrees tab: `2`, then `]`)
+then creates new ones as `<name>/<branch>`, and nvim follows when lazygit
+switches to one. Start lazygit inside a checkout, not in `<name>/` itself.
+
 ## SSH
 
 ### Straight into zellij
