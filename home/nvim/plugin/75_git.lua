@@ -39,8 +39,46 @@ local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs,
 -- lazygit in a float, exactly as in the terminal: its config (home/git.nix)
 -- is left alone, rather than snacks recolouring it to the colour scheme.
 Snacks.config.lazygit = { configure = false }
-map('<leader>gg', function() Snacks.lazygit({ cwd = Snacks.git.get_root() }) end, 'Lazygit')
-map('<leader>gG', function() Snacks.lazygit() end, 'Lazygit (cwd)')
+
+-- Switching worktree in lazygit moves nvim too: on quit, lazygit writes the
+-- folder it ended in to LAZYGIT_NEW_DIR_FILE. If that's another worktree,
+-- nvim saves this folder's session, closes its buffers, changes into the
+-- worktree and restores that one's session (persistence, 85_start.lua).
+local new_dir_file = vim.fn.tempname()
+local switch_worktree = function(dir)
+  if #vim.tbl_filter(function(b) return vim.bo[b].modified end, vim.api.nvim_list_bufs()) > 0 then
+    local choice =
+      vim.fn.confirm('Unsaved changes. Switch worktree?', '&Save all and switch\n&Stay')
+    if choice ~= 1 then return end
+    vim.cmd('wall')
+  end
+  local persistence = require('persistence')
+  persistence.save()
+  vim.cmd('silent %bwipeout')
+  vim.cmd.cd(dir)
+  persistence.load()
+  vim.notify('Worktree: ' .. vim.fn.fnamemodify(dir, ':~'))
+end
+local lazygit = function(cwd)
+  local from = Snacks.git.get_root(cwd)
+  vim.fn.delete(new_dir_file)
+  Snacks.lazygit({
+    cwd = cwd,
+    env = { LAZYGIT_NEW_DIR_FILE = new_dir_file },
+    win = {
+      -- (also runs when the float is only hidden: then there's no file yet)
+      on_close = function()
+        local ok, lines = pcall(vim.fn.readfile, new_dir_file)
+        local dir = ok and lines[1]
+        if dir and Snacks.git.get_root(dir) ~= from then
+          vim.schedule(function() switch_worktree(dir) end)
+        end
+      end,
+    },
+  })
+end
+map('<leader>gg', function() lazygit(Snacks.git.get_root()) end, 'Lazygit')
+map('<leader>gG', function() lazygit(vim.fn.getcwd()) end, 'Lazygit (cwd)')
 
 -- Pickers
 local pick = Snacks.picker
