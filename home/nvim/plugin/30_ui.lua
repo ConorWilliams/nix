@@ -6,9 +6,9 @@
 require('rose-pine').setup({
   variant = 'dawn',
   highlight_groups = {
-    -- Tab bar (below): the current file's tab in solid pine; unsaved
+    -- Tab bar (below): the current file's tab in solid foam; unsaved
     -- changes show as a * after the name, not as differently coloured tabs.
-    MiniTablineCurrent = { fg = 'base', bg = 'pine', bold = true },
+    MiniTablineCurrent = { fg = 'base', bg = 'foam', bold = true },
     MiniTablineModifiedCurrent = { link = 'MiniTablineCurrent' },
     MiniTablineModifiedVisible = { link = 'MiniTablineVisible' },
     MiniTablineModifiedHidden = { link = 'MiniTablineHidden' },
