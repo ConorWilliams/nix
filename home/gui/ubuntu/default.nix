@@ -146,6 +146,16 @@ in
     dbus-update-activation-environment --systemd --all
   '';
 
+  # Not GNOME's geoclue demo agent (an autostart app outside GNOME): it
+  # outlives logouts, so they never finish and the systemd user manager
+  # never restarts afresh (the GNOME session left in it above).
+  xdg.configFile."autostart/geoclue-demo-agent.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Geoclue Demo agent
+    Hidden=true
+  '';
+
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
   home.packages = with pkgs; [
     dex # starts the desktop's autostart apps (startup line below)
