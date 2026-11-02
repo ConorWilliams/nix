@@ -113,6 +113,13 @@ in
       description = "zellij on a host over ssh: new session, or join/create one";
       wraps = "ssh"; # complete hostnames like ssh
       body = /* fish */ ''
+        # Inside a desk's zellij: connect from a kitty window of its own, so
+        # the server's zellij isn't nested in this one (whose Alt-g would
+        # catch the server's). There it runs again, outside zellij.
+        if set -q ZELLIJ; and set -q DISPLAY; and command -q kitty
+          kitty --detach fish -c (string join ' ' -- zzh (string escape -- $argv))
+          return
+        end
         if set -q argv[2]
           ssh -t $argv[1] zellij attach -c $argv[2]
         else
@@ -125,6 +132,13 @@ in
       description = "zellij on a host over mosh: new session, or join/create one";
       wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
       body = /* fish */ ''
+        # Inside a desk's zellij: connect from a kitty window of its own, so
+        # the server's zellij isn't nested in this one (whose Alt-g would
+        # catch the server's). There it runs again, outside zellij.
+        if set -q ZELLIJ; and set -q DISPLAY; and command -q kitty
+          kitty --detach fish -c (string join ' ' -- zosh (string escape -- $argv))
+          return
+        end
         if set -q argv[2]
           mosh $argv[1] -- zellij attach -c $argv[2]
         else
