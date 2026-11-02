@@ -44,7 +44,9 @@ report() {
   path=$(grep '^PATH=' <<<"$envs" | cut -d= -f2-)
   data=$(grep '^XDG_DATA_DIRS=' <<<"$envs" | cut -d= -f2-)
   local problems=()
-  d=$(tr : '\n' <<<"$path" | sort | uniq -d | tr '\n' ' ')
+  # (not /snap/bin: Ubuntu's own environment.d, 990-snapd.conf, adds it to
+  # a PATH from /etc/environment that has it already)
+  d=$(tr : '\n' <<<"$path" | grep -vx /snap/bin | sort | uniq -d | tr '\n' ' ')
   [[ -n $d ]] && problems+=("PATH repeats: $d")
   [[ $path == "$HOME/.local/bin:$first"* ]] || problems+=("PATH starts: ${path:0:100}")
   [[ :$path: == *":$HOME/.nix-profile/bin:"* ]] || problems+=("no ~/.nix-profile/bin on PATH")
