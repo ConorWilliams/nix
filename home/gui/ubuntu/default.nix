@@ -51,6 +51,11 @@ in
   # README), which would also print a setup notice on every switch.
   targets.genericLinux.gpu.enable = false;
 
+  # Skip GNOME's first-login wizard for a new account: the first login
+  # (GNOME, before picking i3) is cut short, leaving it as a failed unit
+  # that every switch then reports.
+  xdg.configFile."gnome-initial-setup-done".text = "yes";
+
   # Desktop notifications (notify-send, Slack...): nothing shows them under
   # i3, so dunst from Nix, started by the first notification.
   services.dunst =
