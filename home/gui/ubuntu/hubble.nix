@@ -1,5 +1,13 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
+let
+  # Called by inputplug (below) as: <event> <device id> <device type> <name>
+  usKeyboard = pkgs.writeShellScript "us-keyboard" /* bash */ ''
+    if [ "$1 $3" = "XIDeviceEnabled XISlaveKeyboard" ]; then
+      setxkbmap -layout us -model pc104
+    fi
+  '';
+in
 {
   imports = [ ./. ]; # the Ubuntu layer.
 
@@ -16,10 +24,12 @@
       ];
       notification = false;
     }
-    # US keyboard here; the machine's default (for all accounts) is UK.
+    # US keyboard here; the machine's default (for all accounts) is UK, and
+    # X gives that to every keyboard it (re)connects, e.g. when the monitors
+    # (and their USB hubs) wake from sleep. So inputplug sets US each time a
+    # keyboard is enabled, and for those already there at login (-0).
     {
-      command = "setxkbmap -layout us -model pc104";
-      always = true;
+      command = "${pkgs.inputplug}/bin/inputplug -0 -c ${usKeyboard}";
       notification = false;
     }
     # Speed up the Logitech mouse.
