@@ -9,7 +9,6 @@ conform.setup({
     lua = { 'stylua' }, -- reads nvim/.stylua.toml
     nix = { 'nixfmt' },
     sh = { 'shfmt' },
-    bash = { 'shfmt' },
     fish = { 'fish_indent' },
   },
   default_format_opts = { lsp_format = 'fallback' },
