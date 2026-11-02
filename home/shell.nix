@@ -24,7 +24,10 @@ let
     '';
 
   # zzh/zosh: zellij on a host (`zzh host [session]`), over ssh or mosh;
-  # only how they connect differs.
+  # only how they connect differs. Not from inside zellij: the host's
+  # zellij would be nested in this one, which catches its keys (Alt-g
+  # locks this one, not the host's). Machines with a screen open a window
+  # of their own for it instead (home/gui).
   zellijOn =
     {
       name,
@@ -35,28 +38,13 @@ let
     {
       inherit description wraps;
       body = /* fish */ ''
-        # Inside a desk's zellij: connect from a kitty window of its own, so
-        # the server's zellij isn't nested in this one (whose Alt-g would
-        # catch the server's). There it runs again, outside zellij. (zellij's
-        # variables are cleared there, and ZZH_OWN_WINDOW stops it ever
-        # opening another window: it would otherwise inherit ZELLIJ and loop.)
-        if set -q ZELLIJ; and not set -q ZZH_OWN_WINDOW; and set -q DISPLAY; and command -q kitty
-          env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ZZH_OWN_WINDOW=1 \
-            kitty --detach fish -c (string join ' ' -- ${name} (string escape -- $argv))
-          return
+        if set -q ZELLIJ
+          echo "${name}: not from inside zellij (it would nest); use a terminal outside it" >&2
+          return 1
         end
-
         set -l zellij zellij # a new session,
         set -q argv[2]; and set zellij zellij attach -c $argv[2] # or join/create one
         ${connect}
-
-        # In its own window, an error (e.g. no zellij on the host) would close
-        # it before it could be read: wait for Enter first.
-        set -l code $status
-        if set -q ZZH_OWN_WINDOW; and test $code -ne 0
-          read -P "${name}: exited with status $code; press Enter to close " -l reply
-        end
-        return $code
       '';
     };
 
