@@ -16,7 +16,7 @@ let
   # need their own shell for the dev environment).
   toFish =
     { commandVar, isLogin }:
-    ''
+    /* bash */ ''
       if [[ $(ps -o comm= -p $PPID) != *fish* && -z ''${${commandVar}:-} && -z ''${IN_NIX_SHELL:-} ]]; then
         ${isLogin} && exec ${config.programs.fish.package}/bin/fish --login
         exec ${config.programs.fish.package}/bin/fish
@@ -33,7 +33,7 @@ in
   programs.bash = {
     enable = true;
     # Runs in every bash, before the "not interactive? stop here" check.
-    bashrcExtra = ''
+    bashrcExtra = /* bash */ ''
       if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh # multi-user Nix
       elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
@@ -68,12 +68,12 @@ in
   # - fish (conf.d runs before config.fish, which loads them): when they're
   #   from another generation, i.e. after a switch. (Not every time: each
   #   load adds the PATH entries again.)
-  home.file.".xprofile".text = ''
+  home.file.".xprofile".text = /* bash */ ''
     unset __HM_SESS_VARS_SOURCED
     . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
     export __hm_session_vars=${config.home.sessionVariablesPackage}
   '';
-  xdg.configFile."fish/conf.d/hm-session-vars.fish".text = ''
+  xdg.configFile."fish/conf.d/hm-session-vars.fish".text = /* fish */ ''
     if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
       set -e __HM_SESS_VARS_SOURCED
       set -gx __hm_session_vars ${config.home.sessionVariablesPackage}
@@ -82,7 +82,7 @@ in
 
   programs.fish = {
     enable = true;
-    interactiveShellInit = ''
+    interactiveShellInit = /* fish */ ''
       set -g fish_greeting # no startup banner
       fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
       # Vim keys: starts in insert mode, Esc for normal mode. The cursor
@@ -100,7 +100,7 @@ in
     functions.zzh = {
       description = "zellij on a host over ssh: new session, or join/create one";
       wraps = "ssh"; # complete hostnames like ssh
-      body = ''
+      body = /* fish */ ''
         if set -q argv[2]
           ssh -t $argv[1] zellij attach -c $argv[2]
         else
@@ -112,7 +112,7 @@ in
     functions.zosh = {
       description = "zellij on a host over mosh: new session, or join/create one";
       wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
-      body = ''
+      body = /* fish */ ''
         if set -q argv[2]
           mosh $argv[1] -- zellij attach -c $argv[2]
         else

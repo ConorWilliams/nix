@@ -10,7 +10,7 @@ let
   # word jumps (fish has vim keys for that: w, b...).
   navigation =
     let
-      bind = key: dir: ''
+      bind = key: dir: /* kdl */ ''
         bind "Ctrl ${key}" {
           MessagePlugin "file:${inputs.vim-zellij-navigator}" {
             name "move_focus";
@@ -31,7 +31,7 @@ let
 
   # The compact bar's key-hint tooltip (F1 also toggles it by hand). This
   # adds to zellij's default plugin list rather than replacing it.
-  compactBar = ''
+  compactBar = /* kdl */ ''
     plugins {
       compact-bar location="zellij:compact-bar" {
         tooltip "F1"

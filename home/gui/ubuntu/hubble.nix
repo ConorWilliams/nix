@@ -24,7 +24,7 @@
     }
     # Speed up the Logitech mouse.
     {
-      command = ''xinput --set-prop "Logitech USB Receiver Mouse" "libinput Accel Speed" 1'';
+      command = /* bash */ ''xinput --set-prop "Logitech USB Receiver Mouse" "libinput Accel Speed" 1'';
       always = true;
       notification = false;
     }

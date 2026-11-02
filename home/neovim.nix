@@ -107,7 +107,7 @@ in
 
   # rumdl (Markdown lint, in nvim): its list-item-spacing rule would
   # insist on one blank-line style per list.
-  xdg.configFile."rumdl/rumdl.toml".text = ''
+  xdg.configFile."rumdl/rumdl.toml".text = /* toml */ ''
     [global]
     disable = ["MD076"]
   '';
