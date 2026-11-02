@@ -38,7 +38,8 @@ local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs,
 
 -- lazygit in a float, exactly as in the terminal: its config (home/git.nix)
 -- is left alone, rather than snacks recolouring it to the colour scheme.
-Snacks.config.lazygit = { configure = false }
+-- The float fills the whole screen, without a border (snacks' is 90%).
+Snacks.config.lazygit = { configure = false, win = { width = 0, height = 0, border = 'none' } }
 
 -- Switching worktree in lazygit moves nvim too: on quit, lazygit writes the
 -- folder it ended in to LAZYGIT_NEW_DIR_FILE. If that's another worktree,
