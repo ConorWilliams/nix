@@ -101,7 +101,7 @@ in
       };
     };
 
-  # Each Alt+Enter terminal is its own zellij session (i3 above), so on the
+  # Each Alt+Enter terminal is its own zellij session (i3, below), so on the
   # desks closing the window ends the session, and ended ones aren't kept
   # to resurrect: no pile of sessions. (Not on servers, where a dropped ssh
   # connection must leave the session running.)
