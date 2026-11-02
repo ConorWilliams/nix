@@ -20,6 +20,7 @@ My terminal environment, managed with Nix + Home Manager.
 ```sh
 ├── flake.nix                # users, hosts -> layer
 ├── bootstrap.sh
+├── check-env.sh             # how shells and the desktop get their variables
 ├── home
 │   ├── default.nix          # server layer: every machine; all CLI tools
 │   ├── shell.nix            #   fish (bash/zsh hand over to it), prompt, history
@@ -58,6 +59,7 @@ nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump only claude
 nix fmt                                    # format all .nix files
 nix flake check --all-systems --no-build   # check every config, Mac too
+./check-env.sh --live                      # shells' and the desktop's PATH etc.
 ```
 
 nvim's plugins come from nixpkgs (two from flake inputs), so
