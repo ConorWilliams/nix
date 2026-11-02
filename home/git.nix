@@ -107,9 +107,9 @@ in
       light = true;
       # Lines git marks as moved (diff.colorMoved) arrive in git's own bold
       # magenta / cyan, which delta would show unstyled; give them soft
-      # backgrounds instead: lavender where they left, light blue where
-      # they arrived.
-      map-styles = "bold purple => syntax #efe0ff, bold cyan => syntax #dff0ff";
+      # backgrounds instead: yellow where they left, light blue where they
+      # arrived.
+      map-styles = "bold purple => syntax #fff3c4, bold cyan => syntax #dff0ff";
     };
   };
 
