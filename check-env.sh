@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Checks how this machine's shells and desktop get their environment, after
 # a switch (or a login): each way in should end up with Home Manager's
-# variables, PATH without repeats, ~/.local/bin and kitty's folder ahead of
-# Nix's, and Nix's data folders ahead of Ubuntu's. Run it by hand; it
-# changes nothing.
+# variables, PATH without repeats, ~/.local/bin (and on the desks kitty's
+# folder) ahead of Nix's, and Nix's data folders ahead of Ubuntu's. Run it
+# by hand; it changes nothing.
 #
 #   ./check-env.sh          simulated logins and shells
 #   ./check-env.sh --live   also the running desktop (only meaningful after
@@ -15,6 +15,20 @@ base=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/us
 fish=$HOME/.nix-profile/bin/fish
 login='. /etc/profile; . ~/.profile'
 failed=0
+
+# kitty's folder comes second where there is one (the desks).
+first=
+[[ -d $HOME/.local/kitty.app/bin ]] && first=$HOME/.local/kitty.app/bin:
+
+# nixFirst <XDG_DATA_DIRS>: Nix's data folders come before Ubuntu's (or it's
+# unset). Trailing slashes (/usr/share/) don't count.
+nixFirst() {
+  local dirs
+  dirs=:$(sed 's|/*:|:|g; s|/*$||' <<<"$1"):
+  [[ $dirs == :: ]] && return 0
+  # (what follows Nix's entry, from its closing colon, has Ubuntu's)
+  [[ $dirs == *":$HOME/.nix-profile/share:"* && ${dirs#*":$HOME/.nix-profile/share"} == *":/usr/share:"* ]]
+}
 
 fail() {
   failed=1
@@ -32,9 +46,9 @@ report() {
   local problems=()
   d=$(tr : '\n' <<<"$path" | sort | uniq -d | tr '\n' ' ')
   [[ -n $d ]] && problems+=("PATH repeats: $d")
-  [[ $path == "$HOME/.local/bin:$HOME/.local/kitty.app/bin:"* ]] || problems+=("PATH starts: ${path:0:100}")
+  [[ $path == "$HOME/.local/bin:$first"* ]] || problems+=("PATH starts: ${path:0:100}")
   [[ :$path: == *":$HOME/.nix-profile/bin:"* ]] || problems+=("no ~/.nix-profile/bin on PATH")
-  if [[ -n $data && :$data: != *":$HOME/.nix-profile/share:"*":/usr/share:"* ]]; then
+  if ! nixFirst "$data"; then
     problems+=("XDG_DATA_DIRS: Nix's after Ubuntu's: ${data:0:100}")
   fi
   grep -q '^NH_FLAKE=.' <<<"$envs" || problems+=("NH_FLAKE missing")
@@ -65,8 +79,10 @@ if [[ ${1-} == --live ]]; then
     grep -xE '__HM_SESS_VARS_SOURCED|__ETC_PROFILE_NIX_SOURCED|SESSION_MANAGER|GNOME_DESKTOP_SESSION_ID' |
     tr '\n' ' ')
   desktop=$(systemctl --user show-environment | grep '^XDG_CURRENT_DESKTOP=')
-  if [[ -n $leftovers || $desktop != XDG_CURRENT_DESKTOP=i3 ]]; then
-    fail "systemd user manager" "leftovers: ${leftovers:-none}" "$desktop"
+  # (what services it starts, dunst and the portals, find apps and icons in)
+  data=$(systemctl --user show-environment | grep '^XDG_DATA_DIRS=' | cut -d= -f2-)
+  if [[ -n $leftovers || $desktop != XDG_CURRENT_DESKTOP=i3 ]] || ! nixFirst "$data"; then
+    fail "systemd user manager" "leftovers: ${leftovers:-none}" "$desktop" "XDG_DATA_DIRS=${data:0:100}"
   else
     echo "ok    systemd user manager"
   fi
