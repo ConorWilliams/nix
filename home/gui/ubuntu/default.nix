@@ -1,5 +1,6 @@
 {
   config,
+  options,
   lib,
   pkgs,
   inputs,
@@ -105,6 +106,17 @@ in
     enable = true;
     config = {
       modifier = mod;
+      # The bar's (and title bars') font: the terminal's, at the size rofi and
+      # the notifications use (i3's default, monospace 8, is tiny on 4K).
+      fonts = {
+        names = [ config.programs.kitty.font.name ];
+        size = 14.0;
+      };
+      # The bar has its own font setting: Home Manager's default bar, with
+      # that font.
+      bars =
+        map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
+          (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
       terminal = kitty;
       menu = "rofi -show run";
       # Borders only, no title bar on top of each window.
