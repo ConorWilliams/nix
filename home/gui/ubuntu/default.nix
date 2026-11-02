@@ -130,20 +130,6 @@ in
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
-  # Desktop login (/etc/gdm3/Xsession reads this after ~/.profile, before
-  # i3): load Home Manager's session variables if ~/.profile didn't, so
-  # i3 and all it launches get them. ~/.profile skips them while they're
-  # marked loaded, and the desktop can keep that mark across logouts (the
-  # systemd user manager outlives them, and holds it) while resetting the
-  # variables. Only a stale or missing record of what was loaded
-  # (home/session-vars.nix) means reload, so they're never loaded twice.
-  home.file.".xprofile".text = /* bash */ ''
-    if [ "''${__hm_session_vars-}" != ${config.hmSessionVarsStamp} ]; then
-      unset __HM_SESS_VARS_SOURCED
-      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
-    fi
-  '';
-
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
   home.packages = with pkgs; [
     dex # starts the desktop's autostart apps (startup line below)

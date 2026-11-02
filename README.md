@@ -23,7 +23,7 @@ My terminal environment, managed with Nix + Home Manager.
 ├── home
 │   ├── default.nix          # server layer: every machine; all CLI tools
 │   ├── shell.nix            #   fish (bash/zsh hand over to it), prompt, history
-│   ├── session-vars.nix     #   when shells reload Home Manager's variables
+│   ├── session-vars.nix     #   Home Manager's variables, safe to load again
 │   ├── git.nix              #   git, delta, lazygit, git clone-wt
 │   ├── zellij.nix, zellij/  #   zellij and its keys
 │   ├── neovim.nix, nvim/    #   nvim: packages from Nix, config in Lua
