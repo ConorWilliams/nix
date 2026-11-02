@@ -89,6 +89,26 @@ in
     # Calculator shortcut
     functions.c = "math $argv";
 
+    # sudo searches its own PATH (secure_path), without ~/.nix-profile/bin,
+    # so `sudo dust` isn't found: give it the program's full path from this
+    # shell's PATH. Starting with an option (sudo -u ...), or not a program
+    # here: passed on as typed.
+    functions.sudo = {
+      description = "sudo, finding programs on this shell's PATH (Nix's too)";
+      wraps = "sudo";
+      body = /* fish */ ''
+        set -l exe
+        if set -q argv[1]; and not string match -q -- '-*' $argv[1]
+          set exe (command -s -- $argv[1])
+        end
+        if set -q exe[1]
+          command sudo $exe $argv[2..]
+        else
+          command sudo $argv
+        end
+      '';
+    };
+
     functions.zzh = {
       description = "zellij on a host over ssh: new session, or join/create one";
       wraps = "ssh"; # complete hostnames like ssh
