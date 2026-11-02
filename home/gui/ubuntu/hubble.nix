@@ -33,6 +33,9 @@ in
         position = 1;
         settings = {
           format = "%used | %available";
+          # used = total - available. The default also counts the kernel's
+          # reclaimable cache as used (60 of "71 GiB used" when 15 really were).
+          memory_used_method = "memavailable";
           threshold_degraded = "1G";
           format_degraded = "MEMORY < %available";
         };
