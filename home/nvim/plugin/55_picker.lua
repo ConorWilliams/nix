@@ -157,10 +157,7 @@ map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
 map('<leader>uC', pick.colorschemes, 'Colour schemes')
 
-map('<leader>uS', function()
-  vim.g.snacks_scroll = vim.g.snacks_scroll == false
-  vim.notify('Smooth scrolling: ' .. (vim.g.snacks_scroll and 'on' or 'off'))
-end, 'Toggle smooth scrolling')
+Snacks.toggle.scroll():map('<leader>uS')
 
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')

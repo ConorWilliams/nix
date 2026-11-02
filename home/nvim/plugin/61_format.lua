@@ -33,7 +33,8 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 })
 
 vim.keymap.set({ 'n', 'x' }, '<leader>cf', conform.format, { desc = 'Format' })
-vim.keymap.set('n', '<leader>uf', function()
-  vim.g.autoformat = vim.g.autoformat == false
-  vim.notify('Format on save: ' .. (vim.g.autoformat and 'on' or 'off'))
-end, { desc = 'Toggle format on save' })
+Snacks.toggle({
+  name = 'Format on save',
+  get = function() return vim.g.autoformat ~= false end,
+  set = function(on) vim.g.autoformat = on end,
+}):map('<leader>uf')

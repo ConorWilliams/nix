@@ -39,10 +39,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- Inline type hints (e.g. ty's inferred types): on; <leader>uh toggles.
 vim.lsp.inlay_hint.enable()
-vim.keymap.set('n', '<leader>uh', function()
-  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-  vim.notify('Inlay hints: ' .. (vim.lsp.inlay_hint.is_enabled() and 'on' or 'off'))
-end, { desc = 'Toggle inlay hints' })
+-- (all buffers: snacks' own inlay_hints toggle is per buffer)
+Snacks.toggle({
+  name = 'Inlay hints',
+  get = function() return vim.lsp.inlay_hint.is_enabled() end,
+  set = function(on) vim.lsp.inlay_hint.enable(on) end,
+}):map('<leader>uh')
 
 -- Language servers' progress (indexing, loading the workspace...) as
 -- progress messages, which ui2 shows in its message window (from :h
