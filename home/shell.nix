@@ -57,6 +57,20 @@ in
     });
   };
 
+  # Home Manager's session variables (EDITOR, NH_FLAKE, fzf's...) are
+  # loaded once per login and marked done, and that mark is inherited: by
+  # every terminal, and on Ubuntu even by later logins (the desktop keeps
+  # it in the systemd user manager, which outlives them). So a variable a
+  # switch adds wouldn't reach fish until a reboot. Instead, fish reloads
+  # them when they come from another generation (conf.d runs before
+  # config.fish, which loads them).
+  xdg.configFile."fish/conf.d/hm-session-vars.fish".text = ''
+    if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
+      set -e __HM_SESS_VARS_SOURCED
+      set -gx __hm_session_vars ${config.home.sessionVariablesPackage}
+    end
+  '';
+
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
