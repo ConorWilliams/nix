@@ -68,6 +68,13 @@ in
   # at unpinned channels, sets a TERMINFO_DIRS for systemd's services that
   # none here use (and that names a folder that doesn't exist), and
   # installs GPU drivers for Nix programs (GUI apps stay with apt; README).
+  # TODO: once Home Manager PR #9925 is merged (genericLinux stops sourcing
+  # nix.sh: https://github.com/nix-community/home-manager/pull/9925), drop
+  # xdg.systemDirs.data and XCURSOR_PATH below for
+  # `targets.genericLinux.enable = true`, overriding its NIX_PATH (it can't
+  # be unset; the flake's pinned nixpkgs instead:
+  # `systemd.user.sessionVariables.NIX_PATH = lib.mkForce "nixpkgs=flake:nixpkgs"`)
+  # and turning off its GPU drivers (`targets.genericLinux.gpu.enable = false`).
   xdg.systemDirs.data = [
     "\${NIX_STATE_DIR:-/nix/var/nix}/profiles/default/share"
     "${config.home.profileDirectory}/share"
