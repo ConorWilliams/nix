@@ -76,3 +76,7 @@ map('n', '<leader><tab>o', '<cmd>tabonly<cr>', { desc = 'Close other tabs' })
 map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit all' })
 map('n', '<leader>ui', vim.show_pos, { desc = 'Inspect highlight under cursor' })
 map('n', '<leader>uI', '<cmd>InspectTree<cr>', { desc = 'Inspect syntax tree' })
+map('n', '<leader>us', function()
+  vim.wo.spell = not vim.wo.spell
+  vim.notify('Spelling: ' .. (vim.wo.spell and 'on' or 'off'))
+end, { desc = 'Toggle spelling' })
