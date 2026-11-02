@@ -44,7 +44,17 @@ let
     };
 in
 {
-  imports = [ ../. ]; # the GUI layer
+  imports = [
+    ../. # the GUI layer
+    # The i3 bar's font size, set per machine like desktop.fontSize.
+    {
+      options.desktop.barFontSize = lib.mkOption {
+        type = lib.types.number;
+        default = 14;
+        description = "Font size of the i3 bar.";
+      };
+    }
+  ];
 
   # Non-NixOS Linux: lets the desktop find apps and icons installed by Nix,
   # and programs find Ubuntu's terminfo too.
