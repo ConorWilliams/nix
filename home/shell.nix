@@ -57,13 +57,22 @@ in
     });
   };
 
-  # Home Manager's session variables (EDITOR, NH_FLAKE, fzf's...) are
-  # loaded once per login and marked done, and that mark is inherited: by
-  # every terminal, and on Ubuntu even by later logins (the desktop keeps
-  # it in the systemd user manager, which outlives them). So a variable a
-  # switch adds wouldn't reach fish until a reboot. Instead, fish reloads
-  # them when they come from another generation (conf.d runs before
-  # config.fish, which loads them).
+  # Home Manager's session variables (PATH additions, EDITOR, NH_FLAKE...)
+  # are loaded once and marked done, and everything started later inherits
+  # that mark. On Ubuntu desktops it even outlives logouts (the systemd user
+  # manager keeps it), so they'd be skipped until a reboot. Two places load
+  # them afresh, recording which generation they loaded (the same record):
+  # - desktop login (~/.xprofile, read after ~/.profile, before i3): always,
+  #   as the login resets PATH but keeps the mark; so i3 and all it
+  #   launches get them;
+  # - fish (conf.d runs before config.fish, which loads them): when they're
+  #   from another generation, i.e. after a switch. (Not every time: each
+  #   load adds the PATH entries again.)
+  home.file.".xprofile".text = ''
+    unset __HM_SESS_VARS_SOURCED
+    . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+    export __hm_session_vars=${config.home.sessionVariablesPackage}
+  '';
   xdg.configFile."fish/conf.d/hm-session-vars.fish".text = ''
     if test "$__hm_session_vars" != ${config.home.sessionVariablesPackage}
       set -e __HM_SESS_VARS_SOURCED
