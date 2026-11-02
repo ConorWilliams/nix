@@ -16,6 +16,12 @@
       ];
       notification = false;
     }
+    # US keyboard here; the machine's default (for all accounts) is UK.
+    {
+      command = "setxkbmap -layout us -model pc104";
+      always = true;
+      notification = false;
+    }
     # Speed up the Logitech mouse.
     {
       command = ''xinput --set-prop "Logitech USB Receiver Mouse" "libinput Accel Speed" 1'';
