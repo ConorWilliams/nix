@@ -204,7 +204,7 @@ in
       # Enter runs the picked command straight away; Tab puts it in the
       # prompt to edit first.
       enter_accept = true;
-      theme.name = "rose-pine-dawn"; # from themes below
+      theme.name = "rose-pine-dawn"; # (themes, below)
 
       # Background daemon, started by the shell when needed (no service).
       # Threads needs it; it also syncs every 5 minutes on its own.
@@ -220,14 +220,15 @@ in
         capture_tools = true; # include tool input/output and edit diffs
       };
     };
+    # Rose Pine Dawn for the search UI: the official port's theme file.
+    themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
   };
 
   # `z foo` jumps to the most-used directory matching foo; `zi` picks with fzf.
   programs.zoxide.enable = true;
 
-  # Rose Pine Dawn for fish's syntax colours and atuin's search UI: the
-  # official ports' theme files, selected above.
+  # Rose Pine Dawn for fish's syntax colours: the official port's theme
+  # file, selected above.
   xdg.configFile."fish/themes/Rosé Pine Dawn.theme".source =
     "${inputs.rose-pine-fish}/themes/Rosé Pine Dawn.theme";
-  programs.atuin.themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-atuin}/dist/rose-pine-dawn.toml";
 }
