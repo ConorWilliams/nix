@@ -13,14 +13,13 @@ in
 
   # Thicker window borders than the Ubuntu layer's 2px: on these 4K screens
   # the focused window's thin outline is easy to miss.
-  # Terminal font size: what reads well on these screens (the GUI layer's
-  # default is 20).
-  programs.kitty.font.size = 16;
+  # Font sizes (home/gui/default.nix): what reads well on these screens.
+  desktop.fontSize = 16;
+  desktop.barFontSize = 16;
 
   xsession.windowManager.i3.config = {
     window.border = 5;
     floating.border = 5;
-    fonts.size = 16.0; # the bar's, 2 up from the Ubuntu layer's
   };
 
   # i3 startup list (added to the Ubuntu layer's).

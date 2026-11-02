@@ -11,7 +11,7 @@ in
 {
   imports = [ ./. ]; # the Ubuntu layer.
 
-  programs.kitty.font.size = 18; # smaller screen.
+  desktop.fontSize = 18; # smaller screen (home/gui/default.nix)
 
   xsession.windowManager.i3.config.startup = [
     (touchpad "Scrolling Pixel Distance" "30") # half the default scroll speed

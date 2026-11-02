@@ -10,7 +10,7 @@
 let
   mod = "Mod1"; # Alt.
   lock = "i3lock -c 000000"; # black screen
-  font = "${config.programs.kitty.font.name} 14"; # rofi and notifications
+  font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
   # Rose Pine Dawn notification colours from the official mako port (mako
   # is Wayland-only; dunst has only a community port): its key=value
@@ -123,11 +123,11 @@ in
     enable = true;
     config = {
       modifier = mod;
-      # The bar's (and title bars') font: the terminal's, at the size rofi and
-      # the notifications use (i3's default, monospace 8, is tiny on 4K).
+      # The bar's (and title bars') font: the terminal's, at the machine's
+      # bar size (i3's default, monospace 8, is tiny on 4K).
       fonts = {
         names = [ config.programs.kitty.font.name ];
-        size = lib.mkDefault 14.0;
+        size = config.desktop.barFontSize * 1.0; # (i3 wants a decimal)
       };
       # The bar has its own font setting: Home Manager's default bar, with
       # that font.
