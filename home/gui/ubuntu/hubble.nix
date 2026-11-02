@@ -19,34 +19,6 @@ in
     fonts.size = 16.0; # the bar's, 2 up from the Ubuntu layer's
   };
 
-  # The bar's status line: just memory and the time (Ubuntu's default, for
-  # laptops, also shows Wi-Fi, battery, IPv6, network, disk and load).
-  programs.i3status = {
-    enable = true;
-    enableDefault = false;
-    general = {
-      colors = true;
-      interval = 5;
-    };
-    modules = {
-      memory = {
-        position = 1;
-        settings = {
-          format = "%used | %available";
-          # used = total - available. The default also counts the kernel's
-          # reclaimable cache as used (60 of "71 GiB used" when 15 really were).
-          memory_used_method = "memavailable";
-          threshold_degraded = "10%"; # of total memory: under 10% available
-          format_degraded = "MEMORY < %available";
-        };
-      };
-      "tztime local" = {
-        position = 2;
-        settings.format = "%Y-%m-%d %a %H:%M"; # 2026-11-02 Mon 14:52
-      };
-    };
-  };
-
   # i3 startup list (added to the Ubuntu layer's).
   xsession.windowManager.i3.config.startup = [
     # The three desk monitors, as set up in arandr: all portrait, the 4K in
