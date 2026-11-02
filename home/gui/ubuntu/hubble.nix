@@ -11,6 +11,13 @@ in
 {
   imports = [ ./. ]; # the Ubuntu layer.
 
+  # Thicker window borders than the Ubuntu layer's 2px: on these 4K screens
+  # the focused window's thin outline is easy to miss.
+  xsession.windowManager.i3.config = {
+    window.border = 5;
+    floating.border = 5;
+  };
+
   # i3 startup list (added to the Ubuntu layer's).
   xsession.windowManager.i3.config.startup = [
     # The three desk monitors, as set up in arandr: all portrait, the 4K in
