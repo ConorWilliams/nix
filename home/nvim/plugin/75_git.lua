@@ -43,7 +43,8 @@ Snacks.config.lazygit = { configure = false }
 -- Switching worktree in lazygit moves nvim too: on quit, lazygit writes the
 -- folder it ended in to LAZYGIT_NEW_DIR_FILE. If that's another worktree,
 -- nvim saves this folder's session, closes its buffers, changes into the
--- worktree and restores that one's session (persistence, 85_start.lua).
+-- worktree and restores that one's session (persistence, 85_start.lua), or
+-- shows the start screen if it has none.
 local new_dir_file = vim.fn.tempname()
 local switch_worktree = function(dir)
   if #vim.tbl_filter(function(b) return vim.bo[b].modified end, vim.api.nvim_list_bufs()) > 0 then
@@ -54,9 +55,20 @@ local switch_worktree = function(dir)
   end
   local persistence = require('persistence')
   persistence.save()
+  vim.cmd('silent! %argdelete') -- (sessions save it: `nvim file` would follow along)
   vim.cmd('silent %bwipeout')
   vim.cmd.cd(dir)
   persistence.load()
+  local restored = vim.tbl_filter(
+    function(b) return vim.bo[b].buflisted and vim.api.nvim_buf_get_name(b) ~= '' end,
+    vim.api.nvim_list_bufs()
+  )
+  if #restored == 0 then
+    Snacks.dashboard.open({
+      buf = vim.api.nvim_get_current_buf(),
+      win = vim.api.nvim_get_current_win(),
+    })
+  end
   vim.notify('Worktree: ' .. vim.fn.fnamemodify(dir, ':~'))
 end
 local lazygit = function(cwd)

@@ -43,8 +43,13 @@ Snacks.config.dashboard = {
         key = 's',
         desc = 'Restore Session',
         action = persistence.load,
-        -- only when this folder has a saved session
-        enabled = vim.fn.filereadable(persistence.current()) == 1,
+        -- only when this folder has a saved session (for this branch, or
+        -- the folder's own, which load() falls back to); checked each time
+        -- the screen opens, as a worktree switch changes the folder
+        enabled = function()
+          return vim.fn.filereadable(persistence.current()) == 1
+            or vim.fn.filereadable(persistence.current({ branch = false })) == 1
+        end,
       },
       { icon = vim.fn.nr2char(0xf426) .. ' ', key = 'q', desc = 'Quit', action = ':qa' },
     },
