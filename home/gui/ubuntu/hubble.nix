@@ -18,6 +18,31 @@ in
     floating.border = 5;
   };
 
+  # The bar's status line: just memory and the time (Ubuntu's default, for
+  # laptops, also shows Wi-Fi, battery, IPv6, network, disk and load).
+  programs.i3status = {
+    enable = true;
+    enableDefault = false;
+    general = {
+      colors = true;
+      interval = 5;
+    };
+    modules = {
+      memory = {
+        position = 1;
+        settings = {
+          format = "%used | %available";
+          threshold_degraded = "1G";
+          format_degraded = "MEMORY < %available";
+        };
+      };
+      "tztime local" = {
+        position = 2;
+        settings.format = "%a %-d %b %H:%M"; # Mon 2 Nov 14:52
+      };
+    };
+  };
+
   # i3 startup list (added to the Ubuntu layer's).
   xsession.windowManager.i3.config.startup = [
     # The three desk monitors, as set up in arandr: all portrait, the 4K in
