@@ -2,7 +2,9 @@
   description = "Conor's terminal environment";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # nixpkgs-unstable, not nixos-unstable: no NixOS here, and the nixos-*
+    # branches advance without waiting for the Mac's (darwin) builds.
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager";
