@@ -192,6 +192,11 @@ in
       keybindings = lib.mkOptionDefault {
         "${mod}+o" = "exec kitty yazi";
         "${mod}+n" = "exec ${lock}";
+        # Exit ends the whole login, not just i3: otherwise programs it
+        # started that outlive it (applets, a desk's zellij) keep the login
+        # open, and the systemd user manager never restarts afresh.
+        "${mod}+Shift+e" =
+          "exec i3-nagbar -t warning -m 'Log out?' -B 'Yes' 'loginctl terminate-session $XDG_SESSION_ID'";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
         # Volume, mute and brightness keys (under GNOME its settings daemon
