@@ -45,7 +45,7 @@ if vim.fn.executable('zk') == 1 then
   })
   -- Inside a notebook: <leader>n makes a note (in the current file's
   -- folder), and <leader><space> finds notes instead of files
-  -- (55_picker.lua; <leader>ff always finds files).
+  -- (<leader>ff always finds files).
   local zk_util = require('zk.util')
   local in_notebook = function() return zk_util.notebook_root(zk_util.resolve_notebook_path(0)) end
   vim.keymap.set('n', '<leader>n', function()
