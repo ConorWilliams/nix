@@ -6,9 +6,11 @@
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('config-prose', {}),
   pattern = { 'markdown', 'text', 'gitcommit', 'typst', 'tex' },
-  callback = function()
+  callback = function(ev)
     vim.opt_local.wrap = true
-    vim.opt_local.spell = true
+    -- (the others have a treesitter parser, which turns spelling on:
+    -- 40_treesitter.lua)
+    if ev.match == 'text' then vim.opt_local.spell = true end
   end,
 })
 
