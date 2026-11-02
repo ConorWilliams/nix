@@ -77,11 +77,12 @@ in
         . "$HOME/.nix-profile/etc/profile.d/nix.sh" # single-user Nix (no sudo)
       fi
     '';
-    # Runs only in interactive bash
-    initExtra = toFish {
+    # Runs only in interactive bash; first (Home Manager loads completion
+    # at order 100 and fzf at 200), as fish sets those up for itself.
+    initExtra = lib.mkOrder 50 (toFish {
       commandVar = "BASH_EXECUTION_STRING";
       isLogin = "shopt -q login_shell";
-    };
+    });
   };
 
   # macOS's login shell is zsh: the same hand-off from there.
