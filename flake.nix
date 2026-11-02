@@ -22,6 +22,14 @@
     # keeps the combination it ships with.
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # A prebuilt, weekly index of what every nixpkgs package contains, for
+    # comma and "command not found" (home/default.nix): no indexing on each
+    # machine.
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Official Rose Pine ports.
     rose-pine-tm-theme = {
       url = "github:rose-pine/tm-theme";

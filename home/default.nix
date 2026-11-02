@@ -10,6 +10,7 @@
 
 {
   imports = [
+    inputs.nix-index-database.homeModules.nix-index
     ./git.nix
     ./shell.nix
     ./zellij.nix
@@ -22,6 +23,11 @@
 
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
+
+  # `, cowsay hi` runs a program from nixpkgs without installing it, and a
+  # command that isn't installed says which package has it (in fish too).
+  programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
 
   # nh: a friendlier front end for switching.
   programs.nh = {
