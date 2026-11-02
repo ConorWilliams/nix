@@ -60,7 +60,9 @@ local switch_worktree = function(dir)
   local persistence = require('persistence')
   if persistence.active() then vim.api.nvim_exec_autocmds('VimLeavePre', { group = 'persistence' }) end
   vim.cmd('silent! %argdelete') -- (sessions save it: `nvim file` would follow along)
-  vim.cmd('silent %bwipeout')
+  -- ! so a terminal with a running job can't stop the switch halfway (E89,
+  -- as in a bare nvim); unsaved files were dealt with above.
+  vim.cmd('silent %bwipeout!')
   vim.cmd.cd(dir)
   persistence.load()
   local restored = vim.tbl_filter(
