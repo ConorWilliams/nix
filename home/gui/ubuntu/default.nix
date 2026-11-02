@@ -60,12 +60,29 @@ in
   # Mac has its own way: Home Manager links them into ~/Library/Fonts.)
   fonts.fontconfig.enable = true;
 
-  # Non-NixOS Linux: lets the desktop find apps and icons installed by Nix,
-  # and programs find Ubuntu's terminfo too.
-  targets.genericLinux.enable = true;
-  # ...but not its GPU drivers for Nix programs (GUI apps stay with apt;
-  # README), which would also print a setup notice on every switch.
-  targets.genericLinux.gpu.enable = false;
+  # Non-NixOS Linux: the desktop finds apps and icons installed by Nix (as
+  # well as Ubuntu's own), and cursors and terminfo too. These are the
+  # parts of Home Manager's targets.genericLinux wanted here. Not the rest:
+  # it also sources a single-user Nix's nix.sh in every shell, on top of
+  # the multi-user one Ubuntu's /etc/profile loads (doubling PATH entries),
+  # points <nixpkgs> at unpinned channels, and installs GPU drivers for Nix
+  # programs (GUI apps stay with apt; README).
+  xdg.systemDirs.data = [
+    "\${NIX_STATE_DIR:-/nix/var/nix}/profiles/default/share"
+    "${config.home.profileDirectory}/share"
+    "/usr/share/ubuntu"
+    "/usr/local/share"
+    "/usr/share"
+    "/var/lib/snapd/desktop"
+  ];
+  home.sessionSearchVariables.XCURSOR_PATH = [
+    "${config.home.profileDirectory}/share/icons"
+    "/usr/share/icons"
+    "/usr/share/pixmaps"
+  ];
+  # (for programs systemd starts; ncurses stops looking in the system's
+  # folders once this is set, so they're listed too)
+  systemd.user.sessionVariables.TERMINFO_DIRS = "${config.home.profileDirectory}/share/terminfo:$TERMINFO_DIRS\${TERMINFO_DIRS:+:}/etc/terminfo:/lib/terminfo:/usr/share/terminfo";
 
   # Skip GNOME's first-login wizard for a new account: the first login
   # (GNOME, before picking i3) is cut short, leaving it as a failed unit
