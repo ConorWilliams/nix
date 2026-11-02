@@ -88,8 +88,8 @@ in
         # called x. (One update-ref for all: repos can have thousands.)
         branch=$(git -C "$dir" symbolic-ref HEAD)
         branch=''${branch#refs/heads/}
-        git -C "$dir" for-each-ref --format='delete %(refname)' refs/heads |
-          grep -vxF "delete refs/heads/$branch" |
+        git -C "$dir" for-each-ref --format='delete %(refname)' \
+          --exclude="refs/heads/$branch" refs/heads |
           git -C "$dir" update-ref --stdin
         git -C "$dir" branch --quiet --set-upstream-to="origin/$branch" "$branch"
 
