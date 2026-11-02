@@ -30,6 +30,7 @@ vim.lsp.config('copilot', {
     local root = vim.fs.root(bufnr, '.git')
     if root then on_dir(root) end
   end,
+  settings = { telemetry = { telemetryLevel = 'off' } }, -- (lspconfig's: 'all')
   handlers = {
     -- The server reports problems such as not being signed in
     didChangeStatus = function(err, res)
