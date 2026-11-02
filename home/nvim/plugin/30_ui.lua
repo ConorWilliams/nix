@@ -73,6 +73,18 @@ vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {
   callback = function() vim.schedule(vim.cmd.redrawstatus) end,
 })
 
+-- TODO, FIXME, HACK and NOTE stand out wherever they're written.
+local hipatterns = require('mini.hipatterns')
+local word = function(w, hl) return { pattern = '%f[%w]()' .. w .. '()%f[%W]', group = hl } end
+hipatterns.setup({
+  highlighters = {
+    fixme = word('FIXME', 'MiniHipatternsFixme'),
+    hack = word('HACK', 'MiniHipatternsHack'),
+    todo = word('TODO', 'MiniHipatternsTodo'),
+    note = word('NOTE', 'MiniHipatternsNote'),
+  },
+})
+
 -- Tabline at the top: open buffers as tabs (Shift-h / Shift-l move
 -- between them); tab pages, when there's more than one, show at the right.
 require('mini.tabline').setup({
