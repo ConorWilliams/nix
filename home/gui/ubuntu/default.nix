@@ -86,6 +86,15 @@ in
       };
     };
 
+  # Each Alt+Enter terminal is its own zellij session (i3 above), so on the
+  # desks closing the window ends the session, and ended ones aren't kept
+  # to resurrect: no pile of sessions. (Not on servers, where a dropped ssh
+  # connection must leave the session running.)
+  programs.zellij.settings = {
+    on_force_close = "quit";
+    session_serialization = false;
+  };
+
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
@@ -125,7 +134,7 @@ in
       bars =
         map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
           (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
-      terminal = "kitty";
+      terminal = "kitty zellij"; # Alt+Enter: a terminal in its own zellij session (below)
       menu = "rofi -show run";
       # Borders only, no title bar on top of each window.
       window.titlebar = false;
