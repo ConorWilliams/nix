@@ -1,5 +1,5 @@
 # GUI layer: machines with a screen, on any OS. Adds the
-# terminal's config and fonts on top of the server layer.
+# terminal's config and font on top of the server layer.
 {
   config,
   lib,
@@ -34,8 +34,5 @@
       themeFile = "rose-pine-dawn"; # kitty's official port of the theme
       settings.hide_window_decorations = "titlebar-only";
     };
-
-    # Lets every app (not just Nix ones) find fonts installed by Nix.
-    fonts.fontconfig.enable = true;
   };
 }

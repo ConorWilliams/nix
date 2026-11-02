@@ -56,6 +56,10 @@ in
     }
   ];
 
+  # Lets every app (not just Nix ones) find fonts installed by Nix. (The
+  # Mac has its own way: Home Manager links them into ~/Library/Fonts.)
+  fonts.fontconfig.enable = true;
+
   # Non-NixOS Linux: lets the desktop find apps and icons installed by Nix,
   # and programs find Ubuntu's terminfo too.
   targets.genericLinux.enable = true;
