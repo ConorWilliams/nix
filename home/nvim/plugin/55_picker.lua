@@ -93,6 +93,9 @@ require('snacks').setup({
   -- Other uses of the name under the cursor are highlighted (via the
   -- language server), as in LazyVim.
   words = {},
+  -- Faint guides at each indent level, the current block's highlighted, as
+  -- in LazyVim.
+  indent = {},
   picker = { -- also takes over vim.ui.select (code actions, zk, ...)
     layouts = layouts,
     layout = { preset = 'tall' }, -- the explorer picks by shape (below)
