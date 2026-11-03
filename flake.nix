@@ -109,7 +109,7 @@
       # Every system to build for: the machines'.
       systems = nixpkgs.lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
-      # Users that get configs (every config is generated for each of them).
+      # Server users, also the default for hosts without an explicit users list.
       users = [ "conix" ];
 
       # Machines with a config of their own, by hostname, pointing at their
@@ -125,10 +125,10 @@
           system = "x86_64-linux";
           module = ./home/gui/ubuntu/luna.nix;
         };
-        # TODO: rename to the Mac's real hostname once it's set up
-        mac = {
+        "Conors-MacBook-Pro-2" = {
           system = "aarch64-darwin";
           module = ./home/gui/mac;
+          users = [ "main" ];
         };
       };
 
@@ -164,18 +164,19 @@
         };
     in
     {
-      # Per user: <user> (a server) and <user>@<host> for each host.
-      homeConfigurations = nixpkgs.lib.mergeAttrsList (
-        map (
-          user:
-          {
-            ${user} = mkHome user server;
-          }
-          // nixpkgs.lib.mapAttrs' (
-            host: machine: nixpkgs.lib.nameValuePair "${user}@${host}" (mkHome user machine)
+      # Keep Linux's conix configs; the Mac's actual account is main.
+      homeConfigurations =
+        nixpkgs.lib.genAttrs users (user: mkHome user server)
+        // nixpkgs.lib.mergeAttrsList (
+          nixpkgs.lib.mapAttrsToList (
+            host: machine:
+            builtins.listToAttrs (
+              map (user: nixpkgs.lib.nameValuePair "${user}@${host}" (mkHome user machine)) (
+                machine.users or users
+              )
+            )
           ) hosts
-        ) users
-      );
+        );
 
       # `nix fmt`
       formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
@@ -191,12 +192,11 @@
           ))
           {
             # ...and the Mac's system settings (nix-darwin).
-            aarch64-darwin.darwin-mac = self.darwinConfigurations.mac.system;
+            aarch64-darwin.darwin-mac = self.darwinConfigurations."Conors-MacBook-Pro-2".system;
           };
 
       # The Mac's system settings only.
-      # TODO: rename to the Mac's real hostname once it's set up.
-      darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
+      darwinConfigurations."Conors-MacBook-Pro-2" = nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/mac.nix ];
       };
     };
