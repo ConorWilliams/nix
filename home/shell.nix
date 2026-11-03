@@ -101,8 +101,19 @@ in
       set -g fish_cursor_visual block
     '';
 
-    # Calculator shortcut
-    functions.c = "math $argv";
+    # c: a Python REPL (the venv's, if one is active); with arguments, a
+    # calculator: `c '2**10'`, `c 'sqrt(2)'` (quoted: fish would read * and
+    # ( ) itself). math's names are imported in both.
+    functions.c = {
+      description = "Python REPL, or evaluate the arguments (c '2**10')";
+      body = /* fish */ ''
+        if set -q argv[1]
+          python3 -c "from math import *; print($argv)"
+        else
+          python3 -q -i -c "from math import *"
+        end
+      '';
+    };
 
     # starship's shrunk prompt after a command runs (enableTransience,
     # below): just its ❯ module, given the status and vi mode it's passed.
