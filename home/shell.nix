@@ -146,12 +146,10 @@ in
       username.format = "[$user]($style)@";
       hostname.format = "[$hostname]($style) ";
       # The path the way fish shortens it: every folder above the current
-      # one cut to its first letter (~/c/uv-review), counted from ~ or /
-      # even inside a git repo (not from the repo's top folder).
+      # one cut to its first letter (~/c/uv-review).
       directory = {
         truncation_length = 1;
         fish_style_pwd_dir_length = 1;
-        truncate_to_repo = false;
       };
       git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
       python.format = "[($virtualenv )]($style)"; # active venv name only
