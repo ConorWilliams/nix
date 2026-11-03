@@ -145,10 +145,12 @@ in
       # user@host only over SSH (starship's default rule for both).
       username.format = "[$user]($style)@";
       hostname.format = "[$hostname]($style) ";
-      # The path's last 3 folders, also inside a git repo (by default it
-      # starts at the repo's top folder there, often just "main").
+      # The path the way fish shortens it: every folder above the current
+      # one cut to its first letter (~/c/uv-review), counted from ~ or /
+      # even inside a git repo (not from the repo's top folder).
       directory = {
-        truncation_length = 3;
+        truncation_length = 1;
+        fish_style_pwd_dir_length = 1;
         truncate_to_repo = false;
       };
       git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
