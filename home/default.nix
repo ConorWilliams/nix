@@ -105,6 +105,20 @@
     mosh = "mosh --ssh=ssh";
   };
 
+  # ssh's settings (~/.ssh/config; the ssh itself stays the system's, see
+  # the mosh alias above). Keep-alives: a check every minute keeps idle
+  # sessions open through routers that drop quiet connections, and a
+  # connection that has really died is given up after 3 unanswered (about
+  # 3 minutes) instead of freezing the terminal.
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false; # (Home Manager's old defaults, being retired)
+    matchBlocks."*" = {
+      serverAliveInterval = 60;
+      serverAliveCountMax = 3;
+    };
+  };
+
   home.sessionVariables = {
     # Tell programs the terminal supports 24-bit colour.
     COLORTERM = "truecolor";
