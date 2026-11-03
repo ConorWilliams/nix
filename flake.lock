@@ -203,7 +203,6 @@
         "rose-pine-rofi": "rose-pine-rofi",
         "rose-pine-starship": "rose-pine-starship",
         "rose-pine-tm-theme": "rose-pine-tm-theme",
-        "rose-pine-yazi": "rose-pine-yazi",
         "rose-pine-zellij": "rose-pine-zellij",
         "smart-splits-zellij": "smart-splits-zellij",
         "vim-zellij-navigator": "vim-zellij-navigator"
@@ -366,22 +365,6 @@
       "original": {
         "owner": "rose-pine",
         "repo": "tm-theme",
-        "type": "github"
-      }
-    },
-    "rose-pine-yazi": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1771874935,
-        "narHash": "sha256-9e3dXViWl1rK9BPrGAFfs9ZL/tsG6Njz6ksuU6AIrFY=",
-        "owner": "rose-pine",
-        "repo": "yazi",
-        "rev": "c89d745573d4fcfe0550fe6646f9f9ab1c0e51db",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rose-pine",
-        "repo": "yazi",
         "type": "github"
       }
     },

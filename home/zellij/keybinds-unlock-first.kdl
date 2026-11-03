@@ -4,8 +4,9 @@
 // zellij 0.45's first-run setup screen, except:
 // - the Alt bindings for moving focus are gone (Ctrl+arrows does that, via
 //   the NAVIGATION line below, filled in by home/zellij.nix), along with
-//   those i3 takes on the desks (Alt f, n, o, p, -) and their pairs (Alt +,
-//   =, i), and Alt [ / ] (swap layouts), which nvim uses for Copilot;
+//   those i3 takes on the desks (Alt f, n, p, -; and Alt o, which it once
+//   did) and their pairs (Alt +, =, i), and Alt [ / ] (swap layouts), which
+//   nvim uses for Copilot;
 // - Alt g locks and unlocks, not the preset's Ctrl g, which nvim's pickers
 //   use (live grep <-> fuzzy filter).
 keybinds clear-defaults=true {

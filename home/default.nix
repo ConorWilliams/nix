@@ -177,18 +177,4 @@
     };
   };
   xdg.configFile."eza/theme.yml".source = "${inputs.rose-pine-eza}/dist/rose-pine-dawn.yml";
-
-  # Rose Pine Dawn: the port's flavor (UI colours and the code-preview
-  # theme), named for light and dark alike (detection fails over mosh and
-  # inside zellij), plus its icon colours.
-  programs.yazi = {
-    enable = true;
-    flavors.rose-pine-dawn = "${inputs.rose-pine-yazi}/flavors/rose-pine-dawn.yazi";
-    theme = fromTOML (builtins.readFile "${inputs.rose-pine-yazi}/themes/rose-pine-dawn.toml") // {
-      flavor = {
-        light = "rose-pine-dawn";
-        dark = "rose-pine-dawn";
-      };
-    };
-  };
 }

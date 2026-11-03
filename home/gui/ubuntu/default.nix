@@ -202,7 +202,6 @@ in
 
       # mkOptionDefault: add to i3's default keys rather than replace them.
       keybindings = lib.mkOptionDefault {
-        "${mod}+o" = "exec kitty yazi";
         "${mod}+n" = "exec ${lock}";
         "${mod}+Shift+less" = "move workspace to output left";
         "${mod}+Shift+greater" = "move workspace to output right";
