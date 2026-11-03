@@ -15,6 +15,38 @@ ask() {
   [[ $answer == [yY]* ]]
 }
 
+# Home Manager's -b backs up regular files, but rejects foreign symlinks.
+# Move only links that collide with files in the built generation. Never follow
+# the links into an existing dotfile checkout or move links owned by HM.
+backup_home_symlinks() {
+  local generation=$1 suffix=$2 store_dir=$3 home_dir=$4
+  local source relative target link parent backup
+  while IFS= read -r -d '' source; do
+    relative=${source#"$generation/home-files/"}
+    target=$home_dir/$relative
+    [[ -L $target ]] || continue
+    link=$(readlink "$target")
+    [[ $link == "$store_dir/"*-home-manager-files/* ]] && continue
+
+    # Moving a link through a symlinked parent could change the old checkout.
+    parent=${target%/*}
+    while [[ $parent != "$home_dir" ]]; do
+      if [[ -L $parent ]]; then
+        echo "Cannot back up $target through symlinked parent $parent."
+        return 1
+      fi
+      parent=${parent%/*}
+    done
+    backup=$target.$suffix
+    if [[ -e $backup || -L $backup ]]; then
+      echo "Backup already exists: $backup"
+      return 1
+    fi
+    echo "Backing up symlink: $target -> $backup"
+    mv -- "$target" "$backup"
+  done < <(find -H "$generation/home-files" -type l -print0)
+}
+
 main() {
   say "Nix"
   if ! type -P nix >/dev/null; then
@@ -38,7 +70,13 @@ main() {
 
   say "Repo: $dir"
   if [[ -d $dir/.git ]]; then
-    git -C "$dir" pull --ff-only || echo "Couldn't fast-forward $dir (local changes or commits?); using it as it is."
+    # A local setup branch may have no upstream. Apply that checkout rather
+    # than pulling main into it or changing branches behind the user's back.
+    if git -C "$dir" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
+      git -C "$dir" pull --ff-only || echo "Couldn't fast-forward $dir (local changes or commits?); using it as it is."
+    else
+      echo "Using the existing checkout (no upstream configured)."
+    fi
   else
     git clone "$repo" "$dir" # HTTPS: public, so no login needed yet
   fi
@@ -61,6 +99,10 @@ main() {
   fi
   desk=false
   [[ $config == *@* ]] && desk=true
+
+  # Catch user-environment build failures before changing system settings.
+  say "Build Home Manager: $config"
+  home_generation=$(nix build --no-link --print-out-paths "$dir#homeConfigurations.\"$config\".activationPackage")
 
   # Ubuntu desks: the few things that can't come from Nix.
   if $desk && [[ $(uname -s) == Linux ]]; then
@@ -88,18 +130,31 @@ main() {
       echo "Homebrew installed"
     elif ask "Install Homebrew (for the Mac's apps, e.g. kitty; uses sudo)?"; then
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/tty
+    else
+      echo "Homebrew is required for the Mac's declared apps; stopping before activation."
+      exit 1
     fi
     if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
       echo "flake.nix has no darwinConfigurations.$host (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
+      # Build as this user first; package/build failures must not start activation.
+      nix build --no-link "$dir#darwinConfigurations.$host.system"
       sudo "$(type -P nix)" --extra-experimental-features 'nix-command flakes' \
         run --inputs-from "$dir" nix-darwin#darwin-rebuild -- switch --flake "$dir#$host"
+    elif [[ ! -e /run/current-system ]]; then
+      echo "The first Mac setup needs nix-darwin before Home Manager; stopping."
+      exit 1
     fi
   fi
 
   say "Home Manager: $config"
-  # -b backup renames files in the way (e.g. the starter .bashrc) to *.backup
-  nix run --inputs-from "$dir" home-manager -- switch -b backup --flake "$dir#$config"
+  # Preserve existing files/symlinks without following them into their targets. A
+  # unique suffix also avoids clobbering backups from a previous attempt.
+  backup_suffix="before-home-manager-$(date +%Y%m%d-%H%M%S)-$$"
+  store_dir=$(nix eval --raw --expr builtins.storeDir)
+  backup_home_symlinks "$home_generation" "$backup_suffix" "$store_dir" "$HOME"
+  nix run --inputs-from "$dir" home-manager -- switch \
+    -b "$backup_suffix" --flake "$dir#$config"
   export PATH=$HOME/.nix-profile/bin:$PATH # the tools it just installed
 
   say "Logins"
