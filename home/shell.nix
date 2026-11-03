@@ -141,7 +141,7 @@ in
     settings = {
       add_newline = false;
       # Only these modules, in this order, to keep the prompt short.
-      format = "$username$hostname$directory$git_branch$git_status$python$cmd_duration$status$character";
+      format = "$username$hostname$directory$git_branch$python$cmd_duration$status$character";
       # user@host only over SSH (starship's default rule for both).
       username.format = "[$user]($style)@";
       hostname.format = "[$hostname]($style) ";
