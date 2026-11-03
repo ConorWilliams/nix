@@ -151,7 +151,13 @@ in
       # Only these modules, in this order, to keep the prompt short.
       format = "$username$hostname$directory$git_branch$python$cmd_duration$status$character";
       # user@host only over SSH (starship's default rule for both).
-      username.format = "[$user]($style)@";
+      # ...but the user only if it isn't the usual one (root, or another
+      # account): this one's name is aliased to nothing, and the bracketed
+      # part shows only when the name isn't empty.
+      username = {
+        format = "([$user]($style)@)";
+        aliases.${config.home.username} = "";
+      };
       hostname.format = "[$hostname]($style) ";
       git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
       cmd_duration.format = "[$duration]($style) "; # 4s, not "took 4s"
