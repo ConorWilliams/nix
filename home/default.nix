@@ -81,6 +81,7 @@
     uv
     mosh
     tokei
+    fend # calculator, with units (`c` in fish: shell.nix)
     rsync
     kitty.kitten # kitty's helper (icat etc.), without the GUI app
     htop
