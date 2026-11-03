@@ -1,6 +1,6 @@
 # Mac layer: the macOS counterpart of ubuntu/, on top of the GUI layer.
 # Mac GUI apps are Homebrew casks in darwin/mac.nix.
-{ ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [ ../. ]; # the GUI layer
@@ -9,6 +9,18 @@
   # Home Manager's AeroSpace module expects a Nix-built app for its launch agent;
   # this app is installed by Homebrew, so manage only its configuration here.
   home.file.".aerospace.toml".source = ./aerospace.toml;
+
+  # These two 18.24.4 integration tests mistake unreadable interpreter
+  # processes for a live Pi session under macOS build-user isolation. Keep the
+  # rest of the package's tests, and stop skipping them on the next version.
+  programs.atuin.package = pkgs.atuin.overrideAttrs (old: {
+    checkFlags =
+      (old.checkFlags or [ ])
+      ++ lib.optionals (old.version == "18.24.4") [
+        "--skip=a_diverged_copy_resumes_only_as_chosen::agent_4_Agent__Pi"
+        "--skip=a_session_gone_on_with_elsewhere_catches_up_where_it_came_from::agent_3_Agent__Pi"
+      ];
+  });
 
   # Expose the casks' command-line helpers; Home Manager's Nix profile takes
   # precedence.
