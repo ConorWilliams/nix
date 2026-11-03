@@ -4,8 +4,8 @@ My terminal environment, managed with Nix + Home Manager.
 
 ## Quick start
 
-1. Install `nix`: <https://nixos.org/download/> on Linux; on the Mac,
-   [Determinate's installer](https://determinate.systems/nix-installer/).
+1. Install upstream `nix`: <https://nixos.org/download/>. On the Mac,
+   nix-darwin manages Nix and its daemon after the first switch.
 
 2. Run the (idempotent) bootstrap script:
 
@@ -36,7 +36,8 @@ My terminal environment, managed with Nix + Home Manager.
 │       └── mac
 │           └── default.nix  # Mac layer
 └── darwin
-    └── mac.nix              # Mac system settings: not a layer
+    ├── mac.nix              # Mac system settings and Homebrew apps
+    └── preferences.nix      # keyboard, trackpad, Dock, language and region
 ```
 
 Each layer imports the one above it, so a machine only names its last layer.
@@ -47,6 +48,26 @@ its own installer, and i3, rofi and dunst from Nix. On the Mac, GUI apps
 (kitty included) are Homebrew casks in `darwin/mac.nix`; the first nix-darwin
 switch may ask for `/etc/zshrc` and `/etc/bashrc` to be renamed to
 `*.before-nix-darwin`.
+
+### macOS
+
+The configuration names this account and host explicitly:
+`main@Conors-MacBook-Pro-2` for Home Manager, and `Conors-MacBook-Pro-2`
+for nix-darwin. From a fresh terminal in an existing checkout, run:
+
+```sh
+./bootstrap.sh
+```
+
+The script builds Home Manager before system activation, then builds/applies
+nix-darwin using sudo and applies Home Manager. Conflicting dotfiles and symlinks
+are backed up with unique `before-home-manager-*` suffixes. Use `/bin/zsh` as the
+account's login shell; Home Manager hands interactive sessions over to Fish.
+
+GUI apps are declared in `darwin/mac.nix`. System switches uninstall undeclared
+Homebrew packages while preserving app data. Homebrew updates and upgrades are
+explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace's
+configuration lives in `home/gui/mac/aerospace.toml`, and it starts itself at login.
 
 ## Day to day
 
