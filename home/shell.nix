@@ -104,6 +104,10 @@ in
     # Calculator shortcut
     functions.c = "math $argv";
 
+    # starship's shrunk prompt after a command runs (enableTransience,
+    # below): just its ❯ module, given the status and vi mode it's passed.
+    functions.starship_transient_prompt_func = "starship module character $argv";
+
     # sudo searches its own PATH (secure_path), without ~/.nix-profile/bin,
     # so `sudo dust` isn't found: give it the program's full path from this
     # shell's PATH. Starting with an option (sudo -u ...), or not a program
@@ -138,6 +142,10 @@ in
   # Prompt, identical in bash and fish on every machine
   programs.starship = {
     enable = true;
+    # Once a command runs, its prompt shrinks to just the ❯ in the scrollback
+    # (in fish; the function below draws it, still red after a failure and
+    # ❮ in vi normal mode).
+    enableTransience = true;
     settings = {
       add_newline = false;
       # Only these modules, in this order, to keep the prompt short.
@@ -146,6 +154,7 @@ in
       username.format = "[$user]($style)@";
       hostname.format = "[$hostname]($style) ";
       git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
+      cmd_duration.format = "[$duration]($style) "; # 4s, not "took 4s"
       python.format = "[($virtualenv )]($style)"; # active venv name only
       # Show the exit code when a command fails, as a red [127].
       status = {
