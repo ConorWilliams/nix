@@ -10,6 +10,11 @@ require('mini.ai').setup({
   n_lines = 500, -- How far to look for a match (default 50)
 })
 
+-- mini.pairs (as in LazyVim): typing ( [ { ' " or ` inserts its pair, the
+-- closing one steps over an existing one, and backspace between a pair
+-- deletes both. Insert mode only.
+require('mini.pairs').setup()
+
 -- mini.surround under gs (LazyVim's prefix; plain s is flash's).
 -- gsa{motion}{char} add, gsd{char} delete, gsr{old}{new} replace.
 -- E.g. gsaiw" quotes a word, gsd( strips brackets, gsr'" swaps quotes.
