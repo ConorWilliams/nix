@@ -113,9 +113,9 @@
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false; # (Home Manager's old defaults, being retired)
-    matchBlocks."*" = {
-      serverAliveInterval = 60;
-      serverAliveCountMax = 3;
+    settings."*" = {
+      ServerAliveInterval = 60;
+      ServerAliveCountMax = 3;
     };
   };
 
