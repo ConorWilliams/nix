@@ -80,7 +80,7 @@ in
   # i3, so dunst from Nix, started by the first notification.
   services.dunst =
     let
-      # Rose Pine Dawn (../default.nix), as the official port for mako (a
+      # Rose Pine Dawn (home/default.nix), as the official port for mako (a
       # Wayland dunst) colours notifications, except the frame: muted, as the
       # port's (highlight high) isn't in the palette.
       colours = {

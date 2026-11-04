@@ -6,6 +6,7 @@
   lib,
   pkgs,
   inputs,
+  dawn,
   ...
 }:
 
@@ -47,11 +48,6 @@ let
         ${connect}
       '';
     };
-
-  # Rose Pine Dawn palette from the official starship port.
-  rosePine =
-    (fromTOML (builtins.readFile "${inputs.rose-pine-starship}/rose-pine-dawn.toml"))
-    .palettes.rose-pine-dawn;
 in
 
 {
@@ -168,15 +164,16 @@ in
         format = "[\\[$status\\]]($style) ";
       };
       # Full colour: the modules' standard colour names (red, green...) are
-      # redefined as Rose Pine Dawn's, mapped as in kitty's Rose Pine theme.
+      # redefined as Rose Pine Dawn's (home/default.nix), mapped as in
+      # kitty's Rose Pine theme.
       palette = "rose-pine-dawn";
-      palettes.rose-pine-dawn = rosePine // {
-        red = rosePine.love;
-        green = rosePine.pine;
-        yellow = rosePine.gold;
-        blue = rosePine.foam;
-        purple = rosePine.iris;
-        cyan = rosePine.rose;
+      palettes.rose-pine-dawn = {
+        red = dawn.love;
+        green = dawn.pine;
+        yellow = dawn.gold;
+        blue = dawn.foam;
+        purple = dawn.iris;
+        cyan = dawn.rose;
       };
     };
   };
