@@ -10,62 +10,62 @@
 {
   imports = [ ../. ]; # the GUI layer
 
-  # AeroSpace manages its own start-at-login behavior.
-  # Home Manager's AeroSpace module expects a Nix-built app for its launch agent;
-  # this app is installed by Homebrew, so manage only its configuration here.
-  # Its settings (aerospace.toml), plus the keys, from the list shared with
-  # i3 (../keys.nix) with Cmd as the leader.
+  # AeroSpace's config, written here rather than by Home Manager's
+  # programs.aerospace, which always sets start-at-login = false: AeroSpace
+  # is a Homebrew cask (darwin/) and starts itself at login. Anything not
+  # set is AeroSpace's default. The keys come from the list shared with i3
+  # (../keys.nix), with Cmd as the leader.
   home.file.".aerospace.toml".source =
     let
       wm = import ../keys.nix { inherit lib; };
       key = wm.aerospaceKey;
       k = wm.keys;
     in
-    (pkgs.formats.toml { }).generate "aerospace.toml" (
-      fromTOML (builtins.readFile ./aerospace.toml)
-      // {
-        mode.main.binding =
-          lib.mergeAttrsList (
-            map (n: {
-              ${key n} = "workspace ${n}";
-              ${key "Shift+${n}"} = "move-node-to-workspace ${n}";
-            }) wm.workspaces
-            ++ map (a: {
-              ${key a} = "focus ${lib.toLower a}";
-              ${key "Shift+${a}"} = "move ${lib.toLower a}";
-            }) wm.arrows
-          )
-          // {
-            # A terminal in its own zellij session, as on the desks (by its
-            # store path: apps started here don't get the shell's PATH).
-            ${key k.terminal} =
-              "exec-and-forget open -n -a kitty --args ${lib.getExe config.programs.zellij.package}";
-            # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
-            ${key k.close} = "close";
-            ${key k.fullscreen} = "fullscreen";
-            ${key k.floating} = "layout floating tiling";
-            ${key k.resize} = "mode resize";
-            ${key k.flipSplit} = "layout tiles horizontal vertical";
-            # Puts the screens to sleep, which locks when a password is
-            # required right after sleep (System Settings, Lock Screen).
-            ${key k.lock} = "exec-and-forget pmset displaysleepnow";
-            ${key k.screenshot} =
-              "exec-and-forget mkdir -p ~/Pictures && screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png";
-            ${key k.reload} = "reload-config";
-            ${key k.monitorLeft} = "move-workspace-to-monitor --wrap-around prev";
-            ${key k.monitorRight} = "move-workspace-to-monitor --wrap-around next";
-          };
-        # As i3's: arrows resize the focused window, Esc or Enter leaves.
-        mode.resize.binding = {
-          left = "resize width -50";
-          right = "resize width +50";
-          up = "resize height -50";
-          down = "resize height +50";
-          esc = "mode main";
-          enter = "mode main";
+    (pkgs.formats.toml { }).generate "aerospace.toml" ({
+      start-at-login = true;
+      # The mouse follows focus to another screen, as in i3.
+      on-focused-monitor-changed = [ "move-mouse monitor-lazy-center" ];
+      mode.main.binding =
+        lib.mergeAttrsList (
+          map (n: {
+            ${key n} = "workspace ${n}";
+            ${key "Shift+${n}"} = "move-node-to-workspace ${n}";
+          }) wm.workspaces
+          ++ map (a: {
+            ${key a} = "focus ${lib.toLower a}";
+            ${key "Shift+${a}"} = "move ${lib.toLower a}";
+          }) wm.arrows
+        )
+        // {
+          # A terminal in its own zellij session, as on the desks (by its
+          # store path: apps started here don't get the shell's PATH).
+          ${key k.terminal} =
+            "exec-and-forget open -n -a kitty --args ${lib.getExe config.programs.zellij.package}";
+          # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
+          ${key k.close} = "close";
+          ${key k.fullscreen} = "fullscreen";
+          ${key k.floating} = "layout floating tiling";
+          ${key k.resize} = "mode resize";
+          ${key k.flipSplit} = "layout tiles horizontal vertical";
+          # Puts the screens to sleep, which locks when a password is
+          # required right after sleep (System Settings, Lock Screen).
+          ${key k.lock} = "exec-and-forget pmset displaysleepnow";
+          ${key k.screenshot} =
+            "exec-and-forget mkdir -p ~/Pictures && screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png";
+          ${key k.reload} = "reload-config";
+          ${key k.monitorLeft} = "move-workspace-to-monitor --wrap-around prev";
+          ${key k.monitorRight} = "move-workspace-to-monitor --wrap-around next";
         };
-      }
-    );
+      # As i3's: arrows resize the focused window, Esc or Enter leaves.
+      mode.resize.binding = {
+        left = "resize width -50";
+        right = "resize width +50";
+        up = "resize height -50";
+        down = "resize height +50";
+        esc = "mode main";
+        enter = "mode main";
+      };
+    });
 
   # These two 18.24.4 integration tests mistake unreadable interpreter
   # processes for a live Pi session under macOS build-user isolation. Keep the
