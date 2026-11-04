@@ -74,6 +74,11 @@
       };
   };
 
+  # Left Option is Alt in kitty, as on Linux: zellij's Alt-g, fzf's Alt-C,
+  # nvim's Alt keys. Not the right one: on the British layout it types # and
+  # other characters.
+  programs.kitty.settings.macos_option_as_alt = "left";
+
   # AeroSpace's menu bar icon shows the workspaces as i3's bar does: those
   # with windows or on a screen, in order, the focused one filled and one on
   # another screen dimmed. (Its "i3 style ordered", one of the Experimental
