@@ -34,10 +34,12 @@ My terminal environment, managed with Nix + Home Manager.
 │       │   ├── hubble.nix
 │       │   └── luna.nix
 │       └── mac
-│           └── default.nix  # Mac layer
-└── darwin
-    ├── mac.nix              # Mac system settings and Homebrew apps
-    └── preferences.nix      # keyboard, trackpad, Dock, language and region
+│           ├── default.nix  # Mac layer
+│           └── polaris.nix
+└── darwin                   # the Macs' system settings (nix-darwin)
+    ├── default.nix          # every Mac: Nix, Homebrew, kitty and AeroSpace
+    ├── preferences.nix      #   keyboard, trackpad, Dock, language and region
+    └── polaris.nix          # this Mac: its account, name and apps
 ```
 
 Each layer imports the one above it, so a machine only names its last layer.
@@ -45,16 +47,16 @@ Each layer imports the one above it, so a machine only names its last layer.
 On Ubuntu, GUI apps that need the graphics drivers (browsers, Slack...) stay
 with apt/snap, as Nix-built ones can't use Ubuntu's drivers; kitty comes from
 its own installer, and i3, rofi and dunst from Nix. On the Mac, GUI apps
-(kitty included) are Homebrew casks in `darwin/mac.nix`; the first nix-darwin
+(kitty included) are Homebrew casks in `darwin/`; the first nix-darwin
 switch may ask for `/etc/zshrc` and `/etc/bashrc` to be renamed to
 `*.before-nix-darwin`.
 
 ### macOS
 
 The configuration names this account and host explicitly:
-`main@polaris` for Home Manager, and `polaris` for nix-darwin (`macHost` in
-`flake.nix`). nix-darwin keeps the Mac's name set to it, but the first time
-(or after changing `macHost`) set it yourself, since the bootstrap, `dms`
+`main@polaris` for Home Manager, and `polaris` for nix-darwin
+(`darwin/polaris.nix`). nix-darwin keeps the Mac's name set to it, but the first time
+(or after renaming it) set it yourself, since the bootstrap, `dms`
 and `hms` find their config by the current name:
 
 ```sh
@@ -74,7 +76,8 @@ nix-darwin using sudo and applies Home Manager. Conflicting dotfiles and symlink
 are backed up with unique `before-home-manager-*` suffixes. Use `/bin/zsh` as the
 account's login shell; Home Manager hands interactive sessions over to Fish.
 
-GUI apps are declared in `darwin/mac.nix`. System switches uninstall undeclared
+GUI apps are declared in `darwin/default.nix` (every Mac's) and
+`darwin/polaris.nix` (this one's). System switches uninstall undeclared
 Homebrew packages while preserving app data. Homebrew updates and upgrades are
 explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace's
 settings live in `home/gui/mac/aerospace.toml`; its keys come from

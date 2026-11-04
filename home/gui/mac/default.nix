@@ -1,5 +1,5 @@
 # Mac layer: the macOS counterpart of ubuntu/, on top of the GUI layer.
-# Mac GUI apps are Homebrew casks in darwin/mac.nix.
+# Mac GUI apps are Homebrew casks in darwin/ (every Mac's, and each one's).
 { lib, pkgs, ... }:
 
 {
@@ -78,7 +78,7 @@
   # here hands over to; home.sessionPath would put them first.)
   programs.fish.shellInit = "fish_add_path --append --path /opt/homebrew/bin /opt/homebrew/sbin";
 
-  # Everything on the Mac: system settings (darwin/mac.nix), then home.
+  # Everything on the Mac: system settings (darwin/<hostname>.nix), then home.
   # `hms` stays home only, like everywhere else. nh picks
   # darwinConfigurations.<hostname> and asks for sudo itself; the flake
   # comes from NH_FLAKE.
