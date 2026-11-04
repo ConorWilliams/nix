@@ -6,7 +6,7 @@
   config,
   lib,
   pkgs,
-  inputs,
+  dawn,
   ...
 }:
 
@@ -15,35 +15,30 @@ let
   height = config.desktop.barFontSize * 2;
   font = "${config.programs.kitty.font.name}:Regular:${toString (config.desktop.barFontSize * 1.0)}";
 
-  # Rose Pine Dawn's colours by role (base, text, rose...), from the official
-  # palette, as SketchyBar spells them (0xAARRGGBB).
-  dawn = lib.listToAttrs (
-    map (
-      c: lib.nameValuePair c.role "0xff${c.hex}"
-    ) (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn
-  );
+  # Rose Pine Dawn (../default.nix) as SketchyBar spells colours: 0xAARRGGBB.
+  argb = lib.mapAttrs (_: hex: "0xff" + lib.removePrefix "#" hex) dawn;
   colours = {
-    bar = dawn.base;
-    inherit (dawn) text;
+    bar = argb.base;
+    inherit (argb) text;
     # The workspaces: the focused one outlined in rose (as the official i3
     # port outlines the focused window), one shown on another screen
     # raised, any other muted.
     focused = {
-      border = dawn.rose;
-      background = dawn.overlay;
-      inherit (dawn) text;
+      border = argb.rose;
+      background = argb.overlay;
+      inherit (argb) text;
     };
     visible = {
-      border = dawn.overlay;
-      background = dawn.overlay;
-      inherit (dawn) text;
+      border = argb.overlay;
+      background = argb.overlay;
+      inherit (argb) text;
     };
     other = {
-      border = dawn.base;
-      background = dawn.base;
-      text = dawn.muted;
+      border = argb.base;
+      background = argb.base;
+      text = argb.muted;
     };
-    warning = dawn.love; # muted, or memory running out
+    warning = argb.love; # muted, or memory running out
   };
 
   # Each workspace's button: shown if it has windows or is on a screen, on

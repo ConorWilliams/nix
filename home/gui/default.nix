@@ -4,6 +4,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -25,6 +26,15 @@
   };
 
   config = {
+    # Rose Pine Dawn's colours by role (base, text, rose, love...), from the
+    # official palette, for this layer's modules to use as `dawn`: e.g.
+    # dawn.text = "#464261".
+    _module.args.dawn = lib.listToAttrs (
+      map (
+        c: lib.nameValuePair c.role "#${c.hex}"
+      ) (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn
+    );
+
     # kitty's config. The app itself is installed outside Nix: on Ubuntu,
     # because a Nix-built kitty can't use its graphics drivers; on the Mac,
     # as a Homebrew cask (darwin/default.nix).
