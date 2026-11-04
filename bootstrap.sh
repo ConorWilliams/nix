@@ -15,38 +15,6 @@ ask() {
   [[ $answer == [yY]* ]]
 }
 
-# Home Manager's -b backs up regular files, but rejects foreign symlinks.
-# Move only links that collide with files in the built generation. Never follow
-# the links into an existing dotfile checkout or move links owned by HM.
-backup_home_symlinks() {
-  local generation=$1 suffix=$2 store_dir=$3 home_dir=$4
-  local source relative target link parent backup
-  while IFS= read -r -d '' source; do
-    relative=${source#"$generation/home-files/"}
-    target=$home_dir/$relative
-    [[ -L $target ]] || continue
-    link=$(readlink "$target")
-    [[ $link == "$store_dir/"*-home-manager-files/* ]] && continue
-
-    # Moving a link through a symlinked parent could change the old checkout.
-    parent=${target%/*}
-    while [[ $parent != "$home_dir" ]]; do
-      if [[ -L $parent ]]; then
-        echo "Cannot back up $target through symlinked parent $parent."
-        return 1
-      fi
-      parent=${parent%/*}
-    done
-    backup=$target.$suffix
-    if [[ -e $backup || -L $backup ]]; then
-      echo "Backup already exists: $backup"
-      return 1
-    fi
-    echo "Backing up symlink: $target -> $backup"
-    mv -- "$target" "$backup"
-  done < <(find -H "$generation/home-files" -type l -print0)
-}
-
 main() {
   say "Nix"
   if ! type -P nix >/dev/null; then
@@ -102,7 +70,7 @@ main() {
 
   # Catch user-environment build failures before changing system settings.
   say "Build Home Manager: $config"
-  home_generation=$(nix build --no-link --print-out-paths "$dir#homeConfigurations.\"$config\".activationPackage")
+  nix build --no-link "$dir#homeConfigurations.\"$config\".activationPackage"
 
   # Ubuntu desks: the few things that can't come from Nix.
   if $desk && [[ $(uname -s) == Linux ]]; then
@@ -146,11 +114,9 @@ main() {
   fi
 
   say "Home Manager: $config"
-  # Preserve existing files/symlinks without following them into their targets. A
-  # unique suffix also avoids clobbering backups from a previous attempt.
+  # Existing dotfiles in the way are kept, renamed with a suffix unique to
+  # this run (so a second attempt can't clobber the first one's backups).
   backup_suffix="before-home-manager-$(date +%Y%m%d-%H%M%S)-$$"
-  store_dir=$(nix eval --raw --expr builtins.storeDir)
-  backup_home_symlinks "$home_generation" "$backup_suffix" "$store_dir" "$HOME"
   nix run --inputs-from "$dir" home-manager -- switch \
     -b "$backup_suffix" --flake "$dir#$config"
   export PATH=$HOME/.nix-profile/bin:$PATH # the tools it just installed

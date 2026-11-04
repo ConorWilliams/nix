@@ -71,7 +71,7 @@ Then, from a fresh terminal in an existing checkout, run:
 ```
 
 The script builds Home Manager before system activation, then builds/applies
-nix-darwin using sudo and applies Home Manager. Conflicting dotfiles and symlinks
+nix-darwin using sudo and applies Home Manager. Conflicting dotfiles
 are backed up with unique `before-home-manager-*` suffixes. Use `/bin/zsh` as the
 account's login shell; Home Manager hands interactive sessions over to Fish.
 
