@@ -260,10 +260,7 @@ in
   programs.i3status = {
     enable = true;
     enableDefault = false;
-    general = {
-      colors = true;
-      interval = 5;
-    };
+    general.interval = 5; # seconds between updates (i3status's default is 1)
     modules = {
       # The default output's volume (PulseAudio, or PipeWire's stand-in).
       "volume master" = {
