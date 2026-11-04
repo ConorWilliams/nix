@@ -18,8 +18,10 @@
     lock = "n";
     screenshot = "p"; # of a region, into ~/Pictures
     reload = "Shift+c"; # the window manager's config
-    monitorLeft = "Shift+less"; # the workspace to the other screen
-    monitorRight = "Shift+greater";
+    # The whole workspace to the screen on the left/right (the arrows: plain
+    # focuses, Shift moves the window, Ctrl+Shift moves the workspace).
+    monitorLeft = "Ctrl+Shift+Left";
+    monitorRight = "Ctrl+Shift+Right";
   };
 
   # Focus with the arrows; Shift+arrows moves the window.
@@ -35,9 +37,5 @@
 
   # The same key as AeroSpace spells it: cmd-shift-left, cmd-enter...
   aerospaceKey =
-    key:
-    "cmd-"
-    + lib.toLower (
-      builtins.replaceStrings [ "+" "Return" "less" "greater" ] [ "-" "enter" "comma" "period" ] key
-    );
+    key: "cmd-" + lib.toLower (builtins.replaceStrings [ "+" "Return" ] [ "-" "enter" ] key);
 }
