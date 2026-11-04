@@ -65,12 +65,18 @@ let
     sketchybar "''${args[@]}"
   '';
 
-  # The volume's icon (muted or not, as i3status shows it) and its
-  # percentage, 0 when muted. The first time, before any change, it asks macOS.
+  # The volume's icon (muted or not) and its percentage, as i3status shows
+  # them. SketchyBar's event says 0 when muted, so then (and the first
+  # time, before any change) it asks macOS for the level and mute.
   volume = pkgs.writeShellScript "bar-volume" ''
-    vol=''${INFO:-$(osascript -e 'output volume of (get volume settings)')}
+    vol=$INFO
+    muted=false
+    if [ -z "$vol" ] || [ "$vol" = 0 ]; then
+      read -r vol muted < <(osascript -e 'set s to get volume settings' \
+        -e 'return (output volume of s as text) & " " & (output muted of s as text)')
+    fi
     icon=${icons.volume}
-    [ "$vol" = 0 ] && icon=${icons.muted}
+    [ "$muted" = true ] && icon=${icons.muted}
     sketchybar --set "$NAME" icon="$icon" label="$vol%"
   '';
 
