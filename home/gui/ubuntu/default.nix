@@ -187,7 +187,6 @@ in
       bars =
         map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
           (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
-      terminal = "kitty zellij"; # Alt+Enter: a terminal in its own zellij session (below)
       # Borders only, no title bar on top of each window.
       window.titlebar = false;
       floating.titlebar = false;
