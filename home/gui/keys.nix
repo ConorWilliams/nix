@@ -4,8 +4,6 @@
 # (gui/ubuntu/default.nix, gui/mac/default.nix), so a key changes here once.
 # None of them is one the Mac's apps can't do without (copy, save, find,
 # tabs, quit, Spotlight's Space, Cmd+Tab...).
-{ lib }:
-
 {
   keys = {
     terminal = "Return"; # kitty, in its own zellij session
@@ -33,9 +31,5 @@
   ];
 
   # Workspaces 1-9 and 0 (the tenth); Shift+number moves the window there.
-  workspaces = map toString (lib.range 1 9) ++ [ "0" ];
-
-  # The same key as AeroSpace spells it: cmd-shift-left, cmd-enter...
-  aerospaceKey =
-    key: "cmd-" + lib.toLower (builtins.replaceStrings [ "+" "Return" ] [ "-" "enter" ] key);
+  workspaces = builtins.genList (i: toString (i + 1)) 9 ++ [ "0" ];
 }

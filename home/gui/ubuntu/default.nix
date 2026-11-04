@@ -12,7 +12,7 @@ let
   lock = "i3lock -c 000000"; # black screen
   refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
   # The window manager's keys, shared with the Mac's AeroSpace.
-  wm = import ../keys.nix { inherit lib; };
+  wm = import ../keys.nix;
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
   # Rose Pine Dawn notification colours from the official mako port (mako

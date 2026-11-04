@@ -17,8 +17,10 @@
   # (../keys.nix), with Cmd as the leader.
   home.file.".aerospace.toml".source =
     let
-      wm = import ../keys.nix { inherit lib; };
-      key = wm.aerospaceKey;
+      wm = import ../keys.nix;
+      # A key as AeroSpace spells it, with Cmd as the leader: cmd-shift-left,
+      # cmd-enter...
+      key = k: "cmd-" + lib.toLower (builtins.replaceStrings [ "+" "Return" ] [ "-" "enter" ] k);
       k = wm.keys;
     in
     (pkgs.formats.toml { }).generate "aerospace.toml" ({
