@@ -14,12 +14,29 @@ let
   refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
   # The window manager's keys, shared with the Mac's AeroSpace.
   wm = import ../keys.nix;
-  icons = import ../icons.nix; # the bar's
+  # The bar's icons: Nerd Font glyphs (Material Design), which the
+  # terminal's font includes, each named as in Nerd Fonts' cheat sheet.
+  icons = {
+    volume = "󰕾"; # nf-md-volume_high
+    muted = "󰖁"; # nf-md-volume_off
+    charging = "󰂄"; # nf-md-battery_charging
+    plugged = "󱟢"; # nf-md-battery_check: on power, not charging (full, or held at a limit)
+    battery = "󰁾"; # nf-md-battery_50: on battery, at any charge
+  };
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
-
 in
 {
-  imports = [ ../. ]; # the GUI layer
+  imports = [
+    ../. # the GUI layer
+    # The i3 bar's font size, set per machine like desktop.fontSize.
+    {
+      options.desktop.barFontSize = lib.mkOption {
+        type = lib.types.number;
+        default = 14;
+        description = "Font size of the i3 bar.";
+      };
+    }
+  ];
 
   # Lets every app (not just Nix ones) find fonts installed by Nix. (The
   # Mac has its own way: Home Manager links them into ~/Library/Fonts.)
@@ -236,9 +253,8 @@ in
   };
 
   # The bar's status line: volume, the battery (where there is one) and the
-  # time, with the icons the Mac's bar uses (../icons.nix). (Ubuntu's
-  # default, for laptops, also shows Wi-Fi, IPv6, network, disk, load and
-  # memory.)
+  # time, with icons. (Ubuntu's default, for laptops, also shows Wi-Fi,
+  # IPv6, network, disk, load and memory.)
   programs.i3status = {
     enable = true;
     enableDefault = false;

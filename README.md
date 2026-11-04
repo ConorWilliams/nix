@@ -30,14 +30,12 @@ My terminal environment, managed with Nix + Home Manager.
 │   └── gui
 │       ├── default.nix      # GUI layer: desks on any OS
 │       ├── keys.nix         #   window manager keys, shared by i3 and AeroSpace
-│       ├── icons.nix        #   the bars' icons, shared by i3status and SketchyBar
 │       ├── ubuntu
 │       │   ├── default.nix  # Ubuntu layer
 │       │   ├── hubble.nix
 │       │   └── luna.nix
 │       └── mac
 │           ├── default.nix  # Mac layer
-│           ├── bar.nix      #   SketchyBar, at the bottom like i3's
 │           └── polaris.nix
 └── darwin                   # the Macs' system settings (nix-darwin)
     ├── default.nix          # every Mac: Nix, Homebrew, kitty, preferences
