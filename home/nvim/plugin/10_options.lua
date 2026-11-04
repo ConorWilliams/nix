@@ -33,7 +33,6 @@ vim.o.expandtab = true
 vim.o.shiftwidth = 2 -- Overridden per language by ftplugins/editorconfig
 vim.o.tabstop = 2
 vim.o.shiftround = true -- Round indents to a multiple of shiftwidth
-vim.o.smartindent = true
 vim.o.virtualedit = 'block' -- Visual block can go past line ends
 vim.o.ignorecase = true -- Case-insensitive search...
 vim.o.smartcase = true -- ...unless the pattern has capitals
