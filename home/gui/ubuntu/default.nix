@@ -11,6 +11,8 @@ let
   mod = "Mod1"; # Alt.
   lock = "i3lock -c 000000"; # black screen
   refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
+  # The window manager's keys, shared with the Mac's AeroSpace.
+  wm = import ../keys.nix { inherit lib; };
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
   # Rose Pine Dawn notification colours from the official mako port (mako
@@ -186,32 +188,64 @@ in
         map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
           (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
       terminal = "kitty zellij"; # Alt+Enter: a terminal in its own zellij session (below)
-      menu = "rofi -show run";
       # Borders only, no title bar on top of each window.
       window.titlebar = false;
       floating.titlebar = false;
 
-      # mkOptionDefault: add to i3's default keys rather than replace them.
-      keybindings = lib.mkOptionDefault {
-        "${mod}+n" = "exec ${lock}";
-        "${mod}+Shift+less" = "move workspace to output left";
-        "${mod}+Shift+greater" = "move workspace to output right";
-        # Volume, mute and brightness keys (under GNOME its settings daemon
-        # handles them; it doesn't run under i3). Brightness asks logind, so
-        # no root; on a desk without a backlight it does nothing.
-        # The volume ones also refresh the bar at once (USR1), rather than at
-        # its next 5-second update.
-        "XF86AudioRaiseVolume" =
-          "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
-        "XF86AudioLowerVolume" =
-          "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
-        "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && ${refreshBar}";
-        "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
-        "XF86MonBrightnessUp" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
-        "XF86MonBrightnessDown" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
-        "--release ${mod}+p" =
-          "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
-      };
+      # Every key, not i3's defaults plus some: the shared ones (../keys.nix,
+      # the Mac's AeroSpace uses the same keys) and a few of i3's own.
+      keybindings =
+        let
+          k = wm.keys;
+          ws = n: if n == "0" then "10" else n; # key 0 is workspace 10
+        in
+        lib.mergeAttrsList (
+          map (n: {
+            "${mod}+${n}" = "workspace number ${ws n}";
+            "${mod}+Shift+${n}" = "move container to workspace number ${ws n}";
+          }) wm.workspaces
+          ++ map (a: {
+            "${mod}+${a}" = "focus ${lib.toLower a}";
+            "${mod}+Shift+${a}" = "move ${lib.toLower a}";
+          }) wm.arrows
+        )
+        // {
+          "${mod}+${k.terminal}" = "exec kitty zellij";
+          "${mod}+${k.launcher}" = "exec rofi -show run";
+          "${mod}+${k.close}" = "kill";
+          "${mod}+${k.fullscreen}" = "fullscreen toggle";
+          "${mod}+${k.floating}" = "floating toggle";
+          "${mod}+${k.resize}" = "mode resize";
+          "${mod}+${k.flipSplit}" = "layout toggle split";
+          "${mod}+${k.lock}" = "exec ${lock}";
+          "--release ${mod}+${k.screenshot}" =
+            "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
+          "${mod}+${k.reload}" = "restart"; # (reloads the config too)
+          "${mod}+${k.monitorLeft}" = "move workspace to output left";
+          "${mod}+${k.monitorRight}" = "move workspace to output right";
+
+          # i3's own, with no AeroSpace counterpart.
+          "${mod}+h" = "split h"; # the next window opens beside this one
+          "${mod}+v" = "split v"; # ...or below it
+          "${mod}+a" = "focus parent";
+          "${mod}+minus" = "scratchpad show";
+          "${mod}+Shift+minus" = "move scratchpad";
+          "${mod}+Shift+e" = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
+
+          # Volume, mute and brightness keys (under GNOME its settings daemon
+          # handles them; it doesn't run under i3). Brightness asks logind, so
+          # no root; on a desk without a backlight it does nothing.
+          # The volume ones also refresh the bar at once (USR1), rather than at
+          # its next 5-second update.
+          "XF86AudioRaiseVolume" =
+            "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
+          "XF86AudioLowerVolume" =
+            "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
+          "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && ${refreshBar}";
+          "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+          "XF86MonBrightnessUp" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
+          "XF86MonBrightnessDown" = "exec --no-startup-id ${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
+        };
 
       startup = [
         # Apps from the desktop's autostart folders (network applet etc.).
