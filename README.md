@@ -37,9 +37,8 @@ My terminal environment, managed with Nix + Home Manager.
 │           ├── default.nix  # Mac layer
 │           └── polaris.nix
 └── darwin                   # the Macs' system settings (nix-darwin)
-    ├── default.nix          # every Mac: Nix, Homebrew, kitty and AeroSpace
-    ├── preferences.nix      #   keyboard, trackpad, Dock, language and region
-    └── polaris.nix          # this Mac: its account, name and apps
+    ├── default.nix          # every Mac: Nix, Homebrew, kitty, AeroSpace, preferences
+    └── polaris.nix          # this Mac: its account, name, keyboard and apps
 ```
 
 Each layer imports the one above it, so a machine only names its last layer.
