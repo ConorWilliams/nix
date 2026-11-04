@@ -5,6 +5,6 @@
   volume = "󰕾"; # nf-md-volume_high
   muted = "󰖁"; # nf-md-volume_off
   charging = "󰂄"; # nf-md-battery_charging
-  plugged = "󰚥"; # nf-md-power_plug: on power, not charging (full)
-  battery = "󰁹"; # nf-md-battery: on battery
+  plugged = "󱟢"; # nf-md-battery_check: on power, not charging (full, or held at a limit)
+  battery = "󰁾"; # nf-md-battery_50: on battery, at any charge
 }
