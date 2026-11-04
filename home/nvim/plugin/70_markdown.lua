@@ -14,9 +14,12 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
--- The compiled .spl isn't committed: rebuild it when the word list is newer
--- (zg updates both, but a git pull only brings the .add).
+-- `zg` saves words to this repo's list (since nvim 0.12 it otherwise uses
+-- one under ~/.local/share). The compiled .spl isn't committed: rebuild it
+-- when the word list is newer (zg updates both, but a git pull only brings
+-- the .add).
 local words = vim.fn.stdpath('config') .. '/spell/en.utf-8.add'
+vim.o.spellfile = words
 if vim.fn.getftime(words) > vim.fn.getftime(words .. '.spl') then
   vim.cmd('silent mkspell! ' .. vim.fn.fnameescape(words))
 end
