@@ -10,13 +10,17 @@
 {
   imports = [ ../. ]; # the server layer
 
-  # Each machine's font sizes, set in its own file (e.g. ubuntu/hubble.nix;
-  # the i3 bar's is in the Ubuntu layer).
+  # Each machine's font sizes, set in its own file (e.g. ubuntu/hubble.nix).
   options.desktop = {
     fontSize = lib.mkOption {
       type = lib.types.number;
       default = 20;
       description = "Font size of the terminal (kitty), and on Linux the launcher (rofi) and notifications (dunst).";
+    };
+    barFontSize = lib.mkOption {
+      type = lib.types.number;
+      default = 14;
+      description = "Font size of the bar at the bottom of the screen (i3's, or SketchyBar on the Mac).";
     };
   };
 
