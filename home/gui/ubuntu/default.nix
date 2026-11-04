@@ -123,15 +123,6 @@ in
       };
     };
 
-  # Each Alt+Enter terminal is its own zellij session (i3, below), so on the
-  # desks closing the window ends the session, and ended ones aren't kept
-  # to resurrect: no pile of sessions. (Not on servers, where a dropped ssh
-  # connection must leave the session running.)
-  programs.zellij.settings = {
-    on_force_close = "quit";
-    session_serialization = false;
-  };
-
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
