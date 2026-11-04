@@ -4,7 +4,7 @@
 -- General
 vim.o.undofile = true -- Persistent undo across sessions
 vim.o.confirm = true -- Ask to save instead of failing on :q with changes
-vim.opt.shortmess:append('Wc') -- No "written" or completion-menu messages (as in LazyVim)
+vim.opt.shortmess:append('W') -- No "written" message on save
 vim.o.timeoutlen = 300 -- Faster key-sequence timeout
 -- System clipboard locally; over SSH keep yanks inside nvim
 vim.o.clipboard = vim.env.SSH_CONNECTION and '' or 'unnamedplus'
