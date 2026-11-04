@@ -58,7 +58,7 @@
       name:
       let
         isMac = pkgs.stdenv.hostPlatform.isDarwin;
-        atScreen = if isMac then "not set -q SSH_CONNECTION" else "set -q DISPLAY";
+        atScreen = if isMac then "not set -q SSH_CONNECTION" else "set -q DISPLAY; and not set -q SSH_CONNECTION";
         newWindow = if isMac then "open -na kitty --args" else "kitty --detach";
       in
       {
