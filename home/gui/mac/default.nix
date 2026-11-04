@@ -53,9 +53,9 @@
             ${key k.floating} = "layout floating tiling";
             ${key k.resize} = "mode resize";
             ${key k.flipSplit} = "layout tiles horizontal vertical";
-            # Puts the screens to sleep, which locks when a password is
-            # required right after sleep (System Settings, Lock Screen).
-            ${key k.lock} = "exec-and-forget pmset displaysleepnow";
+            # Invoke macOS's Lock Screen shortcut (Ctrl+Cmd+Q).
+            ${key k.lock} =
+              "exec-and-forget /usr/bin/osascript -e 'tell application \"System Events\" to keystroke \"q\" using {control down, command down}'";
             ${key k.screenshot} =
               "exec-and-forget mkdir -p ~/Pictures && screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png";
             ${key k.reload} = "reload-config";
