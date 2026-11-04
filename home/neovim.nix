@@ -34,6 +34,7 @@ in
       nixd
       nixfmt
       bash-language-server
+      shellcheck # bash-language-server's lint warnings come from it
       shfmt
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
