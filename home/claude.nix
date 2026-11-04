@@ -1,5 +1,6 @@
 # Claude Code, its settings and status line.
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -13,10 +14,10 @@ let
   # Status line script.
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
-    runtimeInputs = with pkgs; [
-      jq
-      git
-      hostname
+    runtimeInputs = [
+      pkgs.jq
+      config.programs.git.package # the git configured in git.nix
+      pkgs.hostname
     ];
     text = builtins.readFile ./claude/statusline.sh;
   };
