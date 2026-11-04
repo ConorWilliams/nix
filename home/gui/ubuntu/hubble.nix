@@ -40,7 +40,7 @@ in
       # (and their USB hubs) wake from sleep. So inputplug sets US each time a
       # keyboard is enabled, and for those already there at login (-0).
       {
-        command = "${pkgs.inputplug}/bin/inputplug -0 -c ${usKeyboard}";
+        command = "${lib.getExe pkgs.inputplug} -0 -c ${usKeyboard}";
         notification = false;
       }
       # Speed up the Logitech mouse.
