@@ -9,10 +9,7 @@
 }:
 
 {
-  imports = [
-    ../. # the GUI layer
-    ./bar.nix # SketchyBar, at the bottom
-  ];
+  imports = [ ../. ]; # the GUI layer
 
   # The window manager, AeroSpace, from Nix. Home Manager starts it at login
   # (a launchd agent, which also restarts it if it stops) and reloads its
@@ -76,6 +73,12 @@
         };
       };
   };
+
+  # AeroSpace's menu bar icon shows the workspaces as i3's bar does: those
+  # with windows or on a screen, in order, the focused one filled and one on
+  # another screen dimmed. (Its "i3 style ordered", one of the Experimental
+  # UI Settings in its menu.)
+  targets.darwin.defaults."bobko.aerospace".displayStyle = "i3Ordered";
 
   # These two 18.24.4 integration tests mistake unreadable interpreter
   # processes for a live Pi session under macOS build-user isolation. Keep the
