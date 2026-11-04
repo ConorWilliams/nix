@@ -22,12 +22,10 @@
       ];
   });
 
-  # Expose the casks' command-line helpers; Home Manager's Nix profile takes
-  # precedence.
-  home.sessionPath = [
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
-  ];
+  # Homebrew's command-line helpers (the casks'), after Nix's tools on PATH
+  # so a Homebrew formula never shadows them. (In fish, which every shell
+  # here hands over to; home.sessionPath would put them first.)
+  programs.fish.shellInit = "fish_add_path --append --path /opt/homebrew/bin /opt/homebrew/sbin";
 
   # Everything on the Mac: system settings (darwin/mac.nix), then home.
   # `hms` stays home only, like everywhere else. nh picks
