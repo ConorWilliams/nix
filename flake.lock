@@ -200,6 +200,7 @@
         "rose-pine-i3": "rose-pine-i3",
         "rose-pine-lazygit": "rose-pine-lazygit",
         "rose-pine-mako": "rose-pine-mako",
+        "rose-pine-palette": "rose-pine-palette",
         "rose-pine-rofi": "rose-pine-rofi",
         "rose-pine-starship": "rose-pine-starship",
         "rose-pine-tm-theme": "rose-pine-tm-theme",
@@ -317,6 +318,22 @@
       "original": {
         "owner": "rose-pine",
         "repo": "mako",
+        "type": "github"
+      }
+    },
+    "rose-pine-palette": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1762352815,
+        "narHash": "sha256-r5CG6HQHpq1bR6XR+TgY3MBDjXftQojf1rMTx0cHz5g=",
+        "owner": "rose-pine",
+        "repo": "rose-pine-palette",
+        "rev": "92af52b465ab6e47437aca223c9b8d3009a2023b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "rose-pine-palette",
         "type": "github"
       }
     },

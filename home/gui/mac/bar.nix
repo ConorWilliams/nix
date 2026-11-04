@@ -1,11 +1,12 @@
 # The Mac's bar (SketchyBar), at the bottom of every screen like i3's:
 # AeroSpace's workspaces on the left, and on the right what i3status shows
-# on Linux (volume, memory, the battery, the date and time), in i3's
-# default bar colours.
+# on Linux (volume, memory, the battery, the date and time), in Rose Pine
+# Dawn like the terminals.
 {
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -14,27 +15,35 @@ let
   height = config.desktop.barFontSize * 2;
   font = "${config.programs.kitty.font.name}:Regular:${toString (config.desktop.barFontSize * 1.0)}";
 
-  # i3bar's defaults (0xAARRGGBB): the focused workspace, one visible on
-  # another screen, any other; and i3status's colour for a warning.
+  # Rose Pine Dawn's colours by role (base, text, rose...), from the official
+  # palette, as SketchyBar spells them (0xAARRGGBB).
+  dawn = lib.listToAttrs (
+    map (
+      c: lib.nameValuePair c.role "0xff${c.hex}"
+    ) (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn
+  );
   colours = {
-    bar = "0xff000000";
-    text = "0xffffffff";
+    bar = dawn.base;
+    inherit (dawn) text;
+    # The workspaces: the focused one outlined in rose (as the official i3
+    # port outlines the focused window), one shown on another screen
+    # raised, any other muted.
     focused = {
-      border = "0xff4c7899";
-      background = "0xff285577";
-      text = "0xffffffff";
+      border = dawn.rose;
+      background = dawn.overlay;
+      inherit (dawn) text;
     };
     visible = {
-      border = "0xff333333";
-      background = "0xff5f676a";
-      text = "0xffffffff";
+      border = dawn.overlay;
+      background = dawn.overlay;
+      inherit (dawn) text;
     };
     other = {
-      border = "0xff333333";
-      background = "0xff222222";
-      text = "0xff888888";
+      border = dawn.base;
+      background = dawn.base;
+      text = dawn.muted;
     };
-    warning = "0xffffff00";
+    warning = dawn.love; # muted, or memory running out
   };
 
   # Each workspace's button: shown if it has windows or is on a screen, on
@@ -130,7 +139,7 @@ in
       ${lib.concatMapStrings (ws: ''
         sketchybar --add item space.${ws} left --set space.${ws} label=${ws} drawing=off \
           padding_left=0 padding_right=0 label.padding_left=8 label.padding_right=8 \
-          background.height=${toString height} background.border_width=1 \
+          background.height=${toString height} background.border_width=2 \
           click_script="aerospace workspace ${ws}"
       '') (import ../keys.nix).workspaces}
       sketchybar --add item workspaces left \

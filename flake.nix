@@ -33,6 +33,10 @@
     };
 
     # Official Rose Pine ports.
+    rose-pine-palette = {
+      url = "github:rose-pine/rose-pine-palette"; # the colours, by role
+      flake = false;
+    };
     rose-pine-tm-theme = {
       url = "github:rose-pine/tm-theme";
       flake = false;
