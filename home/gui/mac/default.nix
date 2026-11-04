@@ -1,6 +1,11 @@
 # Mac layer: the macOS counterpart of ubuntu/, on top of the GUI layer.
 # Mac GUI apps are Homebrew casks in darwin/ (every Mac's, and each one's).
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [ ../. ]; # the GUI layer
@@ -31,9 +36,10 @@
             }) wm.arrows
           )
           // {
-            # A terminal in its own zellij session, as on the desks (full
-            # path: apps started here don't get the shell's PATH).
-            ${key k.terminal} = ''exec-and-forget open -n -a kitty --args "$HOME/.nix-profile/bin/zellij"'';
+            # A terminal in its own zellij session, as on the desks (by its
+            # store path: apps started here don't get the shell's PATH).
+            ${key k.terminal} =
+              "exec-and-forget open -n -a kitty --args ${lib.getExe config.programs.zellij.package}";
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
             ${key k.close} = "close";
             ${key k.fullscreen} = "fullscreen";
