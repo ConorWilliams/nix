@@ -30,6 +30,7 @@ My terminal environment, managed with Nix + Home Manager.
 │   └── gui
 │       ├── default.nix      # GUI layer: desks on any OS
 │       ├── keys.nix         #   window manager keys, shared by i3 and AeroSpace
+│       ├── icons.nix        #   the bars' icons, shared by i3status and SketchyBar
 │       ├── ubuntu
 │       │   ├── default.nix  # Ubuntu layer
 │       │   ├── hubble.nix
