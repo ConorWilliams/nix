@@ -181,23 +181,29 @@
       # `nix fmt`
       formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 
-      # Lets `nix flake check` test every home config.
-      checks =
-        nixpkgs.lib.recursiveUpdate
-          (nixpkgs.lib.genAttrs systems (
-            system:
-            nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (
-              nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system) self.homeConfigurations
-            )
-          ))
-          {
-            # ...and the Mac's system settings (nix-darwin).
-            aarch64-darwin.darwin-polaris = self.darwinConfigurations.polaris.system;
-          };
+      # Lets `nix flake check` test every home config, and each Mac's system
+      # settings (nix-darwin).
+      checks = nixpkgs.lib.genAttrs systems (
+        system:
+        let
+          onSystem = nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system);
+        in
+        nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (onSystem self.homeConfigurations)
+        // nixpkgs.lib.mapAttrs' (host: c: nixpkgs.lib.nameValuePair "darwin-${host}" c.system) (
+          onSystem self.darwinConfigurations
+        )
+      );
 
-      # The Macs' system settings only (nix-darwin), by hostname, like hosts.
-      darwinConfigurations.polaris = nix-darwin.lib.darwinSystem {
-        modules = [ ./darwin/polaris.nix ];
-      };
+      # The Macs' system settings (nix-darwin): darwin/<hostname>.nix for
+      # each Mac in hosts.
+      darwinConfigurations = nixpkgs.lib.mapAttrs (
+        host: machine:
+        nix-darwin.lib.darwinSystem {
+          modules = [
+            ./darwin/${host}.nix
+            { nixpkgs.hostPlatform = machine.system; }
+          ];
+        }
+      ) (nixpkgs.lib.filterAttrs (_: m: nixpkgs.lib.hasSuffix "-darwin" m.system) hosts);
     };
 }

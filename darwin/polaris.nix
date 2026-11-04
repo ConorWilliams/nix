@@ -15,8 +15,6 @@ in
 {
   imports = [ ./. ];
 
-  nixpkgs.hostPlatform = "aarch64-darwin";
-
   # nix-darwin's equivalent of home.stateVersion. Set once, never bump.
   system.stateVersion = 6;
 
