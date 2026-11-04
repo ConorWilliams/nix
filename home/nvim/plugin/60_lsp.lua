@@ -23,13 +23,18 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
     if not client or client.name == 'copilot' then return end
     local map = function(mode, lhs, rhs, desc)
-      vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc, nowait = true })
+      vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc })
     end
     -- Through the picker (55_picker.lua): jumps straight there if there's
     -- only one result, else lists them with a preview.
     map('n', 'gd', Snacks.picker.lsp_definitions, 'Goto definition')
     map('n', 'gD', Snacks.picker.lsp_declarations, 'Goto declaration')
-    map('n', 'gr', Snacks.picker.lsp_references, 'References') -- nowait: skips the built-in gr* keys
+    -- nowait: at once, not waiting to see if it's one of the built-in gr* keys
+    vim.keymap.set('n', 'gr', Snacks.picker.lsp_references, {
+      buffer = ev.buf,
+      desc = 'References',
+      nowait = true,
+    })
     map('n', 'gI', Snacks.picker.lsp_implementations, 'Goto implementation')
     map('n', 'gy', Snacks.picker.lsp_type_definitions, 'Goto type definition')
     map('n', 'gK', vim.lsp.buf.signature_help, 'Signature help')
