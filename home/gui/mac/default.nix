@@ -48,14 +48,16 @@
             ${key k.terminal} =
               "exec-and-forget open -n -a kitty --args ${lib.getExe config.programs.zellij.package}";
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
-            ${key k.close} = "close";
+            # Borderless Kitty has no AX close button; each terminal is a
+            # separate app instance, so quit it when closing its last window.
+            ${key k.close} = "close --quit-if-last-window";
             ${key k.fullscreen} = "fullscreen";
             ${key k.floating} = "layout floating tiling";
             ${key k.resize} = "mode resize";
             ${key k.flipSplit} = "layout tiles horizontal vertical";
-            # Invoke macOS's Lock Screen shortcut (Ctrl+Cmd+Q).
+            # Lock first (Ctrl+Cmd+Q), then turn off the display.
             ${key k.lock} =
-              "exec-and-forget /usr/bin/osascript -e 'tell application \"System Events\" to keystroke \"q\" using {control down, command down}'";
+              "exec-and-forget /usr/bin/osascript -e 'tell application \"System Events\" to keystroke \"q\" using {control down, command down}' && /usr/bin/pmset displaysleepnow";
             ${key k.screenshot} =
               "exec-and-forget mkdir -p ~/Pictures && screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png";
             ${key k.reload} = "reload-config";
