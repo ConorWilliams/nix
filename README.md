@@ -79,7 +79,7 @@ GUI apps are declared in `darwin/default.nix` (every Mac's) and
 `darwin/polaris.nix` (this one's). System switches uninstall undeclared
 Homebrew packages while preserving app data. Homebrew updates and upgrades are
 explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace's
-settings live in `home/gui/mac/aerospace.toml`; its keys come from
+config is written by `home/gui/mac/default.nix`, its keys from
 `home/gui/keys.nix`, shared with i3 (Cmd as the leader where i3 uses Alt). It
 starts itself at login.
 
