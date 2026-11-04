@@ -1,3 +1,5 @@
+# Ubuntu layer: the desks (i3 and its bar, the launcher, notifications,
+# the login session), on top of the GUI layer.
 {
   config,
   options,
