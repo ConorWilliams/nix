@@ -1,5 +1,10 @@
 # Claude Code, its settings and status line.
-{ pkgs, inputs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
   # numtide/llm-agents.nix: updated daily
@@ -26,7 +31,7 @@ in
     settings = {
       statusLine = {
         type = "command";
-        command = "${statusline}/bin/claude-statusline";
+        command = lib.getExe statusline;
       };
       # Claude's own light palette; relies on COLORTERM=truecolor (default.nix)
       theme = "light";
