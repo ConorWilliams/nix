@@ -38,7 +38,7 @@ My terminal environment, managed with Nix + Home Manager.
 │           ├── default.nix  # Mac layer
 │           └── polaris.nix
 └── darwin                   # the Macs' system settings (nix-darwin)
-    ├── default.nix          # every Mac: Nix, Homebrew, kitty, AeroSpace, preferences
+    ├── default.nix          # every Mac: Nix, Homebrew, kitty, preferences
     └── polaris.nix          # this Mac: its account, name, keyboard and apps
 ```
 
@@ -79,10 +79,11 @@ account's login shell; Home Manager hands interactive sessions over to Fish.
 GUI apps are declared in `darwin/default.nix` (every Mac's) and
 `darwin/polaris.nix` (this one's). System switches uninstall undeclared
 Homebrew packages while preserving app data. Homebrew updates and upgrades are
-explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace's
-config is written by `home/gui/mac/default.nix`, its keys from
-`home/gui/keys.nix`, shared with i3 (Cmd as the leader where i3 uses Alt). It
-starts itself at login.
+explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace
+comes from Nix, set up in `home/gui/mac/default.nix` (Home Manager starts it
+at login and reloads it on `hms`), its keys from `home/gui/keys.nix`, shared
+with i3 (Cmd as the leader where i3 uses Alt). After an AeroSpace update,
+macOS may ask again to allow it under Privacy & Security, Accessibility.
 
 ## Day to day
 
