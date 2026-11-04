@@ -1,7 +1,7 @@
 -- Picker: snacks.nvim's fuzzy finder for files, grep, buffers, symbols,
 -- help, ... and its file explorer, with the custom full-screen layout. snacks is a
--- collection of modules; the picker, explorer, smooth scrolling, bigfile
--- and words are switched on here (bufdelete is a plain function), the
+-- collection of modules; the picker, explorer, smooth scrolling, bigfile,
+-- words and indent guides are switched on here (bufdelete is a plain function), the
 -- start screen in 85_start.lua and lazygit's float in 75_git.lua.
 -- Inside the picker: type to filter, C-j/C-k move, Enter opens, C-v/C-s
 -- split, Tab multi-selects, Esc closes, ? shows all its keys.

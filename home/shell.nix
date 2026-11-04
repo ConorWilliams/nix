@@ -144,7 +144,7 @@ in
   programs.starship = {
     enable = true;
     # Once a command runs, its prompt shrinks to just the ❯ in the scrollback
-    # (in fish; the function below draws it, still red after a failure and
+    # (in fish; starship_transient_prompt_func, above, draws it, still red after a failure and
     # ❮ in vi normal mode).
     enableTransience = true;
     settings = {

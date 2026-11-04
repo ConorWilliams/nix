@@ -129,7 +129,7 @@
         };
       };
 
-      # Every other machine (remote servers) gets the base layer
+      # Every other machine (remote servers) gets the base layer.
       server = {
         system = "x86_64-linux";
         module = ./home;

@@ -1,3 +1,4 @@
+# luna: the laptop, on top of the Ubuntu layer (./.).
 { ... }:
 
 let

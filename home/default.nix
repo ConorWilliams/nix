@@ -105,7 +105,8 @@
     })
   ];
 
-  # Shell aliases, for every shell Home Manager manages (fish, bash).
+  # Shell aliases, for every shell Home Manager manages (fish, bash, and zsh
+  # on the Mac).
   home.shellAliases = {
     hms = "nh home switch"; # the flake comes from NH_FLAKE (programs.nh)
     icat = "kitten icat";
