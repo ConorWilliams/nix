@@ -65,30 +65,25 @@ let
     sketchybar "''${args[@]}"
   '';
 
-  # The volume's icon by level, and its percentage (0 when muted). The
-  # first time, before any change, it asks macOS.
+  # The volume's icon (muted or not, as i3status shows it) and its
+  # percentage, 0 when muted. The first time, before any change, it asks macOS.
   volume = pkgs.writeShellScript "bar-volume" ''
     vol=''${INFO:-$(osascript -e 'output volume of (get volume settings)')}
-    case $vol in
-    0) icon=${icons.muted} ;;
-    [0-9] | [1-2][0-9]) icon=${icons.volumeLow} ;;
-    [3-5][0-9]) icon=${icons.volumeMedium} ;;
-    *) icon=${icons.volume} ;;
-    esac
+    icon=${icons.volume}
+    [ "$vol" = 0 ] && icon=${icons.muted}
     sketchybar --set "$NAME" icon="$icon" label="$vol%"
   '';
 
-  # The battery's icon (charging, on power when full, or else its level),
-  # and its percentage; nothing without a battery.
+  # The battery's icon (charging, on power when full, or on battery, as
+  # i3status shows it) and its percentage; nothing without a battery.
   battery = pkgs.writeShellScript "bar-battery" ''
     line=$(pmset -g batt | grep -m1 InternalBattery) || {
       sketchybar --set "$NAME" drawing=off
       exit 0
     }
     percent=$(grep -Eo '[0-9]+%' <<<"$line")
-    levels=(${lib.concatStringsSep " " icons.batteryLevels} ${icons.battery})
     case $line in
-    *discharging*) icon=''${levels[$(((''${percent%\%} - 1) / 10))]} ;;
+    *discharging*) icon=${icons.battery} ;;
     *charged* | *"not charging"*) icon=${icons.plugged} ;;
     *) icon=${icons.charging} ;;
     esac
