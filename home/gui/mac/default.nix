@@ -9,7 +9,10 @@
 }:
 
 {
-  imports = [ ../. ]; # the GUI layer
+  imports = [
+    ../. # the GUI layer
+    ./bar.nix # SketchyBar, at the bottom
+  ];
 
   # The window manager, AeroSpace, from Nix. Home Manager starts it at login
   # (a launchd agent, which also restarts it if it stops) and reloads its
