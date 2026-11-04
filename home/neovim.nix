@@ -46,7 +46,8 @@ in
       copilot-language-server
     ];
 
-    # All loaded at startup, before nvim/plugin/*.lua (which set them up).
+    # All on the runtime path at startup, so nvim/plugin/*.lua can require()
+    # and set them up.
     plugins = with pkgs.vimPlugins; [
       rose-pine # (30_ui.lua)
       mini-nvim
@@ -114,8 +115,7 @@ in
   '';
 
   # Live symlink into the repo (not a store copy): edits apply without a
-  # switch. The repo is where nh
-  # expects it (~/nix, home/default.nix).
+  # switch. The repo is where nh expects it (~/nix, home/default.nix).
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.programs.nh.flake}/home/nvim";
 }

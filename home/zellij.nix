@@ -1,6 +1,7 @@
-# zellij, the terminal multiplexer. Not started automatically: run
-# `zellij`, or `zellij attach -c main` to resume a named session (over ssh,
-# `ssh -t host zellij attach -c main`: zellij needs a terminal).
+# zellij, the terminal multiplexer. Not started by the shell: run `zellij`,
+# or `zellij attach -c main` to resume a named session (over ssh, `zzh host
+# main`). On the desks, Leader+Enter opens a terminal in a new session
+# (home/gui).
 { inputs, ... }:
 
 let
@@ -22,7 +23,8 @@ let
     in
     bind "Left" "left" + bind "Down" "down" + bind "Up" "up" + bind "Right" "right";
 
-  # The keybinding preset (copied; see the comment at the top of the file),
+  # The keybinding preset (copied; see the comment at the top of
+  # zellij/keybinds-unlock-first.kdl),
   # with the navigation bindings placed inside its normal/locked block:
   # zellij only reads the first top-level keybinds block.
   keybinds = builtins.replaceStrings [ "// NAVIGATION" ] [ navigation ] (

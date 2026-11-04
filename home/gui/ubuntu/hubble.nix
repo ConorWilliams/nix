@@ -1,3 +1,4 @@
+# hubble: the desk with three monitors, on top of the Ubuntu layer (./.).
 { lib, pkgs, ... }:
 
 let
@@ -17,7 +18,7 @@ in
   desktop.barFontSize = 16;
 
   xsession.windowManager.i3.config = {
-    # Thicker window borders than the Ubuntu layer's 2px: on these 4K
+    # Thicker window borders than i3's default 2px: on these 4K
     # screens the focused window's thin outline is easy to miss.
     window.border = 5;
     floating.border = 5;

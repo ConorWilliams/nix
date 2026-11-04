@@ -31,7 +31,7 @@ require('vim._core.ui2').enable({ msg = { targets = 'msg' } })
 require('go-up').setup()
 
 -- mini.nvim: one repo of small modules (icons, statusline, hipatterns and
--- tabline here; ai and surround in 50_editing.lua). Icons for file types,
+-- tabline here; ai, surround and pairs in 50_editing.lua). Icons for file types,
 -- used by which-key and others.
 require('mini.icons').setup()
 

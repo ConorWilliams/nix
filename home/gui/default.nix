@@ -1,5 +1,6 @@
-# GUI layer: machines with a screen, on any OS. Adds the
-# terminal's config and font on top of the server layer.
+# GUI layer: machines with a screen, on any OS, on top of the server layer:
+# the terminal (kitty) and its font, zellij sessions that end with their
+# window, and zzh/zosh opening a window of their own from inside zellij.
 {
   config,
   lib,
