@@ -21,8 +21,9 @@
   };
 
   config = {
-    # kitty's config. The app itself is installed outside Nix, because a
-    # Nix-built kitty can't use Ubuntu's graphics drivers.
+    # kitty's config. The app itself is installed outside Nix: on Ubuntu,
+    # because a Nix-built kitty can't use its graphics drivers; on the Mac,
+    # as a Homebrew cask (darwin/default.nix).
     programs.kitty = {
       enable = true;
       package = null;
@@ -35,7 +36,7 @@
       settings.hide_window_decorations = "titlebar-only";
     };
 
-    # Each Alt+Enter terminal (i3, AeroSpace) is its own zellij session, so
+    # Each Leader+Enter terminal (i3, AeroSpace) is its own zellij session, so
     # on machines with a screen closing the window ends the session, and
     # ended ones aren't kept to resurrect: no pile of sessions. (Not on
     # servers, where a dropped ssh connection must leave the session
