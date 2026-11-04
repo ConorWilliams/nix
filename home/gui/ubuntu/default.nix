@@ -46,17 +46,7 @@ let
     };
 in
 {
-  imports = [
-    ../. # the GUI layer
-    # The i3 bar's font size, set per machine like desktop.fontSize.
-    {
-      options.desktop.barFontSize = lib.mkOption {
-        type = lib.types.number;
-        default = 14;
-        description = "Font size of the i3 bar.";
-      };
-    }
-  ];
+  imports = [ ../. ]; # the GUI layer
 
   # Lets every app (not just Nix ones) find fonts installed by Nix. (The
   # Mac has its own way: Home Manager links them into ~/Library/Fonts.)
