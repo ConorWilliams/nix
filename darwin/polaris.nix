@@ -21,7 +21,6 @@ in
   # The user that per-user system settings (Homebrew, macOS defaults)
   # apply to.
   system.primaryUser = "main";
-  users.users.main.home = "/Users/main";
 
   # Its name (kept by ./default.nix; set it by hand the first time: README).
   networking.hostName = "polaris";
