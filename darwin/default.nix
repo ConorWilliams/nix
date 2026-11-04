@@ -5,8 +5,6 @@
 { ... }:
 
 {
-  imports = [ ./preferences.nix ];
-
   # Upstream Nix; nix-darwin manages its daemon and settings.
   nix.settings.experimental-features = [
     "nix-command"
@@ -28,5 +26,38 @@
     ];
     # Removing a declaration uninstalls the package, preserving its app data.
     onActivation.cleanup = "uninstall";
+  };
+
+  # Keyboard: Caps Lock is Escape, and keys repeat quickly.
+  system.keyboard = {
+    enableKeyMapping = true;
+    remapCapsLockToEscape = true;
+  };
+
+  system.defaults = {
+    NSGlobalDomain = {
+      InitialKeyRepeat = 15;
+      KeyRepeat = 2;
+      "com.apple.trackpad.scaling" = 2.0;
+    };
+
+    # An empty Dock that hides itself.
+    dock = {
+      autohide = true;
+      persistent-apps = [ ];
+      persistent-others = [ ];
+    };
+
+    # nix-darwin writes these to both built-in and Bluetooth trackpad domains.
+    trackpad = {
+      Clicking = false; # no tap to click
+      TrackpadRightClick = true; # two fingers right-click
+    };
+
+    # Language and region (no dedicated nix-darwin options for these).
+    CustomUserPreferences.NSGlobalDomain = {
+      AppleLanguages = [ "en-GB" ];
+      AppleLocale = "en_GB";
+    };
   };
 }
