@@ -5,7 +5,7 @@
 { config, ... }:
 
 {
-  # Each Mac's name (networking.hostName, in its file) for all three of
+  # Each Mac's name (networking.hostName, from flake.nix) for all three of
   # macOS's names, so it stays put: macOS renames a Mac on a network name
   # clash (adding -2), and the flake finds its configs by this name.
   networking = {
