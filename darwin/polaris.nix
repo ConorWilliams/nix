@@ -18,13 +18,6 @@ in
   # nix-darwin's equivalent of home.stateVersion. Set once, never bump.
   system.stateVersion = 6;
 
-  # The user that per-user system settings (Homebrew, macOS defaults)
-  # apply to.
-  system.primaryUser = "main";
-
-  # Its name (kept by ./default.nix; set it by hand the first time: README).
-  networking.hostName = "polaris";
-
   # Its apps (Homebrew casks), added to every Mac's (./default.nix).
   homebrew.casks = [
     "adobe-creative-cloud"

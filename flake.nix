@@ -187,13 +187,19 @@
       );
 
       # The Macs' system settings (nix-darwin): darwin/<hostname>.nix for
-      # each Mac in hosts.
+      # each Mac in hosts, with its platform, name and account from there.
       darwinConfigurations = lib.mapAttrs (
         host: machine:
         nix-darwin.lib.darwinSystem {
           modules = [
             ./darwin/${host}.nix
-            { nixpkgs.hostPlatform = machine.system; }
+            {
+              nixpkgs.hostPlatform = machine.system;
+              networking.hostName = host;
+              # The account that per-user settings (Homebrew, macOS
+              # defaults) apply to.
+              system.primaryUser = builtins.head (machine.users or users);
+            }
           ];
         }
       ) (lib.filterAttrs (_: m: lib.hasSuffix "-darwin" m.system) hosts);
