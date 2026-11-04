@@ -256,9 +256,8 @@ in
           format_muted = "${icons.muted} %volume";
         };
       };
-      # The icon says charging, on power (full), or on battery (i3status
-      # can't pick one by level, as the Mac's does). Nothing at all without
-      # a battery: i3bar skips a block with no text.
+      # The icon says charging, on power (full), or on battery. Nothing at
+      # all without a battery: i3bar skips a block with no text.
       "battery all" = {
         position = 1;
         settings = {
