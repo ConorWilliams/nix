@@ -4,6 +4,7 @@
   lib,
   pkgs,
   inputs,
+  dawn,
   ...
 }:
 
@@ -15,35 +16,6 @@ let
   wm = import ../keys.nix;
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
-  # Rose Pine Dawn notification colours from the official mako port (mako
-  # is Wayland-only; dunst has only a community port): its key=value
-  # lines, normal ones first, then those for [urgency=high].
-  mako =
-    let
-      port = builtins.readFile "${inputs.rose-pine-mako}/theme/rose-pine-dawn.theme";
-      parse =
-        text:
-        lib.listToAttrs (
-          map (
-            line:
-            let
-              kv = lib.splitString "=" line;
-            in
-            lib.nameValuePair (lib.head kv) (lib.last kv)
-          ) (lib.filter (lib.hasInfix "=") (lib.splitString "\n" text))
-        );
-      sections = lib.splitString "[urgency=high]" port;
-      normal = parse (lib.head sections);
-    in
-    # Fail the build rather than silently losing colours if the port
-    # ever changes its layout.
-    assert lib.assertMsg (
-      lib.length sections == 2 && normal ? background-color
-    ) "rose-pine-mako: unexpected theme layout";
-    {
-      inherit normal;
-      urgent = parse (lib.last sections);
-    };
 in
 {
   imports = [ ../. ]; # the GUI layer
@@ -90,9 +62,12 @@ in
   # i3, so dunst from Nix, started by the first notification.
   services.dunst =
     let
+      # Rose Pine Dawn (../default.nix), as the official port for mako (a
+      # Wayland dunst) colours notifications, except the frame: muted, as the
+      # port's (highlight high) isn't in the palette.
       colours = {
-        background = mako.normal.background-color;
-        foreground = mako.normal.text-color;
+        background = dawn.overlay;
+        foreground = dawn.text;
       };
     in
     {
@@ -101,16 +76,16 @@ in
         global = {
           inherit font;
           frame_width = 2;
-          frame_color = mako.normal.border-color;
+          frame_color = dawn.muted;
           separator_color = "frame";
-          highlight = lib.removePrefix "over " mako.normal.progress-color; # progress bars
+          highlight = dawn.pine; # progress bars
           corner_radius = 8;
           width = "(300, 600)"; # grows with the text, up to 600 px
         };
         urgency_low = colours;
         urgency_normal = colours;
         urgency_critical = colours // {
-          frame_color = mako.urgent.border-color;
+          frame_color = dawn.love;
         };
       };
     };
