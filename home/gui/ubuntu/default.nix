@@ -2,7 +2,6 @@
 # the login session), on top of the GUI layer.
 {
   config,
-  options,
   lib,
   pkgs,
   inputs,
@@ -167,11 +166,15 @@ in
         names = [ config.programs.kitty.font.name ];
         size = config.desktop.barFontSize * 1.0; # (i3 wants a decimal)
       };
-      # The bar has its own font setting: Home Manager's default bar, with
-      # that font.
-      bars =
-        map (bar: bar // { fonts = config.xsession.windowManager.i3.config.fonts; })
-          (options.xsession.windowManager.i3.config.type.getSubOptions [ ]).bars.default;
+      # The bar: i3's own defaults (colours, at the bottom...), with that font,
+      # i3status (below), and the tray on the primary monitor.
+      bars = [
+        {
+          inherit (config.xsession.windowManager.i3.config) fonts;
+          statusCommand = lib.getExe config.programs.i3status.package;
+          trayOutput = "primary";
+        }
+      ];
       # Borders only, no title bar on top of each window.
       window.titlebar = false;
       floating.titlebar = false;
