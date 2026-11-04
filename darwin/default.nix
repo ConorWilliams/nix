@@ -28,6 +28,13 @@
     onActivation.cleanup = "uninstall";
   };
 
+  # sudo asks for a fingerprint (Touch ID), the password still the fallback;
+  # inside zellij too (reattach).
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    reattach = true;
+  };
+
   # Keyboard: Caps Lock is Escape, and keys repeat quickly.
   system.keyboard = {
     enableKeyMapping = true;
