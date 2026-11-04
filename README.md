@@ -52,8 +52,18 @@ switch may ask for `/etc/zshrc` and `/etc/bashrc` to be renamed to
 ### macOS
 
 The configuration names this account and host explicitly:
-`main@Conors-MacBook-Pro-2` for Home Manager, and `Conors-MacBook-Pro-2`
-for nix-darwin. From a fresh terminal in an existing checkout, run:
+`main@polaris` for Home Manager, and `polaris` for nix-darwin (`macHost` in
+`flake.nix`). nix-darwin keeps the Mac's name set to it, but the first time
+(or after changing `macHost`) set it yourself, since the bootstrap, `dms`
+and `hms` find their config by the current name:
+
+```sh
+sudo scutil --set ComputerName polaris
+sudo scutil --set LocalHostName polaris
+sudo scutil --set HostName polaris
+```
+
+Then, from a fresh terminal in an existing checkout, run:
 
 ```sh
 ./bootstrap.sh
@@ -67,7 +77,9 @@ account's login shell; Home Manager hands interactive sessions over to Fish.
 GUI apps are declared in `darwin/mac.nix`. System switches uninstall undeclared
 Homebrew packages while preserving app data. Homebrew updates and upgrades are
 explicit; Photoshop and Bridge are managed through Creative Cloud. AeroSpace's
-configuration lives in `home/gui/mac/aerospace.toml`, and it starts itself at login.
+settings live in `home/gui/mac/aerospace.toml`; its keys come from
+`home/gui/keys.nix`, shared with i3 (Cmd as the leader where i3 uses Alt). It
+starts itself at login.
 
 ## Day to day
 

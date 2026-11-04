@@ -111,7 +111,7 @@
 
       # The Mac's name: its hostname (pinned by nix-darwin below, as macOS
       # renames a Mac on a network name clash) and its configs' names.
-      macHost = "Conors-MacBook-Pro-2";
+      macHost = "polaris";
 
       # Server users, also the default for hosts without an explicit users list.
       users = [ "conix" ];

@@ -1,5 +1,5 @@
 # The Mac's system settings. The home directory is NOT managed here;
-# that's homeConfigurations."main@Conors-MacBook-Pro-2".
+# that's homeConfigurations."main@<macHost>" (flake.nix), as for every machine.
 { ... }:
 
 {
