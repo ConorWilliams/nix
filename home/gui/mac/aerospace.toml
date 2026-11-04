@@ -76,7 +76,9 @@ alt-shift-s = 'mode service'
 
 alt-f = 'fullscreen'
 
-alt-enter = 'exec-and-forget open -n /Applications/kitty.app'
+# A terminal in its own zellij session, as on the desks (full path: apps
+# started here don't get the shell's PATH)
+alt-enter = 'exec-and-forget open -n -a kitty --args "$HOME/.nix-profile/bin/zellij"'
 
 [mode.service.binding]
 esc = ['reload-config', 'mode main']

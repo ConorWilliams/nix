@@ -35,6 +35,16 @@
       settings.hide_window_decorations = "titlebar-only";
     };
 
+    # Each Alt+Enter terminal (i3, AeroSpace) is its own zellij session, so
+    # on machines with a screen closing the window ends the session, and
+    # ended ones aren't kept to resurrect: no pile of sessions. (Not on
+    # servers, where a dropped ssh connection must leave the session
+    # running.)
+    programs.zellij.settings = {
+      on_force_close = "quit";
+      session_serialization = false;
+    };
+
     # zzh/zosh (home/shell.nix) from inside zellij, at the machine's own
     # screen (not over ssh): run again in a kitty window of their own,
     # outside zellij, rather than refuse. (On the Mac, `open` starts kitty
