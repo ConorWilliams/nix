@@ -14,6 +14,7 @@ let
   refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
   # The window manager's keys, shared with the Mac's AeroSpace.
   wm = import ../keys.nix;
+  icons = import ../icons.nix; # the bar's
   font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
 
 in
@@ -234,9 +235,10 @@ in
     extraConfig = builtins.readFile "${inputs.rose-pine-i3}/themes/rose-pine-dawn.theme";
   };
 
-  # The bar's status line: volume, memory, the battery (where there is
-  # one) and the time. (Ubuntu's default, for laptops, also shows Wi-Fi, IPv6,
-  # network, disk and load.)
+  # The bar's status line: volume, the battery (where there is one) and the
+  # time, with the icons the Mac's bar uses (../icons.nix). (Ubuntu's
+  # default, for laptops, also shows Wi-Fi, IPv6, network, disk, load and
+  # memory.)
   programs.i3status = {
     enable = true;
     enableDefault = false;
@@ -250,31 +252,27 @@ in
         position = 0;
         settings = {
           device = "pulse";
-          format = "vol %volume";
-          format_muted = "muted (%volume)";
+          format = "${icons.volume} %volume";
+          format_muted = "${icons.muted} %volume";
         };
       };
-      memory = {
+      # The icon says charging, on power (full), or on battery (i3status
+      # can't pick one by level, as the Mac's does). Nothing at all without
+      # a battery: i3bar skips a block with no text.
+      "battery all" = {
         position = 1;
         settings = {
-          format = "%used | %available";
-          # used = total - available. The default also counts the kernel's
-          # reclaimable cache as used (60 of "71 GiB used" when 15 really were).
-          memory_used_method = "memavailable";
-          threshold_degraded = "10%"; # of total memory: under 10% available
-          format_degraded = "MEMORY < %available";
-        };
-      };
-      # Nothing at all without a battery: i3bar skips a block with no text.
-      "battery all" = {
-        position = 2;
-        settings = {
-          format = "%status %percentage %remaining";
+          format = "%status %percentage";
+          status_chr = icons.charging;
+          status_full = icons.plugged;
+          status_bat = icons.battery;
+          integer_battery_capacity = true; # 85%, not 85.12%
+          last_full_capacity = true; # of what it holds now, as macOS shows it
           format_down = "";
         };
       };
       "tztime local" = {
-        position = 3;
+        position = 2;
         settings.format = "%Y-%m-%d %a %H:%M"; # 2026-11-02 Mon 14:52
       };
     };
