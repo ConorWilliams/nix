@@ -101,8 +101,10 @@
       ...
     }:
     let
+      inherit (nixpkgs) lib;
+
       # Every system to build for: the machines'.
-      systems = nixpkgs.lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
+      systems = lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
       # Server users, also the default for hosts without an explicit users list.
       users = [ "conix" ];
@@ -140,8 +142,7 @@
           pkgs = import nixpkgs {
             inherit (machine) system;
             # Unfree packages to accept.
-            config.allowUnfreePredicate =
-              pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "copilot-language-server" ];
+            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "copilot-language-server" ];
           };
           homeRoot = if pkgs.stdenv.hostPlatform.isDarwin then "/Users" else "/home";
         in
@@ -159,38 +160,35 @@
         };
     in
     {
+      # "<user>" for servers, "<user>@<host>" for each host's users.
       homeConfigurations =
-        nixpkgs.lib.genAttrs users (user: mkHome user server)
-        // nixpkgs.lib.mergeAttrsList (
-          nixpkgs.lib.mapAttrsToList (
-            host: machine:
-            builtins.listToAttrs (
-              map (user: nixpkgs.lib.nameValuePair "${user}@${host}" (mkHome user machine)) (
-                machine.users or users
-              )
-            )
-          ) hosts
-        );
+        lib.genAttrs users (user: mkHome user server)
+        // lib.concatMapAttrs (
+          host: machine:
+          lib.genAttrs' (machine.users or users) (
+            user: lib.nameValuePair "${user}@${host}" (mkHome user machine)
+          )
+        ) hosts;
 
       # `nix fmt`
-      formatter = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+      formatter = lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 
       # Lets `nix flake check` test every home config, and each Mac's system
       # settings (nix-darwin).
-      checks = nixpkgs.lib.genAttrs systems (
+      checks = lib.genAttrs systems (
         system:
         let
-          onSystem = nixpkgs.lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system);
+          onSystem = lib.filterAttrs (_: c: c.pkgs.stdenv.hostPlatform.system == system);
         in
-        nixpkgs.lib.mapAttrs (_: c: c.activationPackage) (onSystem self.homeConfigurations)
-        // nixpkgs.lib.mapAttrs' (host: c: nixpkgs.lib.nameValuePair "darwin-${host}" c.system) (
+        lib.mapAttrs (_: c: c.activationPackage) (onSystem self.homeConfigurations)
+        // lib.mapAttrs' (host: c: lib.nameValuePair "darwin-${host}" c.system) (
           onSystem self.darwinConfigurations
         )
       );
 
       # The Macs' system settings (nix-darwin): darwin/<hostname>.nix for
       # each Mac in hosts.
-      darwinConfigurations = nixpkgs.lib.mapAttrs (
+      darwinConfigurations = lib.mapAttrs (
         host: machine:
         nix-darwin.lib.darwinSystem {
           modules = [
@@ -198,6 +196,6 @@
             { nixpkgs.hostPlatform = machine.system; }
           ];
         }
-      ) (nixpkgs.lib.filterAttrs (_: m: nixpkgs.lib.hasSuffix "-darwin" m.system) hosts);
+      ) (lib.filterAttrs (_: m: lib.hasSuffix "-darwin" m.system) hosts);
     };
 }
