@@ -33,6 +33,7 @@
       size = config.desktop.fontSize;
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
+    settings.confirm_os_window_close = 0;
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
