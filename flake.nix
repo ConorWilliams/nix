@@ -109,6 +109,10 @@
       # Every system to build for: the machines'.
       systems = nixpkgs.lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
+      # The Mac's name: its hostname (pinned by nix-darwin below, as macOS
+      # renames a Mac on a network name clash) and its configs' names.
+      macHost = "Conors-MacBook-Pro-2";
+
       # Server users, also the default for hosts without an explicit users list.
       users = [ "conix" ];
 
@@ -125,7 +129,7 @@
           system = "x86_64-linux";
           module = ./home/gui/ubuntu/luna.nix;
         };
-        "Conors-MacBook-Pro-2" = {
+        ${macHost} = {
           system = "aarch64-darwin";
           module = ./home/gui/mac;
           users = [ "main" ];
@@ -192,12 +196,21 @@
           ))
           {
             # ...and the Mac's system settings (nix-darwin).
-            aarch64-darwin.darwin-mac = self.darwinConfigurations."Conors-MacBook-Pro-2".system;
+            aarch64-darwin.darwin-mac = self.darwinConfigurations.${macHost}.system;
           };
 
       # The Mac's system settings only.
-      darwinConfigurations."Conors-MacBook-Pro-2" = nix-darwin.lib.darwinSystem {
-        modules = [ ./darwin/mac.nix ];
+      darwinConfigurations.${macHost} = nix-darwin.lib.darwinSystem {
+        modules = [
+          ./darwin/mac.nix
+          {
+            networking = {
+              hostName = macHost;
+              localHostName = macHost;
+              computerName = macHost;
+            };
+          }
+        ];
       };
     };
 }
