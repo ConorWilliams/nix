@@ -56,12 +56,6 @@
       persistent-others = [ ];
     };
 
-    # nix-darwin writes these to both built-in and Bluetooth trackpad domains.
-    trackpad = {
-      Clicking = false; # no tap to click
-      TrackpadRightClick = true; # two fingers right-click
-    };
-
     # Language and region (no dedicated nix-darwin options for these).
     CustomUserPreferences.NSGlobalDomain = {
       AppleLanguages = [ "en-GB" ];
