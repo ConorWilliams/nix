@@ -1,5 +1,5 @@
 # polaris: this Mac's own system settings, on top of every Mac's (./.).
-{ ... }:
+{ lib, ... }:
 
 let
   britishKeyboard = {
@@ -29,6 +29,11 @@ in
     "vlc"
     "whatsapp"
   ];
+
+  # Mullvad's only overrides; the cask supplies the daemon and CLI.
+  system.activationScripts.postActivation.text = lib.mkAfter ''
+    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || exit 1
+  '';
 
   # Its keyboard is British: the layout and input sources to match.
   system.defaults.CustomUserPreferences."com.apple.HIToolbox" = {
