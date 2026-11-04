@@ -23,14 +23,8 @@ in
   system.primaryUser = "main";
   users.users.main.home = "/Users/main";
 
-  # Its name, kept: macOS renames a Mac on a network name clash (adding -2),
-  # and the flake finds its configs by this name. (Set it by hand the first
-  # time: README.)
-  networking = {
-    hostName = "polaris";
-    localHostName = "polaris";
-    computerName = "polaris";
-  };
+  # Its name (kept by ./default.nix; set it by hand the first time: README).
+  networking.hostName = "polaris";
 
   # Its apps (Homebrew casks), added to every Mac's (./default.nix).
   homebrew.casks = [

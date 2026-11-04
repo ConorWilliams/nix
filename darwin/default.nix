@@ -2,9 +2,17 @@
 # in darwin/<hostname>.nix, which imports this. The home directory is NOT
 # managed here: that's homeConfigurations."<user>@<hostname>", as on every
 # machine.
-{ ... }:
+{ config, ... }:
 
 {
+  # Each Mac's name (networking.hostName, in its file) for all three of
+  # macOS's names, so it stays put: macOS renames a Mac on a network name
+  # clash (adding -2), and the flake finds its configs by this name.
+  networking = {
+    localHostName = config.networking.hostName;
+    computerName = config.networking.hostName;
+  };
+
   # Upstream Nix; nix-darwin manages its daemon and settings.
   nix.settings.experimental-features = [
     "nix-command"
