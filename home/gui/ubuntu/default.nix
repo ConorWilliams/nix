@@ -11,6 +11,7 @@
 
 let
   mod = "Mod1"; # Alt.
+  key = k: "${mod}+${k}"; # a key after the leader, as i3 spells it: Mod1+Shift+q
   lock = "i3lock -c 000000"; # black screen
   refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
   # The window manager's keys, shared with the Mac's AeroSpace.
@@ -188,36 +189,36 @@ in
         in
         lib.mergeAttrsList (
           map (n: {
-            "${mod}+${n}" = "workspace number ${ws n}";
-            "${mod}+Shift+${n}" = "move container to workspace number ${ws n}";
+            ${key n} = "workspace number ${ws n}";
+            ${key "Shift+${n}"} = "move container to workspace number ${ws n}";
           }) wm.workspaces
           ++ map (a: {
-            "${mod}+${a}" = "focus ${lib.toLower a}";
-            "${mod}+Shift+${a}" = "move ${lib.toLower a}";
+            ${key a} = "focus ${lib.toLower a}";
+            ${key "Shift+${a}"} = "move ${lib.toLower a}";
           }) wm.arrows
         )
         // {
-          "${mod}+${k.terminal}" = "exec kitty zellij";
-          "${mod}+${k.launcher}" = "exec rofi -show run";
-          "${mod}+${k.close}" = "kill";
-          "${mod}+${k.fullscreen}" = "fullscreen toggle";
-          "${mod}+${k.floating}" = "floating toggle";
-          "${mod}+${k.resize}" = "mode resize";
-          "${mod}+${k.flipSplit}" = "layout toggle split";
-          "${mod}+${k.lock}" = "exec ${lock}";
-          "--release ${mod}+${k.screenshot}" =
+          ${key k.terminal} = "exec kitty zellij";
+          ${key k.launcher} = "exec rofi -show run";
+          ${key k.close} = "kill";
+          ${key k.fullscreen} = "fullscreen toggle";
+          ${key k.floating} = "floating toggle";
+          ${key k.resize} = "mode resize";
+          ${key k.flipSplit} = "layout toggle split";
+          ${key k.lock} = "exec ${lock}";
+          "--release ${key k.screenshot}" =
             "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
-          "${mod}+${k.reload}" = "restart"; # (reloads the config too)
-          "${mod}+${k.monitorLeft}" = "move workspace to output left";
-          "${mod}+${k.monitorRight}" = "move workspace to output right";
+          ${key k.reload} = "restart"; # (reloads the config too)
+          ${key k.monitorLeft} = "move workspace to output left";
+          ${key k.monitorRight} = "move workspace to output right";
 
           # i3's own, with no AeroSpace counterpart.
-          "${mod}+h" = "split h"; # the next window opens beside this one
-          "${mod}+v" = "split v"; # ...or below it
-          "${mod}+a" = "focus parent";
-          "${mod}+minus" = "scratchpad show";
-          "${mod}+Shift+minus" = "move scratchpad";
-          "${mod}+Shift+e" = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
+          ${key "h"} = "split h"; # the next window opens beside this one
+          ${key "v"} = "split v"; # ...or below it
+          ${key "a"} = "focus parent";
+          ${key "minus"} = "scratchpad show";
+          ${key "Shift+minus"} = "move scratchpad";
+          ${key "Shift+e"} = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
 
           # Volume, mute and brightness keys (under GNOME its settings daemon
           # handles them; it doesn't run under i3). Brightness asks logind, so
