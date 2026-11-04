@@ -74,10 +74,15 @@
       };
   };
 
-  # Left Option is Alt in kitty, as on Linux: zellij's Alt-g, fzf's Alt-C,
-  # nvim's Alt keys. Not the right one: on the British layout it types # and
-  # other characters.
-  programs.kitty.settings.macos_option_as_alt = "left";
+  programs.kitty.settings = {
+    # Left Option is Alt, as on Linux: zellij's Alt-g, fzf's Alt-C, nvim's
+    # Alt keys. Not the right one: on the British layout it types # and
+    # other characters.
+    macos_option_as_alt = "left";
+    # No title bar and square corners, as tiled windows on i3 (where i3
+    # draws no title bars; this setting does nothing on X11).
+    hide_window_decorations = "titlebar-and-corners";
+  };
 
   # AeroSpace's menu bar icon shows the workspaces as i3's bar does: those
   # with windows or on a screen, in order, the focused one filled and one on

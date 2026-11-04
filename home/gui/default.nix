@@ -34,7 +34,6 @@
         package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
       };
       themeFile = "rose-pine-dawn"; # kitty's official port of the theme
-      settings.hide_window_decorations = "titlebar-only";
     };
 
     # Each Leader+Enter terminal (i3, AeroSpace) is its own zellij session, so
@@ -58,7 +57,8 @@
       name:
       let
         isMac = pkgs.stdenv.hostPlatform.isDarwin;
-        atScreen = if isMac then "not set -q SSH_CONNECTION" else "set -q DISPLAY; and not set -q SSH_CONNECTION";
+        atScreen =
+          if isMac then "not set -q SSH_CONNECTION" else "set -q DISPLAY; and not set -q SSH_CONNECTION";
         newWindow = if isMac then "open -na kitty --args" else "kitty --detach";
       in
       {
