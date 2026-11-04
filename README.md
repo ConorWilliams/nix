@@ -36,6 +36,7 @@ My terminal environment, managed with Nix + Home Manager.
 │       │   └── luna.nix
 │       └── mac
 │           ├── default.nix  # Mac layer
+│           ├── bar.nix      #   SketchyBar, at the bottom like i3's
 │           └── polaris.nix
 └── darwin                   # the Macs' system settings (nix-darwin)
     ├── default.nix          # every Mac: Nix, Homebrew, kitty, preferences
