@@ -23,15 +23,7 @@
   # here the ones every Mac's setup relies on, each Mac's own in its file.
   homebrew = {
     enable = true;
-    taps = [ "nikitabobko/tap" ];
-    casks = [
-      "kitty" # the terminal; Home Manager writes its config (gui layer)
-      # the window manager; its config is Home Manager's (gui/mac)
-      {
-        name = "nikitabobko/tap/aerospace";
-        trusted = true;
-      }
-    ];
+    casks = [ "kitty" ]; # the terminal; Home Manager writes its config (gui layer)
     # Removing a declaration uninstalls the package, preserving its app data.
     onActivation.cleanup = "uninstall";
   };
