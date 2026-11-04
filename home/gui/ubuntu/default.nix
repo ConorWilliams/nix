@@ -315,7 +315,7 @@ in
     };
   };
 
-  # rofi (Alt+d), in Rose Pine Dawn: the official port, with the terminal's
+  # rofi (Alt+Space), in Rose Pine Dawn: the official port, with the terminal's
   # font instead of the port's (which isn't installed).
   programs.rofi = {
     enable = true;

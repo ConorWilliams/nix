@@ -2,8 +2,10 @@
 # (AeroSpace, leader Cmd): which key each action uses after the leader,
 # spelled as i3 spells it. Each layer binds them to its own commands
 # (gui/ubuntu/default.nix, gui/mac/default.nix), so a key changes here once.
-# None of them is one the Mac's apps can't do without (copy, save, find,
-# tabs, quit, Spotlight's Space, Cmd+Tab...).
+# On the Mac they leave copy, paste, save, find, quit, Cmd+W/T/Tab and
+# Spotlight's Cmd+Space alone, but take over some of macOS's: Cmd+arrows in
+# text (line and document start/end), Cmd+number (tabs), Cmd+Shift+3/4/5
+# (screenshots: the screenshot key below instead), Cmd+N, Cmd+P, Cmd+Enter.
 {
   keys = {
     terminal = "Return"; # kitty, in its own zellij session

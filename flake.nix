@@ -128,7 +128,7 @@
         polaris = {
           system = "aarch64-darwin";
           module = ./home/gui/mac/polaris.nix;
-          users = [ "main" ];
+          users = [ "main" ]; # its account, not conix
         };
       };
 
@@ -164,7 +164,6 @@
         };
     in
     {
-      # Keep Linux's conix configs; the Mac's actual account is main.
       homeConfigurations =
         nixpkgs.lib.genAttrs users (user: mkHome user server)
         // nixpkgs.lib.mergeAttrsList (

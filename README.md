@@ -29,6 +29,7 @@ My terminal environment, managed with Nix + Home Manager.
 │   ├── claude.nix, claude/  #   Claude Code and its status line
 │   └── gui
 │       ├── default.nix      # GUI layer: desks on any OS
+│       ├── keys.nix         #   window manager keys, shared by i3 and AeroSpace
 │       ├── ubuntu
 │       │   ├── default.nix  # Ubuntu layer
 │       │   ├── hubble.nix
