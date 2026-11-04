@@ -17,5 +17,12 @@ in
     (touchpad "Scrolling Pixel Distance" "30") # half the default scroll speed
     (touchpad "Natural Scrolling Enabled" "1")
     (touchpad "Tapping Enabled" "1")
+    # Caps Lock is Escape, as on the Mac (darwin/default.nix). Added to the
+    # keyboard's current layout and options.
+    {
+      command = "setxkbmap -option caps:escape";
+      always = true;
+      notification = false;
+    }
   ];
 }
