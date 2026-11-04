@@ -11,7 +11,8 @@ in
 {
   imports = [ ./. ]; # the Ubuntu layer.
 
-  # Font sizes (home/gui/default.nix): what reads well on these screens.
+  # Font sizes (the terminal's in home/gui/default.nix, the bar's in the
+  # Ubuntu layer): what reads well on these screens.
   desktop.fontSize = 16;
   desktop.barFontSize = 16;
 
