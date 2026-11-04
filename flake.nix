@@ -109,17 +109,13 @@
       # Every system to build for: the machines'.
       systems = nixpkgs.lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
-      # The Mac's name: its hostname (pinned by nix-darwin below, as macOS
-      # renames a Mac on a network name clash) and its configs' names.
-      macHost = "polaris";
-
       # Server users, also the default for hosts without an explicit users list.
       users = [ "conix" ];
 
       # Machines with a config of their own, by hostname, pointing at their
       # layer in home/:
       #   server -> gui -> ubuntu -> hubble, luna
-      #                 -> mac
+      #                 -> mac -> polaris
       hosts = {
         hubble = {
           system = "x86_64-linux";
@@ -129,9 +125,9 @@
           system = "x86_64-linux";
           module = ./home/gui/ubuntu/luna.nix;
         };
-        ${macHost} = {
+        polaris = {
           system = "aarch64-darwin";
-          module = ./home/gui/mac;
+          module = ./home/gui/mac/polaris.nix;
           users = [ "main" ];
         };
       };
@@ -196,21 +192,12 @@
           ))
           {
             # ...and the Mac's system settings (nix-darwin).
-            aarch64-darwin.darwin-mac = self.darwinConfigurations.${macHost}.system;
+            aarch64-darwin.darwin-polaris = self.darwinConfigurations.polaris.system;
           };
 
-      # The Mac's system settings only.
-      darwinConfigurations.${macHost} = nix-darwin.lib.darwinSystem {
-        modules = [
-          ./darwin/mac.nix
-          {
-            networking = {
-              hostName = macHost;
-              localHostName = macHost;
-              computerName = macHost;
-            };
-          }
-        ];
+      # The Macs' system settings only (nix-darwin), by hostname, like hosts.
+      darwinConfigurations.polaris = nix-darwin.lib.darwinSystem {
+        modules = [ ./darwin/polaris.nix ];
       };
     };
 }
