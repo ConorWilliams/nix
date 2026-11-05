@@ -18,13 +18,10 @@
     ./neovim.nix
   ];
 
-  # Rose Pine Dawn's colours by role (base, text, rose, love...), from the
-  # official palette, for every module to use as `dawn`: e.g.
-  # dawn.text = "#464261".
-  _module.args.dawn = lib.listToAttrs (
-    map (
-      c: lib.nameValuePair c.role "#${c.hex}"
-    ) (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn
+  # Rose Pine Dawn's colours by role (base, text, rose, love...), from
+  # the official palette, for every module to use as `dawn`
+  _module.args.dawn = lib.genAttrs' (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn (
+    c: lib.nameValuePair c.role "#${c.hex}"
   );
 
   # Compatibility marker for Home Manager's defaults, not a version pin.

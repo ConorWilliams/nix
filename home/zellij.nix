@@ -2,7 +2,12 @@
 # or `zellij attach -c main` to resume a named session (over ssh, `zzh host
 # main`). On the desks, Leader+Enter opens a terminal in a new session
 # (home/gui).
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Ctrl+arrows move between panes, and inside nvim between its splits too
@@ -10,18 +15,22 @@ let
   # Bound in normal and locked mode, so shell panes lose Ctrl+Left/Right
   # word jumps (fish has vim keys for that: w, b...).
   navigation =
-    let
-      bind = key: dir: /* kdl */ ''
-        bind "Ctrl ${key}" {
+    lib.concatMapStrings
+      (dir: /* kdl */ ''
+        bind "Ctrl ${lib.toSentenceCase dir}" {
           MessagePlugin "file:${pkgs.zellijPlugins.vim-zellij-navigator}" {
             name "move_focus";
             payload "${dir}";
             use_arrow_keys "true"; // hand nvim Ctrl+arrows, not Ctrl-h/j/k/l
           };
         }
-      '';
-    in
-    bind "Left" "left" + bind "Down" "down" + bind "Up" "up" + bind "Right" "right";
+      '')
+      [
+        "left"
+        "down"
+        "up"
+        "right"
+      ];
 
   # The keybinding preset (copied; see the comment at the top of
   # zellij/keybinds-unlock-first.kdl),

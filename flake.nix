@@ -93,7 +93,7 @@
       inherit (nixpkgs) lib;
 
       # Every system to build for.
-      systems = lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
+      systems = lib.unique (lib.catAttrs "system" (builtins.attrValues hosts ++ [ server ]));
 
       # The default for hosts without an explicit users list (servers).
       users = [ "conix" ];
@@ -128,7 +128,7 @@
           pkgs = import nixpkgs {
             inherit (machine) system;
             # Unfree packages to accept.
-            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "copilot-language-server" ];
+            config.allowUnfreePredicate = pkg: lib.getName pkg == "copilot-language-server";
           };
           homeRoot = if pkgs.stdenv.hostPlatform.isDarwin then "/Users" else "/home";
         in
