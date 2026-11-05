@@ -2,31 +2,27 @@
   description = "Conor's terminal environment";
 
   inputs = {
-    # nixpkgs-unstable, not nixos-unstable: no NixOS here, and the nixos-*
-    # branches advance without waiting for the Mac's (darwin) builds.
+
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      # Use this flake's nixpkgs rather than home-manager's own copy,
-      # so there is exactly one package set.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin";
-      # Same as above.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Claude Code, updated daily by a bot (home/claude.nix). No `follows` on
-    # purpose: that flake is only tested against its own nixpkgs pin, so it
-    # keeps the combination it ships with.
-    llm-agents.url = "github:numtide/llm-agents.nix";
+    # For a daily Claude
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    # A prebuilt, weekly index of what every nixpkgs package contains, for
-    # comma and "command not found" (home/default.nix): no indexing on each
-    # machine.
+    # A pre built, weekly index of what every nixpkgs package contains, for
+    # comma and "command not found": no indexing on each machine.
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,7 +30,7 @@
 
     # Official Rose Pine ports.
     rose-pine-palette = {
-      url = "github:rose-pine/rose-pine-palette"; # the colours, by role
+      url = "github:rose-pine/rose-pine-palette";
       flake = false;
     };
     rose-pine-tm-theme = {
