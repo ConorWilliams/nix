@@ -1,4 +1,3 @@
-# Git: identity, settings, and the tools around it (delta, lazygit, lfs).
 {
   config,
   pkgs,
@@ -61,8 +60,7 @@ in
   # `git clone-wt <url> [dir]`: a repo set up for worktrees. The repo itself
   # (bare, no files) goes in <dir>/.bare, and each checkout is a folder
   # beside it, starting with <dir>/<default branch>; lazygit then offers
-  # <dir>/<branch> for new ones. (A git subcommand runs as its own process,
-  # so it can't cd the shell: it prints where to go.)
+  # <dir>/<branch> for new ones.
   home.packages = [
     (pkgs.writeShellApplication {
       name = "git-clone-wt";
@@ -105,13 +103,10 @@ in
     enableGitIntegration = true;
     options = {
       navigate = true; # n / N jump between files
-      # All terminals use the light Rosé Pine Dawn theme. Declared because
-      # detection fails inside lazygit/zellij.
       light = true;
-      # Lines git marks as moved (diff.colorMoved) arrive in git's own bold
-      # magenta / cyan, which delta would show unstyled; give them soft
-      # backgrounds instead: yellow where they left, light blue where they
-      # arrived.
+      # Lines git marks as moved arrive in git's own bold magenta / cyan, which
+      # delta would show unstyled; give them soft backgrounds instead: yellow
+      # where they left, light blue where they arrived.
       map-styles = "bold purple => syntax #fff3c4, bold cyan => syntax #dff0ff";
     };
   };
@@ -150,9 +145,8 @@ in
       gui = {
         nerdFontsVersion = "3"; # file icons
         showCommandLog = false; # the git commands it runs; @ shows it
-        # The selected line in Rose Pine Dawn's highlight high, keeping the
-        # text readable: the port's pine bar is dark under dark text. (Written
-        # here: the palette file has no highlight colours.)
+        # The selected line in Rose Pine Dawn's "highlight high",
+        # because the official port is unreadable.
         theme.selectedLineBgColor = [ "#cecacd" ];
       };
     };
