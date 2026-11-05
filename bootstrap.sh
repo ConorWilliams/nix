@@ -23,23 +23,18 @@ main() {
   fi
   echo "Nix $(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)"
 
-  # The official installer leaves flakes off; turn them on for this user
-  # (asking the real nix: the wrapper below always passes the flag).
+  # The official installer leaves flakes off; turn them on for this user.
   if ! command nix config show experimental-features 2>/dev/null | grep -qw flakes; then
     mkdir -p ~/.config/nix
     echo 'extra-experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
     echo "Turned on flakes in ~/.config/nix/nix.conf"
   fi
-  # ...and for this run, whatever nix.conf says.
-  nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
   # git from Nix if the system has none
   git() { if type -P git >/dev/null; then command git "$@"; else nix run nixpkgs#git -- "$@"; fi; }
 
   say "Repo: $dir"
   if [[ -d $dir/.git ]]; then
-    # A local setup branch may have no upstream. Apply that checkout rather
-    # than pulling main into it or changing branches behind the user's back.
     if git -C "$dir" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
       git -C "$dir" pull --ff-only || echo "Couldn't fast-forward $dir (local changes or commits?); using it as it is."
     else
@@ -68,16 +63,13 @@ main() {
   desk=false
   [[ $config == *@* ]] && desk=true
 
-  # Catch user-environment build failures before changing system settings.
+  # Catch build failures before changing system settings.
   say "Build Home Manager: $config"
   nix build --no-link "$dir#homeConfigurations.\"$config\".activationPackage"
 
-  # Ubuntu desks: the few things that can't come from Nix.
+  # Ubuntu: the few things that can't come from Nix.
   if $desk && [[ $(uname -s) == Linux ]]; then
     say "Ubuntu desk extras"
-    # Only what Nix can't provide: the login screen's "i3" session entry
-    # (i3-wm) and a locker that can use Ubuntu's PAM (i3lock). i3 itself
-    # and everything else come from Nix.
     if dpkg -s i3-wm i3lock >/dev/null 2>&1; then
       echo "i3-wm and i3lock installed"
     elif ask "Install i3-wm and i3lock with apt (login session entry, screen lock; uses sudo)?"; then
@@ -90,8 +82,7 @@ main() {
     fi
   fi
 
-  # The Mac: Homebrew (nix-darwin installs apps such as kitty with it, but
-  # doesn't install Homebrew itself), then the system settings.
+  # The Mac: Homebrew, then the system settings.
   if [[ $(uname -s) == Darwin ]]; then
     say "Mac system settings"
     if type -P brew >/dev/null || [[ -x /opt/homebrew/bin/brew ]]; then
@@ -115,7 +106,7 @@ main() {
 
   say "Home Manager: $config"
   # Existing dotfiles in the way are kept, renamed with a suffix unique to
-  # this run (so a second attempt can't clobber the first one's backups).
+  # this run.
   backup_suffix="before-home-manager-$(date +%Y%m%d-%H%M%S)-$$"
   nix run --inputs-from "$dir" home-manager -- switch \
     -b "$backup_suffix" --flake "$dir#$config"
@@ -153,7 +144,7 @@ main() {
   say "Done"
   echo "Open a new terminal (or log in again) to start fish with everything."
   if $desk && [[ $(uname -s) == Linux ]]; then
-    echo "First time on this desk: log out and pick the \"i3\" session."
+    echo "First time on this machine: log out and pick the \"i3\" session."
   fi
 }
 
