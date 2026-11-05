@@ -1,13 +1,12 @@
-# The Macs' system settings (nix-darwin), for every Mac; each one's own are
-# in darwin/<hostname>.nix, which imports this. The home directory is NOT
-# managed here: that's homeConfigurations."<user>@<hostname>", as on every
-# machine.
+# The Macs' system settings (nix-darwin)
 { config, ... }:
 
+# TODO: the division between default.nix and polaris.nix is a
+# little arbitrary because at the moment I only have one Mac.
+
 {
-  # Each Mac's name (networking.hostName, from flake.nix) for all three of
-  # macOS's names, so it stays put: macOS renames a Mac on a network name
-  # clash (adding -2), and the flake finds its configs by this name.
+  # Each Mac's name for all three of macOS's names, so it stays put: macOS
+  # renames a Mac on a network name clash.
   networking = {
     localHostName = config.networking.hostName;
     computerName = config.networking.hostName;
@@ -19,20 +18,14 @@
     "flakes"
   ];
 
-  # GUI apps via Homebrew casks (bootstrap.sh installs Homebrew itself):
-  # here the ones every Mac's setup relies on, each Mac's own in its file.
+  # GUI apps via Homebrew casks
   homebrew = {
     enable = true;
-    casks = [ "kitty" ]; # the terminal; Home Manager writes its config (gui layer)
-    # Removing a declaration uninstalls the package, preserving its app data.
+    casks = [ "kitty" ];
     onActivation.cleanup = "uninstall";
   };
 
-  # Weekly clean-up of old versions and unused files, as root, so it covers
-  # the system's versions (each `dms`) as well as every account's: nh clean
-  # all, keeping the same as on Linux (home/default.nix). Sundays at 03:15,
-  # or at the next wake if the Mac was asleep. (Home Manager's own user-only
-  # clean-up is off on the Mac: home/default.nix.)
+  # Weekly clean-up of old versions and unused files, as root.
   programs.nh = {
     enable = true;
     clean = {
@@ -41,14 +34,12 @@
     };
   };
 
-  # sudo asks for a fingerprint (Touch ID), the password still the fallback;
-  # inside zellij too (reattach).
+  # sudo asks for a fingerprint (Touch ID).
   security.pam.services.sudo_local = {
     touchIdAuth = true;
-    reattach = true;
+    reattach = true; # inside zellij too.
   };
 
-  # Keyboard: Caps Lock is Escape, and keys repeat quickly.
   system.keyboard = {
     enableKeyMapping = true;
     remapCapsLockToEscape = true;
@@ -68,7 +59,6 @@
       persistent-others = [ ];
     };
 
-    # Language and region (no dedicated nix-darwin options for these).
     CustomUserPreferences.NSGlobalDomain = {
       AppleLanguages = [ "en-GB" ];
       AppleLocale = "en_GB";
