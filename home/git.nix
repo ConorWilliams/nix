@@ -119,9 +119,9 @@ in
   # Git TUI, showing diffs through delta.
   programs.lazygit = {
     enable = true;
-    # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE, so the
-    # command is wrapped to read its config (settings below) and then the
-    # official port's theme.
+    # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE (later ones
+    # win), so the command is wrapped to read the official port's theme and
+    # then its config (settings below, which adjust the theme).
     package =
       let
         configDir =
@@ -136,7 +136,7 @@ in
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
           wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
-            "${configDir}/lazygit/config.yml,${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml"
+            "${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml,${configDir}/lazygit/config.yml"
         '';
       };
     settings = {
@@ -150,6 +150,10 @@ in
       gui = {
         nerdFontsVersion = "3"; # file icons
         showCommandLog = false; # the git commands it runs; @ shows it
+        # The selected line in Rose Pine Dawn's highlight high, keeping the
+        # text readable: the port's pine bar is dark under dark text. (Written
+        # here: the palette file has no highlight colours.)
+        theme.selectedLineBgColor = [ "#cecacd" ];
       };
     };
   };
