@@ -1,5 +1,5 @@
 # The Macs' system settings (nix-darwin)
-{ config, ... }:
+{ config, lib, ... }:
 
 # TODO: the division between default.nix and polaris.nix is a
 # little arbitrary because at the moment I only have one Mac.
@@ -45,6 +45,15 @@
     enableKeyMapping = true;
     remapCapsLockToEscape = true;
   };
+
+  # Free Ctrl+arrows for Zellij/Neovim
+  system.activationScripts.postActivation.text = lib.mkAfter ''
+    for key in 32 33 34 35 79 80 81 82; do
+      sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
+        com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \
+        '<dict><key>enabled</key><false/></dict>'
+    done
+  '';
 
   system.defaults = {
     # Faster keys/trackpad
