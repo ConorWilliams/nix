@@ -28,6 +28,19 @@
     onActivation.cleanup = "uninstall";
   };
 
+  # Weekly clean-up of old versions and unused files, as root, so it covers
+  # the system's versions (each `dms`) as well as every account's: nh clean
+  # all, keeping the same as on Linux (home/default.nix). Sundays at 03:15,
+  # or at the next wake if the Mac was asleep. (Home Manager's own user-only
+  # clean-up is off on the Mac: home/default.nix.)
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      extraArgs = "--keep 5 --keep-since 7d";
+    };
+  };
+
   # sudo asks for a fingerprint (Touch ID), the password still the fallback;
   # inside zellij too (reattach).
   security.pam.services.sudo_local = {

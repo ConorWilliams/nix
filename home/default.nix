@@ -49,8 +49,12 @@
   programs.nh = {
     enable = true;
     flake = "${config.home.homeDirectory}/nix";
+    # Weekly (Mondays 00:00, or at the next boot if missed): old versions of
+    # this home config beyond the last 5 and the past week, then unused
+    # store files. Not on the Mac, where nix-darwin's clean-up covers this
+    # account too, and the system's versions (darwin/default.nix).
     clean = {
-      enable = true;
+      enable = !pkgs.stdenv.hostPlatform.isDarwin;
       extraArgs = [
         "--keep"
         "5"
