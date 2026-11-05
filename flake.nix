@@ -170,8 +170,43 @@
           )
         ) hosts;
 
-      # `nix fmt`
-      formatter = lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+      # `nix fmt`: the Nix, shell, Lua and Markdown files, with the settings
+      # nvim formats them with on save (home/nvim/plugin/61_format.lua); CI
+      # checks it. Not code embedded in Nix strings (nothing formats it), or
+      # the one-off YAML, TOML and KDL files.
+      formatter = lib.genAttrs systems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.nixfmt-tree.override {
+          settings.formatter = {
+            shfmt = {
+              command = "shfmt";
+              options = [
+                "--write"
+                "--indent=2" # (conform passes nvim's shiftwidth)
+              ];
+              includes = [ "*.sh" ];
+            };
+            stylua = {
+              command = "stylua";
+              options = [ "--config-path=home/nvim/.stylua.toml" ];
+              includes = [ "*.lua" ];
+            };
+            rumdl = {
+              command = "rumdl";
+              options = [ "fmt" ];
+              includes = [ "*.md" ];
+            };
+          };
+          runtimeInputs = with pkgs; [
+            shfmt
+            stylua
+            rumdl
+          ];
+        }
+      );
 
       # Lets `nix flake check` test every home config, and each Mac's system
       # settings (nix-darwin).
