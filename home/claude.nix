@@ -1,4 +1,3 @@
-# Claude Code, its settings and status line.
 {
   config,
   lib,
@@ -8,7 +7,7 @@
 }:
 
 let
-  # numtide/llm-agents.nix: updated daily
+  # Updated daily.
   llm = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
   # Status line script.
