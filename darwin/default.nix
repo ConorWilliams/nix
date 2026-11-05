@@ -40,12 +40,14 @@
     reattach = true; # inside zellij too.
   };
 
+  # Remap caps-lock
   system.keyboard = {
     enableKeyMapping = true;
     remapCapsLockToEscape = true;
   };
 
   system.defaults = {
+    # Faster keys/trackpad
     NSGlobalDomain = {
       InitialKeyRepeat = 15;
       KeyRepeat = 2;
