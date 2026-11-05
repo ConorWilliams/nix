@@ -35,22 +35,15 @@
   programs.nix-index.enable = true;
   programs.nix-index-database.comma.enable = true;
 
-  # The bare name "nixpkgs" (comma, `nix shell nixpkgs#foo`) means this
-  # flake's pinned nixpkgs, not the latest unstable online: nothing to
-  # download, the same versions as what's installed, and updated with
-  # `nix flake update`. For the newest, name it in full:
-  # `nix shell github:NixOS/nixpkgs/nixpkgs-unstable#foo`.
+  # nix commands use our pinned nixpkgs
   nix.registry.nixpkgs.flake = inputs.nixpkgs;
 
   # nh: a friendlier front end for switching.
   programs.nh = {
     enable = true;
     flake = "${config.home.homeDirectory}/nix";
-    # Weekly (Mondays 00:00, or at the next boot if missed): old versions of
-    # this home config beyond the last 5 and the past week, then unused
-    # store files. Not on the Mac, where nix-darwin's clean-up covers this
-    # account too, and the system's versions (darwin/default.nix).
     clean = {
+      # Darwin has its own cleanup
       enable = !pkgs.stdenv.hostPlatform.isDarwin;
       extraArgs = [
         "--keep"
@@ -64,8 +57,7 @@
   # No "unread news" reminder on each switch.
   news.display = "silent";
 
-  # Only the locales in use, not all of them (~220 MB less in every
-  # closure).
+  # Only the locales in use, not all of them.
   i18n.glibcLocales = pkgs.glibcLocales.override {
     allLocales = false;
     locales = [
@@ -77,8 +69,7 @@
   # Programs installed with `uv tool install` (and the like) land here.
   home.sessionPath = [ "$HOME/.local/bin" ];
 
-  # kitty's terminfo where ncurses looks by default, so programs (incl.
-  # over SSH, and under sudo with a preserved HOME) can drive kitty.
+  # kitty's terminfo where ncurses looks by default, so programs can drive kitty.
   home.file.".terminfo".source = "${pkgs.kitty.terminfo}/share/terminfo";
 
   # Plain command-line tools with no config of their own. Tools with config
@@ -90,7 +81,7 @@
     duf
     uv
     mosh
-    tokei
+    tokei # code count
     fend # calculator, with units (`c` in fish: shell.nix)
     rsync
     kitty.kitten # kitty's helper (icat etc.), without the GUI app
@@ -106,8 +97,7 @@
     })
   ];
 
-  # Shell aliases, for every shell Home Manager manages (fish, bash, and zsh
-  # on the Mac).
+  # Shell aliases, for every shell Home Manager manages.
   home.shellAliases = {
     hms = "nh home switch"; # the flake comes from NH_FLAKE (programs.nh)
     icat = "kitten icat";
@@ -116,11 +106,6 @@
     mosh = "mosh --ssh=ssh";
   };
 
-  # ssh's settings (~/.ssh/config; the ssh itself stays the system's, see
-  # the mosh alias above). Keep-alives: a check every minute keeps idle
-  # sessions open through routers that drop quiet connections, and a
-  # connection that has really died is given up after 3 unanswered (about
-  # 3 minutes) instead of freezing the terminal.
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false; # (Home Manager's old defaults, being retired)
@@ -142,7 +127,7 @@
 
   programs.ripgrep = {
     enable = true;
-    arguments = [ "--smart-case" ]; # Case-insensitive unless the pattern has a capital.
+    arguments = [ "--smart-case" ];
   };
 
   programs.bat = {
@@ -184,10 +169,8 @@
     activeTheme = "rose-pine-dawn";
   };
 
-  # eza (ls, ll, la, lt, lla), with icons and a git column. Wrapped so it
-  # always reads its theme from ~/.config/eza (macOS would look in
-  # ~/Library) and ignores LS_COLORS (vivid's), which would otherwise
-  # override the official Rose Pine port below.
+  # eza (ls, ll, la, lt, lla), with icons and a git column.
+  # Wrapped so it ignores LS_COLORS above.
   programs.eza = {
     enable = true;
     icons = "auto";
