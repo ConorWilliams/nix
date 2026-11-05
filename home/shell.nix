@@ -1,6 +1,5 @@
-# Shells: the system's login shell (bash on Linux, zsh on macOS) stays as
-# it is and hands interactive sessions over to fish, the same way on every
-# machine (terminals, ssh, zellij panes).
+# Shells: the system's login shell stays as it is and hands interactive
+# sessions over to fish
 {
   config,
   lib,
@@ -11,10 +10,10 @@
 }:
 
 let
-  # The hand-off, for bash and zsh alike. Not when the parent is already
-  # fish (so typing `bash` inside fish gives bash), not for `-ic 'cmd'`
-  # (tools probing the environment), not in nix-shell / nix develop (they
-  # need their own shell for the dev environment).
+  # The hand-off, not when the parent is already fish (so typing `bash` inside
+  # fish gives bash), not for `-ic 'cmd'` (tools probing the environment), not
+  # in nix-shell / nix develop (they need their own shell for the dev
+  # environment).
   toFish =
     { commandVar, isLogin }:
     /* bash */ ''
@@ -24,11 +23,10 @@ let
       fi
     '';
 
-  # zzh/zosh: zellij on a host (`zzh host [session]`), over ssh or mosh;
-  # only how they connect differs. Not from inside zellij: the host's
-  # zellij would be nested in this one, which catches its keys (Alt-g
-  # locks this one, not the host's). Machines with a screen open a window
-  # of their own for it instead (home/gui).
+  # zzh/zosh: zellij on a host (`zzh host [session]`), over ssh or mosh. Not
+  # from inside zellij: the host's zellij would be nested in this one,
+  # which catches its keys. Machines with a screen open a window of their
+  # own for it instead (home/gui).
   zellijOn =
     {
       name,
@@ -97,8 +95,7 @@ in
       set -g fish_cursor_visual block
     '';
 
-    # c: fend, a calculator that knows units. Alone it's a REPL; with
-    # arguments it answers: `c 2^10`, `c sqrt 2`, `c 5 GiB to MB`.
+    # c: fend, a calculator
     functions.c = {
       description = "Calculator (fend): a REPL, or evaluate the arguments";
       wraps = "fend";
@@ -140,20 +137,14 @@ in
     };
   };
 
-  # Prompt, identical in bash and fish on every machine
+  # Prompt for all shells
   programs.starship = {
     enable = true;
-    # Once a command runs, its prompt shrinks to just the ❯ in the scrollback
-    # (in fish; starship_transient_prompt_func, above, draws it, still red after a failure and
-    # ❮ in vi normal mode).
     enableTransience = true;
     settings = {
       add_newline = false;
       # Only these modules, in this order, to keep the prompt short.
       format = "$hostname$directory$git_branch$python$cmd_duration$status$character";
-      # The host only over SSH (starship's default rule), and no user: this
-      # prompt only runs in shells started as this user (root or another
-      # account gets its own).
       hostname.format = "[$hostname]($style) ";
       git_branch.format = "\\[[$branch(:$remote_branch)]($style)\\] "; # [branch], no "on"
       cmd_duration.format = "[$duration]($style) "; # 4s, not "took 4s"
@@ -163,9 +154,6 @@ in
         disabled = false;
         format = "[\\[$status\\]]($style) ";
       };
-      # Full colour: the modules' standard colour names (red, green...) are
-      # redefined as Rose Pine Dawn's (home/default.nix), mapped as in
-      # kitty's Rose Pine theme.
       palette = "rose-pine-dawn";
       palettes.rose-pine-dawn = {
         red = dawn.love;
@@ -178,9 +166,7 @@ in
     };
   };
 
-  # direnv: entering a folder with an .envrc loads its environment (`use
-  # flake` for a project's dev shell, cached by nix-direnv), and leaving
-  # unloads it, all in the same fish. `direnv allow` once per project.
+  # direnv: entering a folder with an .envrc loads its environment
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -196,8 +182,7 @@ in
       sync_frequency = "5m";
       update_check = false; # Nix handles updates
       filter_mode = "global";
-      filter_mode_shell_up_key_binding = "host";
-      workspaces = false; # don't narrow to the current git repo
+      filter_mode_shell_up_key_binding = "global";
       inline_height = 0; # full screen
       # Enter runs the picked command straight away; Tab puts it in the
       # prompt to edit first.
