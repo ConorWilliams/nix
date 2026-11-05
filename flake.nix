@@ -70,7 +70,7 @@
       flake = false;
     };
 
-    # nvim plugins nixpkgs doesn't package (home/neovim.nix).
+    # nvim plugins nixpkgs doesn't package.
     go-up-nvim = {
       url = "github:nullromo/go-up.nvim";
       flake = false;
@@ -92,16 +92,13 @@
     let
       inherit (nixpkgs) lib;
 
-      # Every system to build for: the machines'.
+      # Every system to build for.
       systems = lib.unique (map (m: m.system) (builtins.attrValues hosts ++ [ server ]));
 
-      # Server users, also the default for hosts without an explicit users list.
+      # The default for hosts without an explicit users list (servers).
       users = [ "conix" ];
 
-      # Machines with a config of their own, by hostname, pointing at their
-      # layer in home/:
-      #   server -> gui -> ubuntu -> hubble, luna
-      #                 -> mac -> polaris
+      # Machines with a config of their own, by hostname
       hosts = {
         hubble = {
           system = "x86_64-linux";
@@ -114,11 +111,11 @@
         polaris = {
           system = "aarch64-darwin";
           module = ./home/gui/mac/polaris.nix;
-          users = [ "main" ]; # its account, not conix
+          users = [ "main" ];
         };
       };
 
-      # Every other machine (remote servers) gets the base layer.
+      # Any other machine (servers) gets the base layer.
       server = {
         system = "x86_64-linux";
         module = ./home;
@@ -137,7 +134,7 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          # Makes `inputs` available to every module, e.g. home/claude.nix.
+          # Makes `inputs` available to every module.
           extraSpecialArgs = { inherit inputs; };
           modules = [
             machine.module
@@ -159,10 +156,7 @@
           )
         ) hosts;
 
-      # `nix fmt`: the Nix, shell, Lua and Markdown files, with the settings
-      # nvim formats them with on save (home/nvim/plugin/61_format.lua); CI
-      # checks it. Not code embedded in Nix strings (nothing formats it), or
-      # the one-off YAML, TOML and KDL files.
+      # Formatting this repo
       formatter = lib.genAttrs systems (
         system:
         let
@@ -174,7 +168,7 @@
               command = "shfmt";
               options = [
                 "--write"
-                "--indent=2" # (conform passes nvim's shiftwidth)
+                "--indent=2"
               ];
               includes = [ "*.sh" ];
             };
@@ -197,8 +191,7 @@
         }
       );
 
-      # Lets `nix flake check` test every home config, and each Mac's system
-      # settings (nix-darwin).
+      # Lets `nix flake check` test every config
       checks = lib.genAttrs systems (
         system:
         let
@@ -220,8 +213,6 @@
             {
               nixpkgs.hostPlatform = machine.system;
               networking.hostName = host;
-              # The account that per-user settings (Homebrew, macOS
-              # defaults) apply to.
               system.primaryUser = builtins.head (machine.users or users);
             }
           ];

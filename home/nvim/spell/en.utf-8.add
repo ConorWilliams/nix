@@ -36,3 +36,5 @@ memoize
 Pracheta
 Homebrew
 nixpkgs
+config
+hostname
