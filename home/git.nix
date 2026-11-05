@@ -147,7 +147,10 @@ in
         }
       ];
       os.editPreset = "nvim-remote";
-      gui.nerdFontsVersion = "3"; # file icons
+      gui = {
+        nerdFontsVersion = "3"; # file icons
+        showCommandLog = false; # the git commands it runs; @ shows it
+      };
     };
   };
 }
