@@ -30,9 +30,13 @@ in
     "whatsapp"
   ];
 
-  # Mullvad's only overrides; the cask supplies the daemon and CLI.
+  # Mullvad connects by itself at login (the cask installs its daemon and
+  # this CLI; the setting is kept by the daemon, so this only reasserts it).
+  # A warning rather than a failed switch if the daemon isn't running yet,
+  # e.g. on a new Mac before Mullvad's background service is approved.
   system.activationScripts.postActivation.text = lib.mkAfter ''
-    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || exit 1
+    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on \
+      || echo "warning: couldn't set Mullvad to auto-connect (is its daemon running?)" >&2
   '';
 
   # Its keyboard is British: the layout and input sources to match.
