@@ -2,7 +2,7 @@
 # or `zellij attach -c main` to resume a named session (over ssh, `zzh host
 # main`). On the desks, Leader+Enter opens a terminal in a new session
 # (home/gui).
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 let
   # Ctrl+arrows move between panes, and inside nvim between its splits too
@@ -13,7 +13,7 @@ let
     let
       bind = key: dir: /* kdl */ ''
         bind "Ctrl ${key}" {
-          MessagePlugin "file:${inputs.vim-zellij-navigator}" {
+          MessagePlugin "file:${pkgs.zellijPlugins.vim-zellij-navigator}" {
             name "move_focus";
             payload "${dir}";
             use_arrow_keys "true"; // hand nvim Ctrl+arrows, not Ctrl-h/j/k/l

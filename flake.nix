@@ -70,13 +70,6 @@
       flake = false;
     };
 
-    # zellij plugin behind Ctrl+arrows moving between nvim splits and
-    # zellij panes (home/zellij.nix). A release file, pinned here.
-    vim-zellij-navigator = {
-      url = "file+https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm";
-      flake = false;
-    };
-
     # nvim plugins nixpkgs doesn't package (home/neovim.nix).
     go-up-nvim = {
       url = "github:nullromo/go-up.nvim";
