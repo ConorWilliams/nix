@@ -56,6 +56,7 @@ in
       smart-splits-nvim # (20_keymaps.lua)
       (fromInput "smart-splits-zellij" inputs.smart-splits-zellij)
       flash-nvim # (50_editing.lua)
+      yanky-nvim # (50_editing.lua)
       snacks-nvim # (55_picker.lua)
       nvim-lspconfig # (60_lsp.lua)
       conform-nvim # (61_format.lua)

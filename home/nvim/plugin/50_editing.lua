@@ -40,3 +40,30 @@ map({ 'n', 'x', 'o' }, 'S', flash.treesitter, { desc = 'Flash treesitter' })
 map('o', 'r', flash.remote, { desc = 'Remote flash' }) -- e.g. yr<jump>iw: yank a word elsewhere
 map({ 'o', 'x' }, 'R', flash.treesitter_search, { desc = 'Treesitter search' })
 map('c', '<C-s>', flash.toggle, { desc = 'Toggle flash in / search' })
+
+-- yanky: yank history, and puts that know about it (LazyVim's yanky extra).
+-- After a paste, [y ]y swap it for an earlier / later yank; <leader>p picks
+-- one from the history. ]p [p paste on the line below / above, indented
+-- like this one, even a word; >p <p paste and indent; =p through a filter.
+require('yanky').setup({
+  -- Clipboard changes join the history, but not over SSH (no clipboard:
+  -- 10_options.lua)
+  system_clipboard = { sync_with_ring = not vim.env.SSH_CONNECTION },
+  -- Pastes flash briefly; yanks already do (15_autocmds.lua)
+  highlight = { on_yank = false, timer = 150 },
+})
+local plug = function(name) return '<Plug>(Yanky' .. name .. ')' end
+map({ 'n', 'x' }, '<leader>p', function() Snacks.picker.yanky() end, { desc = 'Yank history' })
+map({ 'n', 'x' }, 'y', plug('Yank'), { desc = 'Yank' })
+map({ 'n', 'x' }, 'p', plug('PutAfter'), { desc = 'Put after' })
+map({ 'n', 'x' }, 'P', plug('PutBefore'), { desc = 'Put before' })
+map('n', '[y', plug('CycleForward'), { desc = 'Earlier yank' })
+map('n', ']y', plug('CycleBackward'), { desc = 'Later yank' })
+map('n', ']p', plug('PutIndentAfterLinewise'), { desc = 'Put below, indented' })
+map('n', '[p', plug('PutIndentBeforeLinewise'), { desc = 'Put above, indented' })
+map('n', ']P', plug('PutIndentAfterLinewise'), { desc = 'Put below, indented' })
+map('n', '[P', plug('PutIndentBeforeLinewise'), { desc = 'Put above, indented' })
+map('n', '>p', plug('PutIndentAfterShiftRight'), { desc = 'Put below, indent right' })
+map('n', '<p', plug('PutIndentAfterShiftLeft'), { desc = 'Put below, indent left' })
+map('n', '>P', plug('PutIndentBeforeShiftRight'), { desc = 'Put above, indent right' })
+map('n', '<P', plug('PutIndentBeforeShiftLeft'), { desc = 'Put above, indent left' })
