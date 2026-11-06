@@ -107,11 +107,16 @@ in
     ];
   };
 
-  # rumdl (Markdown lint, in nvim): its list-item-spacing rule would
-  # insist on one blank-line style per list.
+  # rumdl (Markdown lint and format: nvim, nix fmt): not its
+  # list-item-spacing rule (it would insist on one blank-line style per
+  # list); tables with their columns aligned (opt-in).
   xdg.configFile."rumdl/rumdl.toml".text = /* toml */ ''
     [global]
     disable = ["MD076"]
+
+    [MD060]
+    enabled = true
+    style = "aligned"
   '';
 
   # Live symlink into the repo (not a store copy): edits apply without a
