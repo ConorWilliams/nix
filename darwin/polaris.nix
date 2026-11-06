@@ -29,7 +29,7 @@ in
   ];
 
   system.activationScripts.postActivation.text = lib.mkAfter ''
-    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on
+    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || echo "warning: Mullvad auto-connect not set" >&2
   '';
 
   # It's a British keyboard.
