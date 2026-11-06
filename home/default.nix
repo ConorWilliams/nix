@@ -123,7 +123,14 @@
 
   programs.gh = {
     enable = true;
-    settings.git_protocol = "https"; # gh repo clone etc. use HTTPS too
+    # gh repo clone etc. use HTTPS too
+    settings.git_protocol = "https";
+    # `gh poi [--dry-run]`: deletes local branches whose PR was merged and their unused worktrees
+    # `gh stack`: stacked PRs
+    extensions = with pkgs; [
+      gh-poi
+      gh-stack
+    ];
   };
 
   programs.ripgrep = {
