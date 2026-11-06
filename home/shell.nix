@@ -93,6 +93,8 @@ in
       set -g fish_cursor_insert line
       set -g fish_cursor_replace_one underscore
       set -g fish_cursor_visual block
+      # Typing `zi ` opens zoxide's picker straight away, without Enter.
+      bind -M insert space self-insert expand-abbr 'if test "$(commandline)" = "zi "; commandline ""; __zoxide_zi; commandline -f repaint; end'
     '';
 
     # c: fend, a calculator
@@ -209,6 +211,8 @@ in
 
   # `z foo` jumps to the most-used directory matching foo; `zi` picks with fzf.
   programs.zoxide.enable = true;
+  # Fuzzy `zi` (zoxide's own fzf options include --exact).
+  home.sessionVariables._ZO_FZF_OPTS = "${config.home.sessionVariables.FZF_DEFAULT_OPTS} --height=45% --layout=reverse --tiebreak=index";
 
   # Rose Pine Dawn for fish's syntax colours: the official port's theme
   # file, selected above.
