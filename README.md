@@ -16,7 +16,7 @@ My terminal environment, managed with Nix + Home Manager.
 
 ## Layout
 
-```sh
+```fish
 ├── flake.nix                # users, hosts -> layer
 ├── bootstrap.sh
 ├── home
@@ -25,13 +25,13 @@ My terminal environment, managed with Nix + Home Manager.
 │       ├── default.nix      # GUI layer: desks on any OS
 │       ├── ubuntu
 │       │   ├── default.nix  # Ubuntu layer
-│       │   └── machine.nix
+│       │   └── <host>.nix
 │       └── mac
 │           ├── default.nix  # Mac layer
-│           └── machine.nix
+│           └── <host>.nix
 └── darwin
     ├── default.nix          # Macs' system settings
-    └── machine.nix
+    └── <host>.nix
 ```
 
 Each layer imports the one above it, so a machine only names its last layer.
