@@ -14,7 +14,9 @@ vim.api.nvim_create_autocmd('FileType', {
     -- language marks as prose (comments, and strings in some), never code.
     -- Not previews, popups or help, which aren't files (buftype set).
     if vim.bo[ev.buf].buftype == '' then vim.opt_local.spell = true end
-    if vim.treesitter.query.get(lang, 'indents') then
+    -- Not for Markdown: there it would undo the list-item indent when
+    -- wrapping (gw/gq), which nvim's own list handling gets right.
+    if lang ~= 'markdown' and vim.treesitter.query.get(lang, 'indents') then
       vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
     end
   end,
