@@ -40,6 +40,7 @@ in
 {
   programs.zellij = {
     enable = true;
+    # The contents: a path would be written out as text.
     themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
     # Modal keys with a leader: see the comment at the top of
     # zellij/keybinds-unlock-first.kdl.
@@ -50,7 +51,7 @@ in
     settings = {
       default_mode = "locked"; # part of the preset: keys go to the shell
       default_layout = "compact";
-      theme = "rose-pine-dawn";
+      theme = "rose-pine-dawn"; # over mosh zellij guesses dark
       show_startup_tips = false;
       show_release_notes = false;
     };

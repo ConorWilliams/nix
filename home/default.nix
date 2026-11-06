@@ -69,7 +69,8 @@
   # Programs installed with `uv tool install` (and the like) land here.
   home.sessionPath = [ "$HOME/.local/bin" ];
 
-  # kitty's terminfo where ncurses looks by default, so programs can drive kitty.
+  # kitty's terminfo where ncurses looks by default, so programs can drive kitty
+  # (over SSH and under sudo too).
   home.file.".terminfo".source = "${pkgs.kitty.terminfo}/share/terminfo";
 
   # Plain command-line tools with no config of their own. Tools with config

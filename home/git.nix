@@ -103,7 +103,7 @@ in
     enableGitIntegration = true;
     options = {
       navigate = true; # n / N jump between files
-      light = true;
+      light = true; # detection fails inside lazygit/zellij
       # Lines git marks as moved arrive in git's own bold magenta / cyan, which
       # delta would show unstyled; give them soft backgrounds instead: yellow
       # where they left, light blue where they arrived.
