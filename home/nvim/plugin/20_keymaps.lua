@@ -66,6 +66,21 @@ map('n', ']w', jump(1, 'WARN'), { desc = 'Next warning' })
 map('n', '[w', jump(-1, 'WARN'), { desc = 'Prev warning' })
 map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line diagnostics' })
 
+-- ]p / [p paste on the line below / above, indented like this one, even
+-- a word or selection (Vim's own put those inline; whole lines it already
+-- puts on their own line). As in vim-unimpaired.
+local put_lines = function(key)
+  return function()
+    local reg = vim.v.register
+    local text, kind = vim.fn.getreg(reg, 1, true), vim.fn.getregtype(reg)
+    vim.fn.setreg(reg, text, 'l')
+    vim.cmd.normal({ vim.v.count1 .. '"' .. reg .. key, bang = true })
+    vim.fn.setreg(reg, text, kind)
+  end
+end
+map('n', ']p', put_lines(']p'), { desc = 'Paste below' })
+map('n', '[p', put_lines('[p'), { desc = 'Paste above' })
+
 -- Tabs
 map('n', '<leader><tab><tab>', '<cmd>tabnew<cr>', { desc = 'New tab' })
 map('n', '<leader><tab>]', '<cmd>tabnext<cr>', { desc = 'Next tab' })
