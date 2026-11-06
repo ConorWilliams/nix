@@ -44,7 +44,7 @@ map('c', '<C-s>', flash.toggle, { desc = 'Toggle flash in / search' })
 -- yanky: yank history, and puts that know about it (LazyVim's yanky extra).
 -- After a paste, [y ]y swap it for an earlier / later yank; <leader>p picks
 -- one from the history. ]p [p paste on the line below / above, indented
--- like this one, even a word; >p <p paste and indent; =p through a filter.
+-- like this one, even a word; >p <p paste and indent.
 require('yanky').setup({
   -- Clipboard changes join the history, but not over SSH (no clipboard:
   -- 10_options.lua)
@@ -57,6 +57,8 @@ map({ 'n', 'x' }, '<leader>p', function() Snacks.picker.yanky() end, { desc = 'Y
 map({ 'n', 'x' }, 'y', plug('Yank'), { desc = 'Yank' })
 map({ 'n', 'x' }, 'p', plug('PutAfter'), { desc = 'Put after' })
 map({ 'n', 'x' }, 'P', plug('PutBefore'), { desc = 'Put before' })
+map({ 'n', 'x' }, 'gp', plug('GPutAfter'), { desc = 'Put after, cursor after' })
+map({ 'n', 'x' }, 'gP', plug('GPutBefore'), { desc = 'Put before, cursor after' })
 map('n', '[y', plug('CycleForward'), { desc = 'Earlier yank' })
 map('n', ']y', plug('CycleBackward'), { desc = 'Later yank' })
 map('n', ']p', plug('PutIndentAfterLinewise'), { desc = 'Put below, indented' })
