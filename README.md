@@ -9,7 +9,13 @@ My environment, managed with Nix + Home Manager.
 2. Run the (idempotent) bootstrap script:
 
    ```sh
-   curl -fsSL https://raw.githubusercontent.com/ConorWilliams/nix/main/bootstrap.sh | bash
+   nix run github:ConorWilliams/nix
+   ```
+
+   On a fresh Nix install, you may need to enable flakes/commands:
+
+   ```sh
+   nix --extra-experimental-features 'nix-command flakes' run github:ConorWilliams/nix
    ```
 
 3. Open a new terminal!

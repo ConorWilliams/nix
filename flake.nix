@@ -146,6 +146,13 @@
         };
     in
     {
+      # `nix run github:ConorWilliams/nix` bootstraps a machine.
+      packages = lib.genAttrs systems (system: {
+        default = nixpkgs.legacyPackages.${system}.writeShellScriptBin "bootstrap" (
+          builtins.readFile ./bootstrap.sh
+        );
+      });
+
       # "<user>" for servers, "<user>@<host>" for each host's users.
       homeConfigurations =
         lib.genAttrs users (user: mkHome user server)

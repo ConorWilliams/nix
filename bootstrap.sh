@@ -8,7 +8,7 @@ dir=$HOME/nix
 # Pretty output
 say() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
-# Answers come from the terminal: under `curl | bash`, stdin is this script.
+# Read prompts from the terminal, even when stdin is redirected.
 ask() {
   local answer
   read -rp "$1 [y/N] " answer </dev/tty || return 1
@@ -23,11 +23,12 @@ main() {
   fi
   echo "Nix $(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)"
 
-  # The official installer leaves flakes off; turn them on for this user.
+  # Keep flakes enabled after the first run's command-line flags.
   if ! command nix config show experimental-features 2>/dev/null | grep -qw flakes; then
-    mkdir -p ~/.config/nix
-    echo 'extra-experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
-    echo "Turned on flakes in ~/.config/nix/nix.conf"
+    local nix_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nix"
+    mkdir -p "$nix_config_dir"
+    printf '\nextra-experimental-features = nix-command flakes\n' >>"$nix_config_dir/nix.conf"
+    echo "Turned on flakes in $nix_config_dir/nix.conf"
   fi
 
   # git from Nix if the system has none
