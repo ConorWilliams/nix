@@ -130,7 +130,7 @@ impl Hints {
         let width = (key_width + description_width + 6).min(self.size.1.saturating_sub(2));
         let height = (self.rows.len() + 3).min(self.size.0.saturating_sub(2));
         if let Some(coordinates) = FloatingPaneCoordinates::new(
-            Some("1".into()),
+            Some(self.size.1.saturating_sub(width + 1).to_string()),
             Some(self.size.0.saturating_sub(height + 1).to_string()),
             Some(width.to_string()),
             Some(height.to_string()),
