@@ -8,8 +8,10 @@
 - [x] space in fish normal mode
 - [x] versioning for the which-key plugin
 - [x] All the zellij things in server (including serialization)
-- [x] | and - to be replaced with h/v (horizontal/vertical), keep | in tooltip
+- [x] `|` and `-` to be replaced with h/v (horizontal/vertical), keep `|` in tooltip
 - [ ] ctrl+h/ctr+l (like nvim) to flick through tabs
+
+## Later
 
 - [ ] rust treesitter grammer
 - [ ] shift enter for sans zellij terminal
