@@ -1,6 +1,6 @@
 # GUI layer: machines with a screen, on any OS, on top of the server layer:
-# the terminal (kitty) and its font, zellij sessions that end with their
-# window, and zzh/zosh opening a window of their own from inside zellij.
+# the terminal (kitty) and its font, persistent Zellij sessions, and
+# zzh/zosh opening a window of their own from inside Zellij.
 {
   config,
   lib,
@@ -37,14 +37,11 @@
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
-  # Each Leader+Enter terminal (i3, AeroSpace) is its own zellij session, so
-  # on machines with a screen closing the window ends the session, and
-  # ended ones aren't kept to resurrect: no pile of sessions. (Not on
-  # servers, where a dropped ssh connection must leave the session
-  # running.)
+  # Native close policy: preserve live sessions when their window closes.
+  # Leader q q explicitly quits a session, including its running programs.
   programs.zellij.settings = {
-    on_force_close = "quit";
-    session_serialization = false;
+    on_force_close = "detach";
+    session_serialization = false; # no exited-session resurrection list
   };
 
   # zzh/zosh (home/shell.nix) from inside zellij, at the machine's own
