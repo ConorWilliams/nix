@@ -84,7 +84,7 @@ in
         ];
         session._children = [
           (once "n" (launch "new-session"))
-          (once "d" { Quit = { }; })
+          (once "q" { Quit = { }; })
           (once "f" (launch "find-sessions"))
           (once "r" {
             Run = {
