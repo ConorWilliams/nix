@@ -46,14 +46,31 @@
     remapCapsLockToEscape = true;
   };
 
-  # Free Ctrl+arrows for Zellij/Neovim
-  system.activationScripts.postActivation.text = lib.mkAfter ''
-    for key in 32 33 34 35 79 80 81 82; do
-      sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
-        com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \
-        '<dict><key>enabled</key><false/></dict>'
-    done
-  '';
+  # Free Ctrl+arrows for Zellij/Neovim and Cmd+Shift+3/4/5 for AeroSpace.
+  # AeroSpace provides screenshots on Cmd+P instead.
+  system.activationScripts.postActivation.text =
+    let
+      disabledHotkeys = [
+        28 # Screenshot (Cmd+Shift+3).
+        30 # Screenshot (Cmd+Shift+4).
+        32 # Mission Control (Ctrl+Up).
+        34 # Mission Control, slow animation (Ctrl+Shift+Up).
+        33 # Application windows (Ctrl+Down).
+        35 # Application windows, slow animation (Ctrl+Shift+Down).
+        79 # Move left a space (Ctrl+Left).
+        80 # Move left a space, slow animation (Ctrl+Shift+Left).
+        81 # Move right a space (Ctrl+Right).
+        82 # Move right a space, slow animation (Ctrl+Shift+Right).
+        184 # Screenshot and recording toolbar (Cmd+Shift+5).
+      ];
+    in
+    lib.mkAfter ''
+      for key in ${lib.concatMapStringsSep " " toString disabledHotkeys}; do
+        sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
+          com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \
+          '<dict><key>enabled</key><false/></dict>'
+      done
+    '';
 
   system.defaults = {
     # Faster keys/trackpad
