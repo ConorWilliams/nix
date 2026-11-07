@@ -11,6 +11,20 @@ let
     inherit pkgs;
     zellijVersion = config.programs.zellij.package.version;
   };
+  renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
+    while read --local --prompt-str 'Session name: ' name
+      test -z "$name"; and break
+      if string match --quiet '*/*' -- "$name"
+        echo 'Session names cannot contain /.' >&2
+        continue
+      end
+      if contains -- "$name" (${lib.getExe config.programs.zellij.package} list-sessions -sn)
+        echo 'A session by this name already exists.' >&2
+        continue
+      end
+      ${lib.getExe config.programs.zellij.package} action rename-session "$name"; and break
+    end
+  '';
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -59,7 +73,6 @@ in
       };
       plugins.find-tabs = manager { multi_screen = true; };
       plugins.find-sessions = manager { multi_screen = false; };
-      plugins.rename-session = manager { multi_screen = false; };
       keybinds = {
         _props.clear-defaults = true;
         locked._children = [ (bind "Alt g" (mode "normal")) ];
@@ -73,7 +86,20 @@ in
           (once "n" (launch "new-session"))
           (once "d" { Quit = { }; })
           (once "f" (launch "find-sessions"))
-          (once "r" (launch "rename-session"))
+          (once "r" {
+            Run = {
+              _args = [
+                (lib.getExe config.programs.fish.package)
+                "--no-config"
+                (toString renameSession)
+              ];
+              floating = true;
+              name = "Rename session";
+              width = "60%";
+              height = "5";
+              close_on_exit = true;
+            };
+          })
         ];
         tab._children = [
           (bind "r" [

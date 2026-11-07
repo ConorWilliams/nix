@@ -194,6 +194,10 @@ fn describe(action: &Action) -> String {
             ..
         } => "Split horizontally (|)".into(),
         Action::NewTab { .. } => "New tab".into(),
+        Action::NewFloatingPane {
+            pane_name: Some(name),
+            ..
+        } => name.clone(),
         Action::TabNameInput { .. } => "Rename tab".into(),
         Action::GoToTab { .. } => "Go to tab".into(),
         Action::GoToPreviousTab => "Previous tab".into(),
@@ -213,7 +217,6 @@ fn describe(action: &Action) -> String {
         action if action.launches_plugin("new-session") => "New session".into(),
         action if action.launches_plugin("find-tabs") => "Find tabs / panes / sessions".into(),
         action if action.launches_plugin("find-sessions") => "Find sessions".into(),
-        action if action.launches_plugin("rename-session") => "Rename session (Ctrl+R)".into(),
         action if action.launches_plugin("session-manager") => {
             "Find tabs / panes / sessions".into()
         }
