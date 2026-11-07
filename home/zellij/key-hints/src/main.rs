@@ -188,11 +188,11 @@ fn describe(action: &Action) -> String {
         Action::NewPane {
             direction: Some(Direction::Down),
             ..
-        } => "Split below".into(),
+        } => "Split vertically (-)".into(),
         Action::NewPane {
             direction: Some(Direction::Right),
             ..
-        } => "Split right".into(),
+        } => "Split horizontally (|)".into(),
         Action::NewTab { .. } => "New tab".into(),
         Action::TabNameInput { .. } => "Rename tab".into(),
         Action::GoToTab { .. } => "Go to tab".into(),
