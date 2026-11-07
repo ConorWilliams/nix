@@ -27,6 +27,15 @@
         # cmd-enter...
         key = k: "cmd-" + lib.toLower (builtins.replaceStrings [ "+" "Return" ] [ "-" "enter" ] k);
         k = wm.keys;
+
+        # TODO: Workaround AeroSpace #1097.
+        closeWindow = pkgs.writeShellScript "aerospace-close" ''
+          aerospace=${lib.getExe config.programs.aerospace.package}
+          workspace="$($aerospace list-workspaces --focused)" || exit
+          $aerospace close --quit-if-last-window || exit
+          ${lib.getExe' pkgs.coreutils "sleep"} 0.1
+          $aerospace workspace "$workspace"
+        '';
       in
       {
         # The mouse follows focus to another screen, as in i3.
@@ -50,7 +59,7 @@
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
             # Borderless Kitty has no AX close button; each terminal is a
             # separate app instance, so quit it when closing its last window.
-            ${key k.close} = "close --quit-if-last-window";
+            ${key k.close} = "exec-and-forget ${closeWindow}";
             ${key k.fullscreen} = "fullscreen";
             ${key k.floating} = "layout floating tiling";
             ${key k.resize} = "mode resize";
