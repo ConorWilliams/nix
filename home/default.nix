@@ -88,7 +88,6 @@
     kitty.kitten # kitty's helper (icat etc.), without the GUI app
     htop
     zk
-    codex
     # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
     (fuc.overrideAttrs {
       cargoBuildFeatures = [
@@ -97,6 +96,12 @@
       ];
     })
   ];
+
+  programs.codex = {
+    enable = true;
+    mutableSettings = true; # preserve settings added by Codex or the user
+    settings.tui.vim_mode_default = true;
+  };
 
   # Shell aliases, for every shell Home Manager manages.
   home.shellAliases = {

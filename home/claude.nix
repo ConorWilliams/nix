@@ -35,6 +35,7 @@ in
       };
       # Claude's own light palette; relies on COLORTERM=truecolor (default.nix)
       theme = "light";
+      editorMode = "vim";
       tui = "fullscreen";
       autoCompactEnabled = true;
       idleCompaction = false;
