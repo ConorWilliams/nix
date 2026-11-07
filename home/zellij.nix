@@ -92,8 +92,8 @@ in
           (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
         ];
         pane._children = [
-          (once "|" { NewPane = "Right"; })
-          (once "-" { NewPane = "Down"; })
+          (once "h" { NewPane = "Right"; })
+          (once "v" { NewPane = "Down"; })
           (once "d" { CloseFocus = { }; })
           (bind "r" (mode "resize"))
         ];
