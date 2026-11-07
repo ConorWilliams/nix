@@ -112,7 +112,7 @@ in
   # Only Fish knows whether the command line is empty. Everything after
   # this hand-off is handled by Zellij's native modes.
   programs.fish.functions.__zellij_space = /* fish */ ''
-    if set -q ZELLIJ; and test -z "$(commandline)"; and not commandline --paging-mode
+    if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end
       ${lib.getExe config.programs.zellij.package} action switch-mode normal
     else if test "$fish_bind_mode" = default
       commandline -f forward-char
