@@ -84,6 +84,7 @@ in
           kdl # zellij
           # Python and data
           python
+          ini
           toml
           yaml
           json
