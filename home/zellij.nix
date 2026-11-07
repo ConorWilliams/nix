@@ -8,6 +8,32 @@
 
 let
   keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
+  bind = keys: actions: {
+    bind = {
+      _args = lib.toList keys;
+      _children = lib.toList actions;
+    };
+  };
+  mode = name: { SwitchToMode = name; };
+  once =
+    keys: action:
+    bind keys [
+      action
+      (mode "locked")
+    ];
+  manager =
+    options:
+    {
+      _props.location = "zellij:session-manager";
+    }
+    // options;
+  launch = name: {
+    LaunchOrFocusPlugin = {
+      _args = [ name ];
+      floating = true;
+      move_to_focused_tab = true;
+    };
+  };
 
 in
 {
@@ -23,30 +49,52 @@ in
       plugins.compact-bar._props.location = "zellij:compact-bar";
       plugins.key-hints._props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
       load_plugins.key-hints = { };
+      plugins.new-session = manager {
+        multi_screen = false;
+      };
+      plugins.find-tabs = manager { multi_screen = true; };
+      plugins.find-sessions = manager { multi_screen = false; };
       keybinds = {
         _props.clear-defaults = true;
-        locked._children = [
-          {
-            bind = {
-              _args = [ "Alt g" ];
-              SwitchToMode = "normal";
-            };
-          }
+        locked._children = [ (bind "Alt g" (mode "normal")) ];
+        normal._children = [
+          (bind "s" (mode "session"))
+          (bind "t" (mode "tab"))
+          (bind "p" (mode "pane"))
+          # Reuse a native mode for the find prefix; no custom input handling.
+          (bind "f" (mode "tmux"))
+        ];
+        session._children = [
+          (once "n" (launch "new-session"))
+          (once "d" { Quit = { }; })
+        ];
+        tab._children = [
+          (bind "n" [
+            { NewTab = { }; }
+            { TabNameInput = 0; }
+            (mode "renametab")
+          ])
+          (once "d" { CloseTab = { }; })
+        ];
+        renametab._children = [
+          (bind "Enter" (mode "locked"))
+          (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
+        ];
+        pane._children = [
+          (once "|" { NewPane = "Right"; })
+          (once "-" { NewPane = "Down"; })
+          (once "d" { CloseFocus = { }; })
+        ];
+        tmux._children = [
+          (once "t" (launch "find-tabs"))
+          (once "s" (launch "find-sessions"))
         ];
         shared_except = {
-          _args = [ "locked" ];
-          _children = [
-            {
-              bind = {
-                _args = [
-                  "Esc"
-                  "Ctrl c"
-                  "Alt g"
-                ];
-                SwitchToMode = "locked";
-              };
-            }
+          _args = [
+            "locked"
+            "renametab"
           ];
+          _children = [ (bind [ "Esc" "Ctrl c" "Alt g" ] (mode "locked")) ];
         };
       };
     };
