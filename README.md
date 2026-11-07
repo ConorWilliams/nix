@@ -79,6 +79,54 @@ nix fmt                                    # format
 nix flake check --all-systems --no-build   # check every config
 ```
 
+## Zellij
+
+A session contains tabs, and each tab contains terminal panes. The keys borrow
+Neovim's mnemonics: `b` for tabs (buffers), `w` for panes (windows), `q` for sessions.
+
+At an empty Fish prompt, press Space, wait for the bar to leave LOCKED mode,
+then use the keys below. Alt+G enters the same native modes directly and works
+while a program is running. Space in commands and Neovim keeps its usual behavior.
+
+| Keys after leader     | Action                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| `b n`                 | Create a tab and enter native naming mode; Enter accepts          |
+| `b r`                 | Rename this tab; Esc restores the previous name                   |
+| `,` or `b f`          | Fuzzy-find tabs, panes, or sessions in the native manager         |
+| `b b`                 | Last tab                                                          |
+| `b h` / `b l`         | Previous / next tab; `b 1` … `b 9` jumps by position              |
+| `b d`                 | Close this tab and its programs                                   |
+| `q n`, then Ctrl+W    | Open the native new-session form; name it and follow its prompts  |
+| `q r`, then Ctrl+R    | Rename the current session in the native manager                  |
+| `q s`                 | Find and switch sessions                                          |
+| `q d`                 | Detach, leaving programs running                                  |
+| `q q`                 | Quit the session, stopping its programs, whether named or unnamed |
+| `-` / `\|`            | Split below / right                                               |
+| `w w` / `w m` / `w f` | Last pane / maximize pane / floating panes                        |
+| `w d`                 | Close this pane and its program                                   |
+| `r`, then arrows      | Resize; Esc finishes                                              |
+| `s`, then `j` / `k`   | Scroll; Ctrl+D / Ctrl+U scroll half a page; Esc finishes          |
+| `s e`                 | Open scrollback in Neovim                                         |
+
+Ctrl+arrows retain the existing Neovim/Zellij navigation. F1 shows native hints.
+The session manager uses its built-in multi-screen view so fuzzy search includes
+tabs and panes: type a name, select with arrows, Enter accepts, Esc closes it.
+Names are optional; no shell code validates them.
+
+Closing a terminal window detaches every session. Native Zellij cannot choose
+this policy based on whether you named the session. Use `q q` to dispose of work,
+and `q s` or `zellij attach NAME` to return to it. Desktop sessions survive window
+closure, not reboot: resurrection remains disabled.
+
+The Space hand-off uses Zellij's CLI, so allow the mode change before typing the
+next key. Use Alt+G for fast sequences. On macOS, Kitty and shells share a short
+`ZELLIJ_SOCKET_DIR` so named sockets fit the platform's path limit. Older sessions
+in another socket directory remain accessible from their existing windows.
+
+Apply with `hms`, then open a fresh terminal. Start with one session per project,
+tabs for tasks, and panes for programs you want visible together. Project layouts
+can come later, once that workflow feels useful.
+
 ## Credentials
 
 `git` authenticates to GitHub through `gh`, over HTTPS desks log `gh` in with
