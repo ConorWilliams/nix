@@ -22,9 +22,15 @@ let
         session="anon-$(petname --words 2)"
         [[ $'\n'"$existing"$'\n' != *$'\n'"$session"$'\n'* ]] && break
       done
-      trap 'zellij kill-session "$session" >/dev/null 2>&1 || true' EXIT
+      cleanup() {
+        zellij kill-session "$session" >/dev/null 2>&1 || true
+      }
+      trap cleanup EXIT
       trap 'exit' HUP INT TERM
       zellij --session "$session"
+      cleanup
+      trap - EXIT
+      exec ${lib.getExe config.programs.fish.package}
     '';
   };
 in
