@@ -52,11 +52,29 @@ On the Mac, GUI apps are Homebrew casks in `darwin/`.
 
 ## Day to day
 
+Activating configurations:
+
 ```sh
 hms                                        # apply home changes
 dms                                        # on Mac: system settings, then home
+```
+
+Updating things:
+
+```sh
 nix flake update                           # bump all pinned inputs
 nix flake update llm-agents                # bump only claude
+```
+
+Manual garbage collection (runs on a schedule automatically):
+
+```sh
+nh clean all --keep 5 --keep-since 7d --ask
+```
+
+Dev work:
+
+```sh
 nix fmt                                    # format
 nix flake check --all-systems --no-build   # check every config
 ```
