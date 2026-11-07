@@ -7,7 +7,10 @@
 }:
 
 let
-  keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
+  keyHints = import ./zellij/key-hints.nix {
+    inherit pkgs;
+    zellijVersion = config.programs.zellij.package.version;
+  };
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;

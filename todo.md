@@ -6,7 +6,7 @@
 - [x] whichkey zellij on the RHS
 - [x] better anon zellij names
 - [x] space in fish normal mode
-- [ ] versioning for the which-key plugin
+- [x] versioning for the which-key plugin
 - [ ] All the zellij things in server (including serialization)
 - [ ] | and - to be replaced with h/v (horizontal/vertical), keep | in tooltip
 - [ ] ctrl+h/ctr+l (like nvim) to flick through tabs
