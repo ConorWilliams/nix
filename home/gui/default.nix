@@ -58,13 +58,6 @@ in
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
-  # Named sessions detach. The launcher cleans up only the anonymous name
-  # it created; renaming that session makes it survive window closure.
-  programs.zellij.settings = {
-    on_force_close = "detach";
-    session_serialization = false; # no exited-session resurrection list
-  };
-
   # zzh/zosh (home/shell.nix) from inside zellij, at the machine's own
   # screen (not over ssh): run again in a kitty window of their own,
   # outside zellij, rather than refuse. (On the Mac, `open` starts kitty
