@@ -42,9 +42,7 @@ in
     enable = true;
     # The contents: a path would be written out as text.
     themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
-    # Modal keys with a leader: see the comment at the top of
-    # zellij/keybinds-unlock-first.kdl.
-    # TODO: zellij 0.45.1 can't select this preset by name, so it's copied.
+    # TODO: zellij 0.45.1 can't select model keys preset by name, so it's copied.
     # A later release may: then keybinds preset="unlock-first" plus the
     # navigation bindings.
     extraConfig = keybinds + compactBar;
