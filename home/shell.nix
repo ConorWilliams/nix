@@ -12,8 +12,7 @@
 let
   # The hand-off, not when the parent is already fish (so typing `bash` inside
   # fish gives bash), not for `-ic 'cmd'` (tools probing the environment), not
-  # in nix-shell / nix develop (they need their own shell for the dev
-  # environment).
+  # in nix-shell / nix develop.
   toFish =
     { commandVar, isLogin }:
     /* bash */ ''
@@ -104,14 +103,12 @@ in
       body = "fend $argv";
     };
 
-    # starship's shrunk prompt after a command runs (enableTransience,
-    # below): just its ❯ module, given the status and vi mode it's passed.
+    # starship's shrunk prompt after a command runs
     functions.starship_transient_prompt_func = "starship module character $argv";
 
     # sudo searches its own PATH (secure_path), without ~/.nix-profile/bin,
     # so `sudo dust` isn't found: give it the program's full path from this
-    # shell's PATH. Starting with an option (sudo -u ...), or not a program
-    # here: passed on as typed.
+    # shell's PATH.
     functions.sudo = {
       description = "sudo, finding programs on this shell's PATH (Nix's too)";
       wraps = "sudo";
