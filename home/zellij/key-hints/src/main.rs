@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use zellij_tile::prelude::{actions::Action, *};
 
 #[derive(Default)]
@@ -8,25 +8,28 @@ struct Hints {
     visible: bool,
     mode: InputMode,
     rows: Vec<(String, String)>,
-    tab: usize,
-    pane_tab: usize,
     size: (usize, usize),
+    controller: bool,
+    views: BTreeSet<u32>,
 }
 register_plugin!(Hints);
 
 impl ZellijPlugin for Hints {
-    fn load(&mut self, _: BTreeMap<String, String>) {
+    fn load(&mut self, configuration: BTreeMap<String, String>) {
         self.id = get_plugin_ids().plugin_id;
+        self.controller = configuration.get("controller").is_some_and(|v| v == "true");
         self.size = (24, 80);
         // Full ModeUpdate events supply the live keymap; no config parser or cache.
         subscribe(&[
             EventType::ModeUpdate,
             EventType::TabUpdate,
+            EventType::PaneUpdate,
             EventType::PermissionRequestResult,
         ]);
         request_permission(&[
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
+            PermissionType::MessageAndLaunchOtherPlugins,
         ]);
     }
 
@@ -36,8 +39,9 @@ impl ZellijPlugin for Hints {
                 self.ready = true;
                 set_selectable(false);
                 hide_self();
+                self.refresh();
             }
-            Event::ModeUpdate(info) if self.ready => {
+            Event::ModeUpdate(info) => {
                 let rows = bindings(&info);
                 if self.mode != info.mode || self.rows != rows {
                     self.mode = info.mode;
@@ -48,15 +52,46 @@ impl ZellijPlugin for Hints {
             Event::TabUpdate(tabs) => {
                 if let Some(tab) = tabs.iter().find(|t| t.active) {
                     let size = (tab.display_area_rows, tab.display_area_columns);
-                    let changed = self.tab != tab.position || self.size != size;
-                    self.tab = tab.position;
+                    let changed = self.size != size;
                     self.size = size;
                     if self.ready && self.visible && changed {
                         self.refresh();
                     }
                 }
             }
+            Event::PaneUpdate(manifest) if self.controller && self.ready => {
+                let mut views = BTreeSet::new();
+                for panes in manifest.panes.values() {
+                    let mut hints = panes
+                        .iter()
+                        .filter(|p| p.is_plugin && p.plugin_url.as_deref() == Some("key-hints"));
+                    if let Some(pane) = hints.next() {
+                        views.insert(pane.id);
+                    }
+                    // Closing a tab transfers suppressed panes to another tab.
+                    // Keep just one hints pane there, including after hidden closes.
+                    for duplicate in hints {
+                        close_plugin_pane(duplicate.id);
+                    }
+                }
+                if self.views != views {
+                    self.views = views;
+                    self.refresh();
+                }
+            }
             _ => {}
+        }
+        self.ready && self.visible
+    }
+
+    fn pipe(&mut self, message: PipeMessage) -> bool {
+        if !self.controller && message.name == "hints-mode" {
+            if let Some((mode, rows)) = message.payload.and_then(|p| serde_json::from_str(&p).ok())
+            {
+                self.mode = mode;
+                self.rows = rows;
+                self.refresh();
+            }
         }
         self.ready && self.visible
     }
@@ -90,6 +125,21 @@ impl ZellijPlugin for Hints {
 
 impl Hints {
     fn refresh(&mut self) {
+        if !self.ready {
+            return;
+        }
+        if self.controller {
+            let payload = serde_json::to_string(&(self.mode, &self.rows)).unwrap();
+            for id in &self.views {
+                pipe_message_to_plugin(MessageToPlugin {
+                    destination_plugin_id: Some(*id),
+                    message_name: "hints-mode".into(),
+                    message_payload: Some(payload.clone()),
+                    ..Default::default()
+                });
+            }
+            return;
+        }
         let active = matches!(
             self.mode,
             InputMode::Normal
@@ -107,10 +157,6 @@ impl Hints {
             return;
         }
         let pane = PaneId::Plugin(self.id);
-        if self.pane_tab != self.tab {
-            self.pane_tab = self.tab;
-            break_panes_to_tab_with_index(&[pane], self.tab, false);
-        }
         if !self.visible {
             self.visible = true;
             show_pane_with_id(pane, true, false); // leave input focused on the terminal
