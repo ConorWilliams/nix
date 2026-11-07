@@ -11,16 +11,23 @@ let
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
-    }
-    // actions;
+      _children = lib.toList actions;
+    };
   };
   mode = name: { SwitchToMode = name; };
-  once = keys: actions: bind keys (actions // mode "locked");
+  # Native tooltips inspect the first action, so keep the command before
+  # returning to locked mode (attribute sets would sort these by name).
+  once =
+    keys: actions:
+    bind keys [
+      actions
+      (mode "locked")
+    ];
   manager =
     keys:
     once keys {
       LaunchOrFocusPlugin = {
-        _args = [ "zellij:session-manager" ];
+        _args = [ "session-manager" ];
         floating = true;
         move_to_focused_tab = true;
         multi_screen = true; # native fuzzy search includes tabs and panes

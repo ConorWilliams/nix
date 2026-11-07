@@ -109,6 +109,11 @@ while a program is running. Space in commands and Neovim keeps its usual behavio
 | `s e`                 | Open scrollback in Neovim                                         |
 
 Ctrl+arrows retain the existing Neovim/Zellij navigation. F1 shows native hints.
+The popup shows hints for the current mode: after the leader it lists mode
+groups, then `b`, `w`, or `q` shows that group's supported hints. It is not a full
+keymap list: Zellij's built-in popup omits some actions, including the direct
+`,`, `-`, and `|` shortcuts in leader mode and `q q` in session mode. The table
+above is the complete list of our shortcuts.
 The session manager uses its built-in multi-screen view so fuzzy search includes
 tabs and panes: type a name, select with arrows, Enter accepts, Esc closes it.
 Names are optional; no shell code validates them.
