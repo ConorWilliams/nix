@@ -19,7 +19,6 @@
   ];
 
   # Complete Dawn palette, including highlights omitted from palette.json.
-  # The Tailwind export is JSON prefixed with `export default `.
   _module.args.dawn =
     let
       preset = builtins.readFile "${inputs.rose-pine-palette}/dist/tailwindcss/rose-pine.js";
@@ -143,7 +142,6 @@
     # gh repo clone etc. use HTTPS too
     settings.git_protocol = "https";
     # `gh poi [--dry-run]`: deletes local branches whose PR was merged and their unused worktrees
-    # `gh stack`: stacked PRs
     extensions = with pkgs; [
       gh-poi
       gh-stack
@@ -195,7 +193,6 @@
   };
 
   # eza (ls, ll, la, lt, lla), with icons and a git column.
-  # Wrapped so it ignores LS_COLORS above.
   programs.eza = {
     enable = true;
     icons = "auto";
@@ -204,6 +201,7 @@
       name = "eza";
       paths = [ pkgs.eza ];
       nativeBuildInputs = [ pkgs.makeWrapper ];
+      # Wrapped so it ignores LS_COLORS above.
       postBuild = ''
         wrapProgram $out/bin/eza --unset LS_COLORS \
           --set EZA_CONFIG_DIR "${config.xdg.configHome}/eza"
