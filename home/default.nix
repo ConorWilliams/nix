@@ -18,8 +18,7 @@
     ./neovim.nix
   ];
 
-  # Rose Pine Dawn's colours by role (base, text, rose, love...), from
-  # the official palette, for every module to use as `dawn`
+  # Rose Pine Dawn's colours by role, for every module to use as `dawn`
   _module.args.dawn = lib.genAttrs' (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn (
     c: lib.nameValuePair c.role "#${c.hex}"
   );

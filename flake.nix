@@ -1,5 +1,5 @@
 {
-  description = "Conor's terminal environment";
+  description = "Conor's environment";
 
   inputs = {
 
