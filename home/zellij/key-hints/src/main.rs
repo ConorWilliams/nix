@@ -69,7 +69,11 @@ impl ZellijPlugin for Hints {
             .max()
             .unwrap_or(0);
         print_text_with_coordinates(
-            Text::new(format!("{:?}", self.mode)).color_all(0),
+            Text::new(match self.mode {
+                InputMode::Tmux => "Find".into(),
+                mode => format!("{mode:?}"),
+            })
+            .color_all(0),
             1,
             0,
             Some(cols.saturating_sub(2)),
@@ -98,6 +102,7 @@ impl Hints {
                 | InputMode::Session
                 | InputMode::Resize
                 | InputMode::Scroll
+                | InputMode::Tmux
         );
         if !active || self.rows.is_empty() {
             if self.visible {
@@ -179,9 +184,10 @@ fn describe(action: &Action) -> String {
         Action::SwitchToMode { input_mode } => match input_mode {
             InputMode::Locked => "Cancel / return to typing".into(),
             InputMode::Normal => "Leader".into(),
-            InputMode::Tab => "Buffers (tabs)".into(),
-            InputMode::Pane => "Windows (panes)".into(),
+            InputMode::Tab => "Tabs".into(),
+            InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
+            InputMode::Tmux => "Find".into(),
             InputMode::RenameTab => "Rename tab".into(),
             mode => format!("{mode:?}"),
         },
@@ -209,6 +215,9 @@ fn describe(action: &Action) -> String {
         Action::KeybindPipe { name, .. } => {
             format!("Plugin: {}", name.as_deref().unwrap_or("message"))
         }
+        action if action.launches_plugin("new-session") => "New session".into(),
+        action if action.launches_plugin("find-tabs") => "Find tabs / panes / sessions".into(),
+        action if action.launches_plugin("find-sessions") => "Find sessions".into(),
         action if action.launches_plugin("session-manager") => {
             "Find tabs / panes / sessions".into()
         }
