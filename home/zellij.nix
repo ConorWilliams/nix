@@ -103,6 +103,26 @@ in
           "Up"
           "Right"
         ];
+        # The navigator forwards Ctrl+arrows to Neovim, otherwise moves panes.
+        shared._children =
+          map
+            (
+              dir:
+              bind "Ctrl ${lib.toSentenceCase dir}" {
+                MessagePlugin = {
+                  _args = [ "file:${pkgs.zellijPlugins.vim-zellij-navigator}" ];
+                  name = "move_focus";
+                  payload = dir;
+                  use_arrow_keys = "true";
+                };
+              }
+            )
+            [
+              "left"
+              "down"
+              "up"
+              "right"
+            ];
         shared_except = {
           _args = [
             "locked"
