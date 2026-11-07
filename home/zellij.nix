@@ -61,12 +61,12 @@ in
           (bind "s" (mode "session"))
           (bind "t" (mode "tab"))
           (bind "p" (mode "pane"))
-          # Reuse a native mode for the find prefix; no custom input handling.
-          (bind "f" (mode "tmux"))
+          (once "Space" (launch "find-tabs"))
         ];
         session._children = [
           (once "n" (launch "new-session"))
           (once "d" { Quit = { }; })
+          (once "f" (launch "find-sessions"))
         ];
         tab._children = [
           (bind "n" [
@@ -84,10 +84,6 @@ in
           (once "|" { NewPane = "Right"; })
           (once "-" { NewPane = "Down"; })
           (once "d" { CloseFocus = { }; })
-        ];
-        tmux._children = [
-          (once "t" (launch "find-tabs"))
-          (once "s" (launch "find-sessions"))
         ];
         shared_except = {
           _args = [

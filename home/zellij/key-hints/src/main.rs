@@ -69,11 +69,7 @@ impl ZellijPlugin for Hints {
             .max()
             .unwrap_or(0);
         print_text_with_coordinates(
-            Text::new(match self.mode {
-                InputMode::Tmux => "Find".into(),
-                mode => format!("{mode:?}"),
-            })
-            .color_all(0),
+            Text::new(format!("{:?}", self.mode)).color_all(0),
             1,
             0,
             Some(cols.saturating_sub(2)),
@@ -102,7 +98,6 @@ impl Hints {
                 | InputMode::Session
                 | InputMode::Resize
                 | InputMode::Scroll
-                | InputMode::Tmux
         );
         if !active || self.rows.is_empty() {
             if self.visible {
@@ -187,7 +182,6 @@ fn describe(action: &Action) -> String {
             InputMode::Tab => "Tabs".into(),
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
-            InputMode::Tmux => "Find".into(),
             InputMode::RenameTab => "Rename tab".into(),
             mode => format!("{mode:?}"),
         },
