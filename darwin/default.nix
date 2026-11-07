@@ -63,7 +63,7 @@
         184 # Capture toolbar: Cmd+Shift+5
       ];
     in
-    lib.mkAfter ''
+    lib.mkAfter /* bash */ ''
       for key in ${lib.concatMapStringsSep " " toString disabledHotkeys}; do
         sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
           com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \

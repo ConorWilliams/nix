@@ -206,7 +206,7 @@
       paths = [ pkgs.eza ];
       nativeBuildInputs = [ pkgs.makeWrapper ];
       # Wrapped so it ignores LS_COLORS above.
-      postBuild = ''
+      postBuild = /* bash */ ''
         wrapProgram $out/bin/eza --unset LS_COLORS \
           --set EZA_CONFIG_DIR "${config.xdg.configHome}/eza"
       '';

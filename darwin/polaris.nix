@@ -28,7 +28,7 @@ in
     "whatsapp"
   ];
 
-  system.activationScripts.postActivation.text = lib.mkAfter ''
+  system.activationScripts.postActivation.text = lib.mkAfter /* bash */ ''
     '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || echo "warning: Mullvad auto-connect not set" >&2
   '';
 

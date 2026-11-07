@@ -66,7 +66,7 @@ in
     (pkgs.writeShellApplication {
       name = "git-clone-wt";
       runtimeInputs = [ config.programs.git.package ];
-      text = ''
+      text = /* bash */ ''
         if [[ $# -lt 1 ]]; then
           echo "usage: git clone-wt <url> [dir]" >&2
           exit 1
@@ -130,7 +130,7 @@ in
         name = "lazygit";
         paths = [ pkgs.lazygit ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
-        postBuild = ''
+        postBuild = /* bash */ ''
           wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
             "${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml,${configDir}/lazygit/config.yml"
         '';

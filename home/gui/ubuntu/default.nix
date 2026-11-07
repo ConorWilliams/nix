@@ -139,7 +139,7 @@ in
   # Not GNOME's geoclue demo agent (an autostart app outside GNOME): it
   # outlives logouts, so they never finish and the systemd user manager
   # never restarts afresh (the GNOME session left in it above).
-  xdg.configFile."autostart/geoclue-demo-agent.desktop".text = ''
+  xdg.configFile."autostart/geoclue-demo-agent.desktop".text = /* ini */ ''
     [Desktop Entry]
     Type=Application
     Name=Geoclue Demo agent
