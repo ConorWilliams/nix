@@ -5,7 +5,7 @@
   - should protect from anon cleanup
 - [x] whichkey zellij on the RHS
 - [x] better anon zellij names
-- [ ] space in fish normal mode
+- [x] space in fish normal mode
 - [ ] versioning for the which-key plugin
 - [ ] All the zellij things in server (including serialization)
 - [ ] | and - to be replaced with h/v (horizontal/vertical), keep | in tooltip
