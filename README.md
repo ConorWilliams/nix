@@ -1,6 +1,6 @@
 # nix
 
-My terminal environment, managed with Nix + Home Manager.
+My environment, managed with Nix + Home Manager.
 
 ## Quick start
 
@@ -17,24 +17,28 @@ My terminal environment, managed with Nix + Home Manager.
 ## Layout
 
 ```fish
-├── flake.nix                # users, hosts -> layer
-├── bootstrap.sh
+├── flake.nix                # Users, hosts -> layer
 ├── home
-│   ├── default.nix          # cli: every machine
+│   ├── default.nix          # CLI: every machine
+│   ├── <config>.nix         #   specialized configs
+│   ├── <config>/            #   auxiliary files
 │   └── gui
-│       ├── default.nix      # GUI layer: desks on any OS
+│       ├── default.nix      # GUI: any OS
+│       ├── <config>.nix
 │       ├── ubuntu
-│       │   ├── default.nix  # Ubuntu layer
+│       │   ├── default.nix  # Ubuntu
 │       │   └── <host>.nix
 │       └── mac
-│           ├── default.nix  # Mac layer
+│           ├── default.nix  # Mac
 │           └── <host>.nix
 └── darwin
     ├── default.nix          # Macs' system settings
     └── <host>.nix
 ```
 
-Each layer imports the one above it, so a machine only names its last layer.
+Each layer imports the one above it, so a host/machine only names its last layer.
+
+## GUI applications
 
 On Ubuntu, GUI apps that need the graphics drivers stay with apt/snap, as
 Nix-built ones can't use Ubuntu's drivers; kitty comes from its own installer.
@@ -53,7 +57,7 @@ nix flake check --all-systems --no-build   # check every config
 
 ## Credentials
 
-`git` authenticates to GitHub through `gh`, over HTTPS Desks log `gh` in with
+`git` authenticates to GitHub through `gh`, over HTTPS desks log `gh` in with
 the browser; each server gets its own [fine-grained token][pat], limited to
 the repos it needs, to renew one, run:
 
