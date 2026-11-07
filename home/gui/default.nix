@@ -30,8 +30,10 @@ let
       zellij --session "$session"
       cleanup
       trap - EXIT
-      export PATH="${config.home.profileDirectory}/bin:$PATH"
-      exec ${lib.getExe config.programs.fish.package}
+      # Use the normal login-shell -> Fish hand-off, including Nix's environment.
+      exec ${
+        if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else lib.getExe config.programs.bash.package
+      } --login
     '';
   };
 in
