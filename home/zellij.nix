@@ -7,6 +7,7 @@
 }:
 
 let
+  keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
   # These only spell KDL nodes; all actions and modes belong to Zellij.
   bind = keys: actions: {
     bind = {
@@ -45,6 +46,8 @@ in
       show_startup_tips = false;
       show_release_notes = false;
       plugins.compact-bar._props.location = "zellij:compact-bar";
+      plugins.key-hints._props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
+      load_plugins.key-hints = { };
       keybinds = {
         _props.clear-defaults = true;
         locked._children = [ (bind "Alt g" (mode "normal")) ];

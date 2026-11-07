@@ -184,6 +184,11 @@
               options = [ "--config-path=home/nvim/.stylua.toml" ];
               includes = [ "*.lua" ];
             };
+            rustfmt = {
+              command = "rustfmt";
+              options = [ "--edition=2021" ];
+              includes = [ "*.rs" ];
+            };
             rumdl = {
               command = "rumdl";
               options = [ "fmt" ];
@@ -193,6 +198,7 @@
           runtimeInputs = with pkgs; [
             shfmt
             stylua
+            rustfmt
             rumdl
           ];
         }

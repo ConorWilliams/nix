@@ -1,0 +1,207 @@
+use std::collections::BTreeMap;
+use zellij_tile::prelude::{actions::Action, *};
+
+#[derive(Default)]
+struct Hints {
+    id: u32,
+    ready: bool,
+    visible: bool,
+    mode: InputMode,
+    rows: Vec<(String, String)>,
+    tab: usize,
+    pane_tab: usize,
+    size: (usize, usize),
+}
+register_plugin!(Hints);
+
+impl ZellijPlugin for Hints {
+    fn load(&mut self, _: BTreeMap<String, String>) {
+        self.id = get_plugin_ids().plugin_id;
+        self.size = (24, 80);
+        // Full ModeUpdate events supply the live keymap; no config parser or cache.
+        subscribe(&[
+            EventType::ModeUpdate,
+            EventType::TabUpdate,
+            EventType::PermissionRequestResult,
+        ]);
+        request_permission(&[
+            PermissionType::ReadApplicationState,
+            PermissionType::ChangeApplicationState,
+        ]);
+    }
+
+    fn update(&mut self, event: Event) -> bool {
+        match event {
+            Event::PermissionRequestResult(PermissionStatus::Granted) => {
+                self.ready = true;
+                set_selectable(false);
+                hide_self();
+            }
+            Event::ModeUpdate(info) if self.ready => {
+                let rows = bindings(&info);
+                if self.mode != info.mode || self.rows != rows {
+                    self.mode = info.mode;
+                    self.rows = rows;
+                    self.refresh();
+                }
+            }
+            Event::TabUpdate(tabs) => {
+                if let Some(tab) = tabs.iter().find(|t| t.active) {
+                    let size = (tab.display_area_rows, tab.display_area_columns);
+                    let changed = self.tab != tab.position || self.size != size;
+                    self.tab = tab.position;
+                    self.size = size;
+                    if self.ready && self.visible && changed {
+                        self.refresh();
+                    }
+                }
+            }
+            _ => {}
+        }
+        self.ready && self.visible
+    }
+
+    fn render(&mut self, rows: usize, cols: usize) {
+        let key_width = self
+            .rows
+            .iter()
+            .map(|(k, _)| k.chars().count())
+            .max()
+            .unwrap_or(0);
+        print_text_with_coordinates(
+            Text::new(format!("{:?}", self.mode)).color_all(0),
+            1,
+            0,
+            Some(cols.saturating_sub(2)),
+            None,
+        );
+        for (y, (key, description)) in self.rows.iter().take(rows.saturating_sub(1)).enumerate() {
+            let label = format!("{key:<key_width$}  {description}");
+            print_text_with_coordinates(
+                Text::new(label).color_range(3, 0..key.chars().count()),
+                1,
+                y + 1,
+                Some(cols.saturating_sub(2)),
+                None,
+            );
+        }
+    }
+}
+
+impl Hints {
+    fn refresh(&mut self) {
+        let active = matches!(
+            self.mode,
+            InputMode::Normal
+                | InputMode::Pane
+                | InputMode::Tab
+                | InputMode::Session
+                | InputMode::Resize
+                | InputMode::Scroll
+        );
+        if !active || self.rows.is_empty() {
+            if self.visible {
+                self.visible = false;
+                hide_self();
+            }
+            return;
+        }
+        let pane = PaneId::Plugin(self.id);
+        if self.pane_tab != self.tab {
+            self.pane_tab = self.tab;
+            break_panes_to_tab_with_index(&[pane], self.tab, false);
+        }
+        if !self.visible {
+            self.visible = true;
+            show_pane_with_id(pane, true, false); // leave input focused on the terminal
+        }
+        let key_width = self
+            .rows
+            .iter()
+            .map(|(k, _)| k.chars().count())
+            .max()
+            .unwrap_or(0);
+        let description_width = self
+            .rows
+            .iter()
+            .map(|(_, d)| d.chars().count())
+            .max()
+            .unwrap_or(0);
+        let width = (key_width + description_width + 6).min(self.size.1.saturating_sub(2));
+        let height = (self.rows.len() + 3).min(self.size.0.saturating_sub(2));
+        if let Some(coordinates) = FloatingPaneCoordinates::new(
+            Some("1".into()),
+            Some(self.size.0.saturating_sub(height + 1).to_string()),
+            Some(width.to_string()),
+            Some(height.to_string()),
+            Some(true),
+            Some(false),
+        ) {
+            change_floating_panes_coordinates(vec![(pane, coordinates)]);
+        }
+    }
+}
+
+fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
+    let mut groups: Vec<(String, String)> = Vec::new();
+    for (key, actions) in info.get_keybinds_for_mode(info.mode) {
+        let Some(action) = actions.first() else {
+            continue;
+        };
+        let description = describe(action);
+        if let Some((keys, _)) = groups.iter_mut().find(|(_, label)| *label == description) {
+            keys.push_str(&format!(" / {key}"));
+        } else {
+            groups.push((key.to_string(), description));
+        }
+    }
+    groups
+}
+
+fn describe(action: &Action) -> String {
+    match action {
+        Action::SwitchToMode { input_mode } => match input_mode {
+            InputMode::Locked => "Cancel / return to typing".into(),
+            InputMode::Normal => "Leader".into(),
+            InputMode::Tab => "Buffers (tabs)".into(),
+            InputMode::Pane => "Windows (panes)".into(),
+            InputMode::Session => "Sessions".into(),
+            InputMode::RenameTab => "Rename tab".into(),
+            mode => format!("{mode:?}"),
+        },
+        Action::NewPane {
+            direction: Some(Direction::Down),
+            ..
+        } => "Split below".into(),
+        Action::NewPane {
+            direction: Some(Direction::Right),
+            ..
+        } => "Split right".into(),
+        Action::NewTab { .. } => "New tab".into(),
+        Action::GoToTab { .. } => "Go to tab".into(),
+        Action::GoToPreviousTab => "Previous tab".into(),
+        Action::GoToNextTab => "Next tab".into(),
+        Action::ToggleTab => "Last tab".into(),
+        Action::FocusLastPane => "Last pane".into(),
+        Action::CloseTab => "Close tab".into(),
+        Action::CloseFocus => "Close pane".into(),
+        Action::ToggleFocusFullscreen => "Maximize / restore pane".into(),
+        Action::ToggleFloatingPanes => "Show / hide floating panes".into(),
+        Action::Detach => "Detach session".into(),
+        Action::Quit => "Quit session".into(),
+        Action::EditScrollback { .. } => "Open scrollback in editor".into(),
+        Action::KeybindPipe { name, .. } => {
+            format!("Plugin: {}", name.as_deref().unwrap_or("message"))
+        }
+        action if action.launches_plugin("session-manager") => {
+            "Find tabs / panes / sessions".into()
+        }
+        // New actions still appear without adding another menu entry here.
+        action => format!("{action:?}")
+            .split(['{', '('])
+            .next()
+            .unwrap_or("Action")
+            .trim()
+            .to_owned(),
+    }
+}
