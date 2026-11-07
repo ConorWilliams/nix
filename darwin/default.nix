@@ -46,22 +46,21 @@
     remapCapsLockToEscape = true;
   };
 
-  # Free Ctrl+arrows for Zellij/Neovim and Cmd+Shift+3/4/5 for AeroSpace.
-  # AeroSpace provides screenshots on Cmd+P instead.
+  # Free keys that overlap with Zellij/AreoSpace.
   system.activationScripts.postActivation.text =
     let
       disabledHotkeys = [
-        28 # Screenshot (Cmd+Shift+3).
-        30 # Screenshot (Cmd+Shift+4).
-        32 # Mission Control (Ctrl+Up).
-        34 # Mission Control, slow animation (Ctrl+Shift+Up).
-        33 # Application windows (Ctrl+Down).
-        35 # Application windows, slow animation (Ctrl+Shift+Down).
-        79 # Move left a space (Ctrl+Left).
-        80 # Move left a space, slow animation (Ctrl+Shift+Left).
-        81 # Move right a space (Ctrl+Right).
-        82 # Move right a space, slow animation (Ctrl+Shift+Right).
-        184 # Screenshot and recording toolbar (Cmd+Shift+5).
+        28 # Screen capture: Cmd+Shift+3
+        30 # Region capture: Cmd+Shift+4
+        32 # Mission Control: Ctrl+Up
+        34 # ^ slow: Ctrl+Shift+Up
+        33 # App windows: Ctrl+Down
+        35 # ^ slow: Ctrl+Shift+Down
+        79 # Space left: Ctrl+Left
+        80 # ^ slow: Ctrl+Shift+Left
+        81 # Space right: Ctrl+Right
+        82 # ^ slow: Ctrl+Shift+Right
+        184 # Capture toolbar: Cmd+Shift+5
       ];
     in
     lib.mkAfter ''
