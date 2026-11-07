@@ -54,6 +54,21 @@ in
   programs.zellij = {
     enable = true;
     themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
+    # Each tab owns its hints: no cross-tab pane moves, and closing a tab
+    # cannot unload the hints in the remaining tabs.
+    layouts.compact = /* kdl */ ''
+      layout {
+        pane
+        pane size=1 borderless=true {
+          plugin location="compact-bar"
+        }
+        floating_panes {
+          pane {
+            plugin location="key-hints"
+          }
+        }
+      }
+    '';
     settings = {
       default_mode = "locked";
       default_layout = "compact";
@@ -64,7 +79,11 @@ in
       session_serialization = false;
       plugins.compact-bar._props.location = "zellij:compact-bar";
       plugins.key-hints._props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
-      load_plugins.key-hints = { };
+      plugins.key-hints-controller = {
+        _props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
+        controller = true;
+      };
+      load_plugins.key-hints-controller = { };
       plugins.new-session = manager {
         multi_screen = false;
       };
