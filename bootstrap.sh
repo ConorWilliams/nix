@@ -97,7 +97,7 @@ main() {
     if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
       echo "flake.nix has no darwinConfigurations.$host (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
-      sudo "$(type -P nix)" --extra-experimental-features 'nix-command flakes' \
+      sudo -H "$(type -P nix)" --extra-experimental-features 'nix-command flakes' \
         run --inputs-from "$dir" nix-darwin#darwin-rebuild -- switch --flake "$dir#$host"
     elif [[ ! -e /run/current-system ]]; then
       echo "The first Mac setup needs nix-darwin before Home Manager; stopping."
