@@ -39,3 +39,4 @@ nixpkgs
 config
 hostname
 gui
+configs
