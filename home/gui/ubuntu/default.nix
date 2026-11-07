@@ -82,9 +82,7 @@ in
   # i3, so dunst from Nix, started by the first notification.
   services.dunst =
     let
-      # Rose Pine Dawn (home/default.nix), as the official port for mako (a
-      # Wayland dunst) colours notifications, except the frame: muted, as the
-      # port's (highlight high) isn't in the palette.
+      # Rose Pine Dawn, following the official mako port.
       colours = {
         background = dawn.overlay;
         foreground = dawn.text;
@@ -96,7 +94,7 @@ in
         global = {
           inherit font;
           frame_width = 2;
-          frame_color = dawn.muted;
+          frame_color = dawn.highlight-high;
           separator_color = "frame";
           highlight = dawn.pine; # progress bars
           corner_radius = 8;

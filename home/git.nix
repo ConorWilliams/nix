@@ -2,6 +2,7 @@
   config,
   pkgs,
   inputs,
+  dawn,
   ...
 }:
 
@@ -145,9 +146,8 @@ in
       gui = {
         nerdFontsVersion = "3"; # file icons
         showCommandLog = false; # the git commands it runs; @ shows it
-        # The selected line in Rose Pine Dawn's "highlight high",
-        # because the official port is unreadable.
-        theme.selectedLineBgColor = [ "#cecacd" ];
+        # Stronger selection contrast than the official port.
+        theme.selectedLineBgColor = [ dawn.highlight-high ];
       };
     };
   };

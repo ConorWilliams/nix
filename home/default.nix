@@ -18,10 +18,13 @@
     ./neovim.nix
   ];
 
-  # Rose Pine Dawn's colours by role, for every module to use as `dawn`
-  _module.args.dawn = lib.genAttrs' (lib.importJSON "${inputs.rose-pine-palette}/palette.json").dawn (
-    c: lib.nameValuePair c.role "#${c.hex}"
-  );
+  # Complete Dawn palette, including highlights omitted from palette.json.
+  # The Tailwind export is JSON prefixed with `export default `.
+  _module.args.dawn =
+    let
+      preset = builtins.readFile "${inputs.rose-pine-palette}/dist/tailwindcss/rose-pine.js";
+    in
+    (builtins.fromJSON (lib.removePrefix "export default " preset)).theme.colors.rp-dawn;
 
   # Compatibility marker for Home Manager's defaults, not a version pin.
   home.stateVersion = "26.11";
@@ -30,7 +33,7 @@
   programs.home-manager.enable = true;
 
   # `, cowsay hi` runs a program from nixpkgs without installing it, and a
-  # command that isn't installed says which package has it (in fish too).
+  # command that isn't installed says which package has it.
   programs.nix-index.enable = true;
   programs.nix-index-database.comma.enable = true;
 
