@@ -7,10 +7,7 @@
 }:
 
 let
-  keyHints = import ./zellij/key-hints.nix {
-    inherit pkgs;
-    zellijVersion = config.programs.zellij.package.version;
-  };
+  keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
