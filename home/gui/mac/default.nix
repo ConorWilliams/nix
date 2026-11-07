@@ -55,8 +55,8 @@
             # Kitty's configured shell owns the disposable Zellij session.
             ${key k.terminal} = "exec-and-forget open -n -a kitty";
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
-            # Borderless Kitty has no AX close button; each terminal is a
-            # separate app instance, so quit it when closing its last window.
+            # Borderless Kitty has no AX close button; retain the AeroSpace
+            # close workaround. Kitty also quits itself after its last window.
             ${key k.close} = "exec-and-forget ${closeWindow}";
             ${key k.fullscreen} = "fullscreen";
             ${key k.floating} = "layout floating tiling";
@@ -87,6 +87,7 @@
   programs.kitty.environment.ZELLIJ_SOCKET_DIR = config.home.sessionVariables.ZELLIJ_SOCKET_DIR;
 
   programs.kitty.settings = {
+    macos_quit_when_last_window_closed = true;
     # Left Option is Alt, as on Linux: zellij's Alt-g, fzf's Alt-C, nvim's
     # Alt keys. Not the right one: on the British layout it types # and
     # other characters.
