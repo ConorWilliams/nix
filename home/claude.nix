@@ -7,10 +7,8 @@
 }:
 
 let
-  # Updated daily.
   llm = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
-  # Status line script.
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
     runtimeInputs = [
@@ -26,8 +24,9 @@ in
     enable = true;
     package = llm.claude-code;
 
-    # Merge the settings below into ~/.claude/settings.json on each switch.
+    # Merge the settings below on each switch.
     mutableSettings = true;
+
     settings = {
       statusLine = {
         type = "command";
