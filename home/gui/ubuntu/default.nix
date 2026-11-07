@@ -196,7 +196,7 @@ in
           }) wm.arrows
         )
         // {
-          ${key k.terminal} = "exec kitty zellij";
+          ${key k.terminal} = "exec kitty";
           ${key k.launcher} = "exec rofi -show run";
           ${key k.close} = "kill";
           ${key k.fullscreen} = "fullscreen toggle";

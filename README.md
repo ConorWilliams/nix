@@ -99,7 +99,7 @@ while a program is running. Space in commands and Neovim keeps its usual behavio
 | `q n`, then Ctrl+W    | Open the native new-session form; name it and follow its prompts  |
 | `q r`, then Ctrl+R    | Rename the current session in the native manager                  |
 | `q s`                 | Find and switch sessions                                          |
-| `q d`                 | Detach from the current session                                   |
+| `q d`                 | Detach; the launcher's anonymous session is cleaned up            |
 | `q q`                 | Quit the session, stopping its programs, whether named or unnamed |
 | `-` / `\|`            | Split below / right                                               |
 | `w w` / `w m` / `w f` | Last pane / maximize pane / floating panes                        |
@@ -125,6 +125,24 @@ require clicking the status bar.
 The session manager uses its built-in multi-screen view so fuzzy search includes
 tabs and panes: type a name, select with arrows, Enter accepts, Esc closes it.
 Names are optional; no shell code validates them.
+
+Kitty's configured shell starts a disposable `anonymous-<random id>` session.
+Closing the window kills that anonymous session. Rename it through `q r`, then
+Ctrl+R, to keep it: the renamed session detaches and its programs keep running.
+Reserve `anonymous-` for disposable sessions.
+
+The launcher remembers only the session it created. If you switch to named work,
+closing the window preserves that work and cleans up the original anonymous
+session. Detaching with `q d` performs the same cleanup. `q q` explicitly quits
+the current session, whether named or anonymous. Return to named work through
+`q s` or `zellij attach NAME`.
+
+This policy applies to sessions started by Kitty's default shell, including new
+windows from the window manager. Existing windows, direct `zellij` commands, and
+remote sessions are outside that launcher policy. Native-generated names from
+the session manager are also kept; only the launcher's exact anonymous name is
+disposable. Desktop sessions survive window closure, not reboot: resurrection
+remains disabled. A crash or SIGKILL cannot run the launcher's exit cleanup.
 
 The Space hand-off uses Zellij's CLI, so allow the mode change before typing the
 next key. Use Alt+G for fast sequences. On macOS, Kitty and shells share a short
