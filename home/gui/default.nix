@@ -13,11 +13,15 @@ let
     name = "zellij-terminal";
     runtimeInputs = [
       config.programs.zellij.package
-      pkgs.coreutils
+      pkgs.rust-petname
     ];
     text = ''
       unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
-      session="anonymous-$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"
+      existing=$(zellij list-sessions -sn 2>/dev/null || true)
+      while :; do
+        session="anon-$(petname --words 2)"
+        [[ $'\n'"$existing"$'\n' != *$'\n'"$session"$'\n'* ]] && break
+      done
       trap 'zellij kill-session "$session" >/dev/null 2>&1 || true' EXIT
       trap 'exit' HUP INT TERM
       zellij --session "$session"

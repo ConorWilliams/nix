@@ -4,7 +4,7 @@
 - [x] rename tabs/session
   - should protect from anon cleanup
 - [x] whichkey zellij on the RHS
-- [ ] better anon zellij names
+- [x] better anon zellij names
 - [ ] space in fish normal mode
 - [ ] versioning for the which-key plugin
 - [ ] All the zellij things in server (including serialization)
