@@ -30,6 +30,7 @@ let
       zellij --session "$session"
       cleanup
       trap - EXIT
+      export PATH="${config.home.profileDirectory}/bin:$PATH"
       exec ${lib.getExe config.programs.fish.package}
     '';
   };
