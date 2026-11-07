@@ -145,9 +145,25 @@ impl Hints {
 fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
     let mut groups: Vec<(String, String)> = Vec::new();
     for (key, actions) in info.get_keybinds_for_mode(info.mode) {
+        // Plugin message details are stripped from ModeInfo, so match the keys.
+        if key.has_modifiers(&[KeyModifier::Ctrl])
+            && matches!(
+                key.bare_key,
+                BareKey::Left | BareKey::Right | BareKey::Up | BareKey::Down
+            )
+        {
+            continue;
+        }
         let Some(action) = actions.first() else {
             continue;
         };
+        // Keep shared navigation and mode-exit shortcuts out of the menu.
+        match action {
+            Action::SwitchToMode {
+                input_mode: InputMode::Locked,
+            } => continue,
+            _ => {}
+        }
         let description = describe(action);
         if let Some((keys, _)) = groups.iter_mut().find(|(_, label)| *label == description) {
             keys.push_str(&format!(" / {key}"));

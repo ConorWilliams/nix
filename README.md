@@ -109,9 +109,10 @@ while a program is running. Space in commands and Neovim keeps its usual behavio
 | `s e`                 | Open scrollback in Neovim                                         |
 
 Ctrl+arrows retain the existing Neovim/Zellij navigation. A small standalone Rust
-plugin shows every binding for the current mode in a popup: press the leader to
+plugin shows the current mode's commands in a popup: press the leader to
 see its commands, then `b`, `w`, or `q` to see that group's commands. Aliases with
-the same action share a row, including the numbered tab keys. The popup closes
+the same action share a row, including the numbered tab keys. Shared navigation
+and mode-exit shortcuts are omitted from the popup. The popup closes
 when you return to typing or enter a naming prompt. It does not take keyboard
 focus or execute actions; Zellij handles every key.
 
