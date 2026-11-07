@@ -108,7 +108,19 @@ while a program is running. Space in commands and Neovim keeps its usual behavio
 | `s`, then `j` / `k`   | Scroll; Ctrl+D / Ctrl+U scroll half a page; Esc finishes          |
 | `s e`                 | Open scrollback in Neovim                                         |
 
-Ctrl+arrows retain the existing Neovim/Zellij navigation.
+Ctrl+arrows retain the existing Neovim/Zellij navigation. A small standalone Rust
+plugin shows every binding for the current mode in a popup: press the leader to
+see its commands, then `b`, `w`, or `q` to see that group's commands. Aliases with
+the same action share a row, including the numbered tab keys. The popup closes
+when you return to typing or enter a naming prompt. It does not take keyboard
+focus or execute actions; Zellij handles every key.
+
+The stock compact bar is unchanged. Our plugin reads the live keymap from
+Zellij's released plugin API, with no second menu configuration or Zellij source
+patch. Its Rust source and locked dependencies live in `home/zellij/key-hints/`.
+On first launch, Zellij opens a selectable permission popup: press `y` to let it
+read application state and show/hide its own pane. Permission acceptance does not
+require clicking the status bar.
 
 The session manager uses its built-in multi-screen view so fuzzy search includes
 tabs and panes: type a name, select with arrows, Enter accepts, Esc closes it.
