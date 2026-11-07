@@ -52,10 +52,8 @@
             }) wm.arrows
           )
           // {
-            # A terminal in its own zellij session, as on the desks (by its
-            # store path: apps started here don't get the shell's PATH).
-            ${key k.terminal} =
-              "exec-and-forget open -n -a kitty --args ${lib.getExe config.programs.zellij.package}";
+            # Kitty's configured shell owns the disposable Zellij session.
+            ${key k.terminal} = "exec-and-forget open -n -a kitty";
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
             # Borderless Kitty has no AX close button; each terminal is a
             # separate app instance, so quit it when closing its last window.

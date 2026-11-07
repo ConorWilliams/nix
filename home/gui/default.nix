@@ -1,6 +1,6 @@
 # GUI layer: machines with a screen, on any OS, on top of the server layer:
-# the terminal (kitty) and its font, zellij sessions that end with their
-# window, and zzh/zosh opening a window of their own from inside zellij.
+# the terminal (kitty) and its font, disposable or named Zellij sessions, and
+# zzh/zosh opening a window of their own from inside Zellij.
 {
   config,
   lib,
@@ -8,6 +8,22 @@
   ...
 }:
 
+let
+  zellijTerminal = pkgs.writeShellApplication {
+    name = "zellij-terminal";
+    runtimeInputs = [
+      config.programs.zellij.package
+      pkgs.coreutils
+    ];
+    text = ''
+      unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
+      session="anonymous-$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"
+      trap 'zellij kill-session "$session" >/dev/null 2>&1 || true' EXIT
+      trap 'exit' HUP INT TERM
+      zellij --session "$session"
+    '';
+  };
+in
 {
   imports = [
     ../. # the server layer
@@ -34,17 +50,15 @@
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     settings.confirm_os_window_close = 0;
+    settings.shell = lib.getExe zellijTerminal;
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
-  # Each Leader+Enter terminal (i3, AeroSpace) is its own zellij session, so
-  # on machines with a screen closing the window ends the session, and
-  # ended ones aren't kept to resurrect: no pile of sessions. (Not on
-  # servers, where a dropped ssh connection must leave the session
-  # running.)
+  # Named sessions detach. The launcher cleans up only the anonymous name
+  # it created; renaming that session makes it survive window closure.
   programs.zellij.settings = {
-    on_force_close = "quit";
-    session_serialization = false;
+    on_force_close = "detach";
+    session_serialization = false; # no exited-session resurrection list
   };
 
   # zzh/zosh (home/shell.nix) from inside zellij, at the machine's own
