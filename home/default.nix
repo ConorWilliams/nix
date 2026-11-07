@@ -102,6 +102,7 @@
     enable = true;
     mutableSettings = true; # preserve settings added by Codex or the user
     settings.tui = {
+      theme = "rose-pine-dawn";
       vim_mode_default = true;
       status_line = [
         "model-with-reasoning"
@@ -113,6 +114,9 @@
       ];
     };
   };
+
+  home.file.".codex/themes/rose-pine-dawn.tmTheme".source =
+    "${inputs.rose-pine-tm-theme}/dist/rose-pine-dawn.tmTheme";
 
   # Shell aliases, for every shell Home Manager manages.
   home.shellAliases = {
