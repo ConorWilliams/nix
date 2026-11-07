@@ -49,6 +49,8 @@ in
       theme = "rose-pine-dawn";
       show_startup_tips = false;
       show_release_notes = false;
+      on_force_close = "detach";
+      session_serialization = false;
       plugins.compact-bar._props.location = "zellij:compact-bar";
       plugins.key-hints._props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
       load_plugins.key-hints = { };
