@@ -100,7 +100,17 @@
   programs.codex = {
     enable = true;
     mutableSettings = true; # preserve settings added by Codex or the user
-    settings.tui.vim_mode_default = true;
+    settings.tui = {
+      vim_mode_default = true;
+      status_line = [
+        "model-with-reasoning"
+        "current-dir"
+        "git-branch"
+        "context-used"
+        "five-hour-limit"
+        "weekly-limit"
+      ];
+    };
   };
 
   # Shell aliases, for every shell Home Manager manages.
