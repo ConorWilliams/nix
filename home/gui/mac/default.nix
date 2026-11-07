@@ -85,6 +85,9 @@
       };
   };
 
+  # Finder-launched terminals must use the same socket directory as shells.
+  programs.kitty.environment.ZELLIJ_SOCKET_DIR = config.home.sessionVariables.ZELLIJ_SOCKET_DIR;
+
   programs.kitty.settings = {
     # Left Option is Alt, as on Linux: zellij's Alt-g, fzf's Alt-C, nvim's
     # Alt keys. Not the right one: on the British layout it types # and

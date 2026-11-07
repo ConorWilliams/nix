@@ -92,8 +92,7 @@ in
       set -g fish_cursor_insert line
       set -g fish_cursor_replace_one underscore
       set -g fish_cursor_visual block
-      # Typing `g ` opens zoxide's picker straight away, without Enter.
-      bind -M insert space self-insert expand-abbr 'if test "$(commandline)" = "g "; commandline ""; __zoxide_zi; commandline -f repaint; end'
+      # Space's empty-prompt Zellij hand-off and `g ` picker: zellij.nix.
     '';
 
     # c: fend, a calculator
