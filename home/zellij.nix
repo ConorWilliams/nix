@@ -54,6 +54,7 @@ in
       };
       plugins.find-tabs = manager { multi_screen = true; };
       plugins.find-sessions = manager { multi_screen = false; };
+      plugins.rename-session = manager { multi_screen = false; };
       keybinds = {
         _props.clear-defaults = true;
         locked._children = [ (bind "Alt g" (mode "normal")) ];
@@ -67,8 +68,13 @@ in
           (once "n" (launch "new-session"))
           (once "d" { Quit = { }; })
           (once "f" (launch "find-sessions"))
+          (once "r" (launch "rename-session"))
         ];
         tab._children = [
+          (bind "r" [
+            { TabNameInput = 0; }
+            (mode "renametab")
+          ])
           (bind "n" [
             { NewTab = { }; }
             { TabNameInput = 0; }
