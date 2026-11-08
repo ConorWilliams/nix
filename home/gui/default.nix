@@ -9,28 +9,16 @@
 }:
 
 let
-  # An anonymous Zellij session, that cleans itself up (unless renamed)
+  anonZellij = import ../zellij/anon.nix {
+    inherit pkgs;
+    zellij = config.programs.zellij.package;
+  };
   zellijTerminal = pkgs.writeShellApplication {
     name = "zellij-terminal";
-    runtimeInputs = [
-      config.programs.zellij.package
-      pkgs.rust-petname
-    ];
+    runtimeInputs = [ anonZellij ];
     text = /* bash */ ''
       unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
-      existing=$(zellij list-sessions -sn 2>/dev/null || true)
-      while :; do
-        session="anon-$(petname --words 2)"
-        [[ $'\n'"$existing"$'\n' != *$'\n'"$session"$'\n'* ]] && break
-      done
-      cleanup() {
-        zellij kill-session "$session" >/dev/null 2>&1 || true
-      }
-      trap cleanup EXIT
-      trap 'exit' HUP INT TERM
-      zellij --session "$session"
-      cleanup
-      trap - EXIT
+      anon-zellij
       # Use the normal login-shell -> Fish hand-off, including Nix's environment.
       exec ${
         if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else lib.getExe config.programs.bash.package
