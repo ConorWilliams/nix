@@ -6,8 +6,29 @@ vim.o.undofile = true -- Persistent undo across sessions
 vim.o.confirm = true -- Ask to save instead of failing on :q with changes
 vim.opt.shortmess:append('W') -- No "written" message on save
 vim.o.timeoutlen = 300 -- Faster key-sequence timeout
--- System clipboard locally; over SSH keep yanks inside nvim
-vim.o.clipboard = vim.env.SSH_CONNECTION and '' or 'unnamedplus'
+-- Every yank and delete goes to the system clipboard. Over SSH there's no
+-- clipboard to reach, so yanks are sent to the local terminal as OSC 52
+-- (kitty accepts it; zellij passes it on), and p pastes the last yank
+-- from here: reading the clipboard back that way is mostly blocked (Cmd-V
+-- still pastes the Mac's).
+vim.o.clipboard = 'unnamedplus'
+if vim.env.SSH_CONNECTION then
+  local osc52 = require('vim.ui.clipboard.osc52')
+  local last = { {}, 'v' }
+  local copy = function(reg)
+    local send = osc52.copy(reg)
+    return function(lines, regtype)
+      last = { lines, regtype }
+      send(lines)
+    end
+  end
+  local paste = function() return last end
+  vim.g.clipboard = {
+    name = 'OSC 52 (copy only)',
+    copy = { ['+'] = copy('+'), ['*'] = copy('*') },
+    paste = { ['+'] = paste, ['*'] = paste },
+  }
+end
 
 -- UI
 vim.o.number = true
