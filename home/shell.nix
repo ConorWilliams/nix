@@ -122,8 +122,7 @@ in
       '';
     };
 
-    # zzh/zosh host [session]: join or create a Zellij session on a host
-    # (default "main").
+    # zzh/zosh host [session]: join or create a Zellij session on a host.
     functions.zzh = {
       description = "zellij on a host over ssh: join/create a session (default main)";
       wraps = "ssh";
@@ -172,6 +171,7 @@ in
     config.global.hide_env_diff = true; # no list of every variable changed
   };
 
+  # Shell and agent history, across machines
   programs.atuin = {
     enable = true;
     # Don't bind `?` to Atuin AI.
