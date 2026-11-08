@@ -153,6 +153,26 @@ in
         let
           k = wm.keys;
           ws = n: if n == "0" then "10" else n; # key 0 is workspace 10
+          dir = lib.toLower;
+          opposite =
+            d:
+            lib.getAttr d {
+              left = "right";
+              right = "left";
+              up = "down";
+              down = "up";
+            };
+          # As AeroSpace's join-with: wrap the neighbour in a split of the
+          # other orientation, come back, and move into it.
+          join = d: "focus ${d}, split toggle, focus ${opposite d}, move ${d}";
+          run = cmd: "exec --no-startup-id ${cmd}";
+          # The volume keys also refresh the bar at once, not at its next update.
+          pactl = args: run "pactl ${args} && ${refreshBar}";
+          brightness = step: run "${lib.getExe pkgs.brightnessctl} set ${step}";
+          screenshot = pkgs.writeShellScript "screenshot" ''
+            mkdir -p ~/Pictures
+            scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png
+          '';
         in
         lib.mergeAttrsList (
           map (n: {
@@ -160,23 +180,9 @@ in
             ${key "Shift+${n}"} = "move container to workspace number ${ws n}";
           }) wm.workspaces
           ++ map (a: {
-            ${key a} = "focus ${lib.toLower a}";
-            ${key "Shift+${a}"} = "move ${lib.toLower a}";
-            # As AeroSpace's join-with: wrap the neighbour in a split of the
-            # other orientation, come back, and move into it.
-            ${key "Ctrl+${a}"} =
-              let
-                d = lib.toLower a;
-                back =
-                  {
-                    left = "right";
-                    right = "left";
-                    up = "down";
-                    down = "up";
-                  }
-                  .${d};
-              in
-              "focus ${d}, split toggle, focus ${back}, move ${d}";
+            ${key a} = "focus ${dir a}";
+            ${key "Shift+${a}"} = "move ${dir a}";
+            ${key "Ctrl+${a}"} = join (dir a);
           }) wm.arrows
         )
         // {
@@ -187,8 +193,7 @@ in
           ${key k.resize} = "mode resize";
           ${key k.flipSplit} = "layout toggle split";
           ${key k.lock} = "exec ${lock}";
-          "--release ${key k.screenshot}" =
-            "exec --no-startup-id sh -c 'mkdir -p ~/Pictures && scrot -s ~/Pictures/%Y-%m-%d_%H%M%S.png'";
+          "--release ${key k.screenshot}" = run screenshot;
           ${key k.reload} = "restart"; # (reloads the config too)
           ${key k.monitorLeft} = "move workspace to output left";
           ${key k.monitorRight} = "move workspace to output right";
@@ -197,17 +202,15 @@ in
           ${key "a"} = "focus parent";
           ${key "minus"} = "scratchpad show";
           ${key "Shift+minus"} = "move scratchpad";
-          ${key "Shift+e"} = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
+          ${key "Shift+e"} = "exec i3-nagbar -t warning -m 'Exit i3?' -b Yes 'i3-msg exit'";
 
           # Volume, mute and brightness keys
-          "XF86AudioRaiseVolume" =
-            "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
-          "XF86AudioLowerVolume" =
-            "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && ${refreshBar}";
-          "XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && ${refreshBar}";
-          "XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
-          "XF86MonBrightnessUp" = "exec --no-startup-id ${lib.getExe pkgs.brightnessctl} set 5%+";
-          "XF86MonBrightnessDown" = "exec --no-startup-id ${lib.getExe pkgs.brightnessctl} set 5%-";
+          XF86AudioRaiseVolume = pactl "set-sink-volume @DEFAULT_SINK@ +5%";
+          XF86AudioLowerVolume = pactl "set-sink-volume @DEFAULT_SINK@ -5%";
+          XF86AudioMute = pactl "set-sink-mute @DEFAULT_SINK@ toggle";
+          XF86AudioMicMute = run "pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+          XF86MonBrightnessUp = brightness "5%+";
+          XF86MonBrightnessDown = brightness "5%-";
         };
 
       startup = [
