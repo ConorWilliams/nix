@@ -40,55 +40,57 @@
     reattach = true; # inside zellij too.
   };
 
-  # Remap caps-lock
-  system.keyboard = {
-    enableKeyMapping = true;
-    remapCapsLockToEscape = true;
-  };
-
-  # Free keys that overlap with Zellij/AreoSpace.
-  system.activationScripts.postActivation.text =
-    let
-      disabledHotkeys = [
-        28 # Screen capture: Cmd+Shift+3
-        30 # Region capture: Cmd+Shift+4
-        32 # Mission Control: Ctrl+Up
-        34 # ^ slow: Ctrl+Shift+Up
-        33 # App windows: Ctrl+Down
-        35 # ^ slow: Ctrl+Shift+Down
-        79 # Space left: Ctrl+Left
-        80 # ^ slow: Ctrl+Shift+Left
-        81 # Space right: Ctrl+Right
-        82 # ^ slow: Ctrl+Shift+Right
-        184 # Capture toolbar: Cmd+Shift+5
-      ];
-    in
-    lib.mkAfter /* bash */ ''
-      for key in ${lib.concatMapStringsSep " " toString disabledHotkeys}; do
-        sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
-          com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \
-          '<dict><key>enabled</key><false/></dict>'
-      done
-    '';
-
-  system.defaults = {
-    # Faster keys/trackpad
-    NSGlobalDomain = {
-      InitialKeyRepeat = 15;
-      KeyRepeat = 2;
-      "com.apple.trackpad.scaling" = 2.0;
+  system = {
+    # Remap caps-lock
+    keyboard = {
+      enableKeyMapping = true;
+      remapCapsLockToEscape = true;
     };
 
-    # An empty Dock that hides itself.
-    dock = {
-      autohide = true;
-      persistent-apps = [ ];
-      persistent-others = [ ];
-    };
+    # Free keys that overlap with Zellij/AreoSpace.
+    activationScripts.postActivation.text =
+      let
+        disabledHotkeys = [
+          28 # Screen capture: Cmd+Shift+3
+          30 # Region capture: Cmd+Shift+4
+          32 # Mission Control: Ctrl+Up
+          34 # ^ slow: Ctrl+Shift+Up
+          33 # App windows: Ctrl+Down
+          35 # ^ slow: Ctrl+Shift+Down
+          79 # Space left: Ctrl+Left
+          80 # ^ slow: Ctrl+Shift+Left
+          81 # Space right: Ctrl+Right
+          82 # ^ slow: Ctrl+Shift+Right
+          184 # Capture toolbar: Cmd+Shift+5
+        ];
+      in
+      lib.mkAfter /* bash */ ''
+        for key in ${lib.concatMapStringsSep " " toString disabledHotkeys}; do
+          sudo -u ${lib.escapeShellArg config.system.primaryUser} /usr/bin/defaults write \
+            com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$key" \
+            '<dict><key>enabled</key><false/></dict>'
+        done
+      '';
 
-    CustomUserPreferences.NSGlobalDomain = {
-      AppleLanguages = [ "en-GB" ];
-      AppleLocale = "en_GB";
+    defaults = {
+      # Faster keys/trackpad
+      NSGlobalDomain = {
+        InitialKeyRepeat = 15;
+        KeyRepeat = 2;
+        "com.apple.trackpad.scaling" = 2.0;
+      };
+
+      # An empty Dock that hides itself.
+      dock = {
+        autohide = true;
+        persistent-apps = [ ];
+        persistent-others = [ ];
+      };
+
+      CustomUserPreferences.NSGlobalDomain = {
+        AppleLanguages = [ "en-GB" ];
+        AppleLocale = "en_GB";
+      };
     };
   };
 }
