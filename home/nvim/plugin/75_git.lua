@@ -86,5 +86,10 @@ local lazygit = function(cwd)
     },
   })
 end
-map('<leader>g', function() lazygit(Snacks.git.get_root()) end, 'Lazygit')
+-- The current file's repo, or else the folder's (the scratch buffer, help
+-- etc. aren't in one: with no repo to compare, quitting would always look
+-- like a worktree switch)
+map('<leader>g', function()
+  lazygit(Snacks.git.get_root() or Snacks.git.get_root(vim.fn.getcwd()))
+end, 'Lazygit')
 map('<leader>B', Snacks.picker.git_log_line, 'Blame line (log)')
