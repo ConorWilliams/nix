@@ -122,13 +122,17 @@ in
       '';
     };
 
+    # zzh/zosh host [session]: join or create a Zellij session on a host
+    # (default "main").
     functions.zzh = {
+      description = "zellij on a host over ssh: join/create a session (default main)";
       wraps = "ssh";
-      body = "ssh -t $argv zellij attach -c main";
+      body = "ssh -t $argv[1] zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
     };
     functions.zosh = {
+      description = "zellij on a host over mosh: join/create a session (default main)";
       wraps = "mosh";
-      body = "mosh $argv -- zellij attach -c main";
+      body = "mosh $argv[1] -- zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
     };
   };
 
