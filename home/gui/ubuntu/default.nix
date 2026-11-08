@@ -37,29 +37,42 @@ in
   # Lets every app (not just Nix ones) find fonts installed by Nix.
   fonts.fontconfig.enable = true;
 
-  # The desktop finds apps, icons and cursors installed by Nix: the parts of
-  # targets.genericLinux wanted here (the rest sources nix.sh a second time).
-  # TODO: once https://github.com/nix-community/home-manager/pull/9925 is
-  # merged, replace these two with:
-  #   targets.genericLinux.enable = true;
-  #   targets.genericLinux.gpu.enable = false;
-  #   systemd.user.sessionVariables.NIX_PATH = lib.mkForce "nixpkgs=flake:nixpkgs";
-  xdg.systemDirs.data = [
-    "\${NIX_STATE_DIR:-/nix/var/nix}/profiles/default/share"
-    "${config.home.profileDirectory}/share"
-    "/usr/share/ubuntu"
-    "/usr/local/share"
-    "/usr/share"
-    "/var/lib/snapd/desktop"
-  ];
+  xdg = {
+    # The desktop finds apps, icons and cursors installed by Nix: the parts of
+    # targets.genericLinux wanted here (the rest sources nix.sh a second time).
+    # TODO: once https://github.com/nix-community/home-manager/pull/9925 is
+    # merged, replace this and home.sessionSearchVariables below with:
+    #   targets.genericLinux.enable = true;
+    #   targets.genericLinux.gpu.enable = false;
+    #   systemd.user.sessionVariables.NIX_PATH = lib.mkForce "nixpkgs=flake:nixpkgs";
+    systemDirs.data = [
+      "\${NIX_STATE_DIR:-/nix/var/nix}/profiles/default/share"
+      "${config.home.profileDirectory}/share"
+      "/usr/share/ubuntu"
+      "/usr/local/share"
+      "/usr/share"
+      "/var/lib/snapd/desktop"
+    ];
+
+    # Skip GNOME's first-login wizard for a new account
+    configFile."gnome-initial-setup-done".text = "yes";
+
+    # No geoclue demo agent: it outlives logouts, keeping the user manager
+    # (and the stale variables .xprofile clears) alive.
+    configFile."autostart/geoclue-demo-agent.desktop".text = /* ini */ ''
+      [Desktop Entry]
+      Type=Application
+      Name=Geoclue Demo agent
+      Hidden=true
+    '';
+  };
+
+  # Cursors too (see the TODO above).
   home.sessionSearchVariables.XCURSOR_PATH = [
     "${config.home.profileDirectory}/share/icons"
     "/usr/share/icons"
     "/usr/share/pixmaps"
   ];
-
-  # Skip GNOME's first-login wizard for a new account
-  xdg.configFile."gnome-initial-setup-done".text = "yes";
 
   # Desktop notifications
   services.dunst =
@@ -110,15 +123,6 @@ in
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
     fi
-  '';
-
-  # No geoclue demo agent: it outlives logouts, keeping the user manager
-  # (and the stale variables above) alive.
-  xdg.configFile."autostart/geoclue-demo-agent.desktop".text = /* ini */ ''
-    [Desktop Entry]
-    Type=Application
-    Name=Geoclue Demo agent
-    Hidden=true
   '';
 
   # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
