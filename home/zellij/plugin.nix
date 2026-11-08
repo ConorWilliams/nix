@@ -4,7 +4,7 @@
 src:
 let
   wasm = pkgs.pkgsCross.wasm32-wasip1;
-  manifest = builtins.fromTOML (builtins.readFile (src + "/Cargo.toml"));
+  manifest = fromTOML (builtins.readFile (src + "/Cargo.toml"));
 in
 wasm.rustPlatform.buildRustPackage {
   pname = manifest.package.name;
