@@ -13,7 +13,7 @@
 
 ## Later
 
-- [ ] cd alias to zeoxide
+- [x] cd alias to zeoxide
 - [ ] rust treesitter grammer
-- [ ] shift enter for sans zellij terminal
+- [x] shift enter for sans zellij terminal
 - [ ] nvim like zellij splits
