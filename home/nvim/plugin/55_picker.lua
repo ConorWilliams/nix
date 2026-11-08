@@ -173,3 +173,4 @@ map(
 -- Buffers: delete without closing the window
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
 map('<leader>bo', function() Snacks.bufdelete.other() end, 'Delete other buffers')
+map('<leader>ba', function() Snacks.bufdelete.all() end, 'Delete all buffers')
