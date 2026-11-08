@@ -13,10 +13,13 @@ let
     inherit pkgs;
     zellij = config.programs.zellij.package;
   };
+  # Kitty needs a shell after the disposable client exits. Keep this GUI-only
+  # fallback here; invoking anon-zellij by hand returns to its calling shell.
   zellijTerminal = pkgs.writeShellApplication {
     name = "zellij-terminal";
     runtimeInputs = [ anonZellij ];
     text = /* bash */ ''
+      # Also clear these for the fallback shell, not just anon-zellij's child.
       unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
       anon-zellij
       # Use the normal login-shell -> Fish hand-off, including Nix's environment.
