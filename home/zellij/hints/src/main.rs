@@ -189,7 +189,11 @@ impl Hints {
 
 fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
     let mut groups: Vec<(String, String)> = Vec::new();
-    for (key, actions) in info.get_keybinds_for_mode(info.mode) {
+    // The keymap comes unordered; sort so the menu is stable: plain keys
+    // first, then modified ones, alphabetically.
+    let mut keybinds = info.get_keybinds_for_mode(info.mode);
+    keybinds.sort_by_cached_key(|(key, _)| (!key.key_modifiers.is_empty(), key.to_string()));
+    for (key, actions) in keybinds {
         // Plugin message details are stripped from ModeInfo, so match the keys.
         if key.has_modifiers(&[KeyModifier::Ctrl])
             && matches!(
