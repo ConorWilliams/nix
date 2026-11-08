@@ -8,9 +8,9 @@ local map = vim.keymap.set
 map({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true })
 map({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true })
 
--- Windows. Ctrl+arrows move between splits and, at the edge of nvim, on
--- into the neighbouring zellij pane (zellij hands them over the other way:
--- home/zellij.nix). Resize with the built-in C-w + - < >.
+-- Windows ("panes"), mirroring zellij's pane mode (Alt g p ...: home/zellij.nix).
+-- Ctrl+arrows move between splits and, at the edge of nvim, on into the
+-- neighbouring zellij pane (zellij hands them over the other way).
 local splits = require('smart-splits')
 splits.setup({
   -- (no warning outside zellij, where there's simply nothing to hand over to)
@@ -20,9 +20,28 @@ map('n', '<C-Left>', splits.move_cursor_left, { desc = 'Go to left window' })
 map('n', '<C-Down>', splits.move_cursor_down, { desc = 'Go to lower window' })
 map('n', '<C-Up>', splits.move_cursor_up, { desc = 'Go to upper window' })
 map('n', '<C-Right>', splits.move_cursor_right, { desc = 'Go to right window' })
-map('n', '<leader>-', '<C-w>s', { desc = 'Split below' })
-map('n', '<leader>|', '<C-w>v', { desc = 'Split right' })
-map('n', '<leader>wd', '<C-w>c', { desc = 'Delete window' })
+map('n', '<leader>ph', '<C-w>v', { desc = 'New pane right' })
+map('n', '<leader>pv', '<C-w>s', { desc = 'New pane down' })
+map('n', '<leader>pd', '<C-w>c', { desc = 'Close pane' })
+-- Resize mode, as zellij's: arrows grow the window that way (at nvim's edge,
+-- the zellij pane instead); any other key leaves.
+local resize = {
+  ['<Left>'] = splits.resize_left,
+  ['<Down>'] = splits.resize_down,
+  ['<Up>'] = splits.resize_up,
+  ['<Right>'] = splits.resize_right,
+}
+map('n', '<leader>pr', function()
+  while true do
+    vim.api.nvim_echo({ { 'Resize: arrows, any other key to stop' } }, false, {})
+    vim.cmd.redraw()
+    local ok, key = pcall(vim.fn.getcharstr)
+    local step = ok and resize[vim.fn.keytrans(key)]
+    if not step then break end
+    step()
+  end
+  vim.api.nvim_echo({ { '' } }, false, {})
+end, { desc = 'Resize mode' })
 
 -- Buffers
 map('n', '<S-h>', '<cmd>bprevious<cr>', { desc = 'Prev buffer' })
@@ -62,13 +81,6 @@ map('n', '[e', jump(-1, 'ERROR'), { desc = 'Prev error' })
 map('n', ']w', jump(1, 'WARN'), { desc = 'Next warning' })
 map('n', '[w', jump(-1, 'WARN'), { desc = 'Prev warning' })
 map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line diagnostics' })
-
--- Tabs
-map('n', '<leader><tab><tab>', '<cmd>tabnew<cr>', { desc = 'New tab' })
-map('n', '<leader><tab>]', '<cmd>tabnext<cr>', { desc = 'Next tab' })
-map('n', '<leader><tab>[', '<cmd>tabprevious<cr>', { desc = 'Prev tab' })
-map('n', '<leader><tab>d', '<cmd>tabclose<cr>', { desc = 'Close tab' })
-map('n', '<leader><tab>o', '<cmd>tabonly<cr>', { desc = 'Close other tabs' })
 
 -- Misc
 map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit all' })
