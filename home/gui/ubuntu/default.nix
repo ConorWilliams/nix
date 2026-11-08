@@ -193,6 +193,21 @@ in
           ++ map (a: {
             ${key a} = "focus ${lib.toLower a}";
             ${key "Shift+${a}"} = "move ${lib.toLower a}";
+            # As AeroSpace's join-with: wrap the neighbour in a split of the
+            # other orientation, come back, and move into it.
+            ${key "Ctrl+${a}"} =
+              let
+                d = lib.toLower a;
+                back =
+                  {
+                    left = "right";
+                    right = "left";
+                    up = "down";
+                    down = "up";
+                  }
+                  .${d};
+              in
+              "focus ${d}, split toggle, focus ${back}, move ${d}";
           }) wm.arrows
         )
         // {
@@ -210,8 +225,6 @@ in
           ${key k.monitorRight} = "move workspace to output right";
 
           # i3's own, with no AeroSpace counterpart.
-          ${key "h"} = "split h"; # the next window opens beside this one
-          ${key "v"} = "split v"; # ...or below it
           ${key "a"} = "focus parent";
           ${key "minus"} = "scratchpad show";
           ${key "Shift+minus"} = "move scratchpad";

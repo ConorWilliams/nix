@@ -49,6 +49,7 @@
             ++ map (a: {
               ${key a} = "focus ${lib.toLower a}";
               ${key "Shift+${a}"} = "move ${lib.toLower a}";
+              ${key "Ctrl+${a}"} = "join-with ${lib.toLower a}";
             }) wm.arrows
           )
           // {
