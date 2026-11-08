@@ -216,7 +216,7 @@ in
   };
 
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
-  # for the session name. Home is short too, and private, unlike /tmp.
+  # for the session name.
   home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
   };
