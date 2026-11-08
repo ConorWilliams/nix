@@ -6,4 +6,4 @@ Follow nearby conventions and keep changes focused.
 
 Put changes in the narrowest appropriate layer.
 
-Make sure to `fmt` and `flake check` changes.
+Make sure to `fmt` changes and that `.github/check.sh` passes.

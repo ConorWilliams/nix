@@ -77,6 +77,7 @@ Dev work:
 ```sh
 nix fmt                                    # format
 nix flake check --all-systems --no-build   # check every config
+.github/check.sh [check|lint|rust|nvim]    # everything CI checks
 ```
 
 ## Credentials
