@@ -18,28 +18,28 @@ fields=$(jq -r '
     (.rate_limits.five_hour.used_percentage | pct),
     (.rate_limits.seven_day.used_percentage | pct)
   ] | map(. // "" | tostring) | join("\u001f")')
-IFS=$'\x1f' read -r model dir pct used size h5 d7 <<<"$fields"
+IFS=$'\x1f' read -r model dir pct used size h5 d7 <<<"${fields}"
 
 # Colour a percentage: green under 50, yellow 50-79, red 80+.
 color() {
   local c=32
   (($1 >= 50)) && c=33
   (($1 >= 80)) && c=31
-  printf '\033[01;%sm%s\033[0m' "$c" "$2"
+  printf '\033[01;%sm%s\033[0m' "${c}" "$2"
 }
 
 # Location: ~/path@branch, prefixed with user@host over SSH.
-branch=$(git --no-optional-locks -C "$dir" branch --show-current 2>/dev/null || true)
-where="${dir/#$HOME/\~}${branch:+@$branch}"
-[[ -n ${SSH_CONNECTION:-} ]] && where="$USER@$(hostname -s):$where"
+branch=$(git --no-optional-locks -C "${dir}" branch --show-current 2>/dev/null || true)
+where="${dir/#${HOME}/\~}${branch:+@${branch}}"
+[[ -n ${SSH_CONNECTION:-} ]] && where="${USER}@$(hostname -s):${where}"
 
-line=$(printf '\033[01;36m%s\033[0m' "$model")
-line+=" | $(printf '\033[01;34m%s\033[0m' "$where")"
-[[ -n $pct ]] && line+=" | $(color "$pct" "$((used / 1000))k/$((size / 1000))k")"
+line=$(printf '\033[01;36m%s\033[0m' "${model}")
+line+=" | $(printf '\033[01;34m%s\033[0m' "${where}")"
+[[ -n ${pct} ]] && line+=" | $(color "${pct}" "$((used / 1000))k/$((size / 1000))k")"
 limits=""
-[[ -n $h5 ]] && limits+="$(color "$h5" "5h $h5%")  "
-[[ -n $d7 ]] && limits+="$(color "$d7" "7d $d7%")"
-[[ -n $limits ]] && line+=" | ${limits%  }"
+[[ -n ${h5} ]] && limits+="$(color "${h5}" "5h ${h5}%")  "
+[[ -n ${d7} ]] && limits+="$(color "${d7}" "7d ${d7}%")"
+[[ -n ${limits} ]] && line+=" | ${limits%  }"
 
 printf '%s' "${line// | /$'\033[90m | \033[0m'}" # dim separators
 
