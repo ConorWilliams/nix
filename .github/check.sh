@@ -77,6 +77,8 @@ nvim_startup() {
   mkdir -p "${nvim_tmp}/config" && ln -s "${root}/home/nvim" "${nvim_tmp}/config/nvim" || return
   export XDG_CONFIG_HOME=${nvim_tmp}/config XDG_DATA_HOME=${home_files}/.local/share
   export XDG_STATE_HOME=${nvim_tmp}/state XDG_CACHE_HOME=${nvim_tmp}/cache
+  # The login session's variable nixd's config needs (after/lsp/nixd.lua).
+  export NH_FLAKE=${root}
   # Fails, too, if the config didn't load.
   "${package}/bin/nvim" --headless -i NONE \
     +'lua if not vim.lsp.config.lua_ls.settings.Lua.workspace then error("config not loaded") end' \
