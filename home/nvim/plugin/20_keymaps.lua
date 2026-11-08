@@ -27,9 +27,6 @@ map('n', '<leader>wd', '<C-w>c', { desc = 'Delete window' })
 -- Buffers
 map('n', '<S-h>', '<cmd>bprevious<cr>', { desc = 'Prev buffer' })
 map('n', '<S-l>', '<cmd>bnext<cr>', { desc = 'Next buffer' })
-map('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Other buffer' })
-map('n', '<leader>bD', '<cmd>bd<cr>', { desc = 'Delete buffer and window' })
-map('n', '<leader>fn', '<cmd>enew<cr>', { desc = 'New file' })
 
 -- Move lines with Alt-j/k
 map('n', '<A-j>', "<cmd>execute 'move .+' . v:count1<cr>==", { desc = 'Move down' })
