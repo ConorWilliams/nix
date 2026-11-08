@@ -120,10 +120,6 @@ require('snacks').setup({
 
 local pick = Snacks.picker
 local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs, { desc = desc }) end
--- The "root" variants search from the top of the git repo instead of cwd
-local root = function(source)
-  return function() pick[source]({ cwd = Snacks.git.get_root() }) end
-end
 
 -- Find (<leader><space>, find files, is in 70_markdown.lua: notes in a notebook)
 map('<leader>ff', pick.files, 'Files')
@@ -131,7 +127,6 @@ map('<leader>fb', pick.buffers, 'Buffers')
 
 -- Search
 map('<leader>sg', pick.grep, 'Grep')
-map('<leader>sG', root('grep'), 'Grep (git root)')
 map('<leader>sw', pick.grep_word, 'Word or selection', { 'n', 'x' })
 map('<leader>sb', pick.lines, 'Buffer lines')
 map('<leader>ss', pick.lsp_symbols, 'Symbols')
