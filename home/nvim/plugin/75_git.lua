@@ -54,6 +54,11 @@ local switch_worktree = function(dir)
   -- ! so a terminal with a running job can't stop the switch halfway (E89,
   -- as in a bare nvim); unsaved files were dealt with above.
   vim.cmd('silent %bwipeout!')
+  -- The old worktree's language servers have no files left, but would keep
+  -- running (and indexing it); the new one's files start their own.
+  for _, client in ipairs(vim.lsp.get_clients()) do
+    if vim.tbl_isempty(client.attached_buffers) then client:stop() end
+  end
   vim.cmd.cd(dir)
   persistence.load()
   local restored = vim.tbl_filter(
