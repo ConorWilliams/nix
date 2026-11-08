@@ -141,7 +141,10 @@ map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
 
--- Buffers: delete without closing the window
+-- Buffers: a scratch buffer (snacks: a float, one per folder and git
+-- branch, saved between sessions; q closes it), and delete without closing
+-- the window
+map('<leader>bn', function() Snacks.scratch() end, 'Scratch buffer')
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
 map('<leader>bo', function() Snacks.bufdelete.other() end, 'Delete other buffers')
 map('<leader>ba', function() Snacks.bufdelete.all() end, 'Delete all buffers')
