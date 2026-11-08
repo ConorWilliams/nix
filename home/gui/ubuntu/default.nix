@@ -1,5 +1,3 @@
-# Ubuntu layer: the desks (i3 and its bar, the launcher, notifications,
-# the login session), on top of the GUI layer.
 {
   config,
   lib,
@@ -11,26 +9,22 @@
 
 let
   mod = "Mod1"; # Alt.
-  key = k: "${mod}+${k}"; # a key after the leader, as i3 spells it: Mod1+Shift+q
+  key = k: "${mod}+${k}"; # a key after the leader, as i3 spells it
   lock = "i3lock -c 000000"; # black screen
-  refreshBar = "pkill -USR1 -x i3status"; # makes the bar update now
-  # The window manager's keys, shared with the Mac's AeroSpace.
+  refreshBar = "pkill -USR1 -x i3status";
   wm = import ../keys.nix;
-  # The bar's icons: Nerd Font glyphs (Material Design), which the
-  # terminal's font includes, each named as in Nerd Fonts' cheat sheet.
   icons = {
-    volume = "󰕾"; # nf-md-volume_high
-    muted = "󰖁"; # nf-md-volume_off
-    charging = "󰂄"; # nf-md-battery_charging
-    plugged = "󱟢"; # nf-md-battery_check: on power, not charging (full, or held at a limit)
-    battery = "󰁾"; # nf-md-battery_50: on battery, at any charge
+    volume = "󰕾";
+    muted = "󰖁";
+    charging = "󰂄";
+    plugged = "󱟢";
+    battery = "󰁾";
   };
-  font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}"; # rofi and notifications
+  font = "${config.programs.kitty.font.name} ${toString config.desktop.fontSize}";
 in
 {
   imports = [
-    ../. # the GUI layer
-    # The i3 bar's font size, set per machine like desktop.fontSize.
+    ../.
     {
       options.desktop.barFontSize = lib.mkOption {
         type = lib.types.number;
@@ -40,8 +34,7 @@ in
     }
   ];
 
-  # Lets every app (not just Nix ones) find fonts installed by Nix. (The
-  # Mac has its own way: Home Manager links them into ~/Library/Fonts.)
+  # Lets every app (not just Nix ones) find fonts installed by Nix.
   fonts.fontconfig.enable = true;
 
   # Non-NixOS Linux: the desktop finds apps, icons and cursors installed by
