@@ -67,12 +67,45 @@ in
     '';
   };
 
-  # Cursors too (see the TODO above).
-  home.sessionSearchVariables.XCURSOR_PATH = [
-    "${config.home.profileDirectory}/share/icons"
-    "/usr/share/icons"
-    "/usr/share/pixmaps"
-  ];
+  home = {
+    # Cursors too (see the TODO above).
+    sessionSearchVariables.XCURSOR_PATH = [
+      "${config.home.profileDirectory}/share/icons"
+      "/usr/share/icons"
+      "/usr/share/pixmaps"
+    ];
+
+    # kitty comes from its own installer.
+    sessionPath = [ "$HOME/.local/kitty.app/bin" ];
+
+    # Run by gdm before i3. The systemd user manager outlives logouts and keeps
+    # a GNOME login's variables (a dead SESSION_MANAGER, GNOME's desktop name,
+    # Home Manager's and Nix's "already loaded" marks): clear them, then give
+    # it this desktop's name. Only those: importing everything would carry
+    # this login's marks to the next.
+    file.".xprofile".text = /* bash */ ''
+      unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE
+      systemctl --user unset-environment SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID \
+        GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
+      dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP \
+        XDG_SESSION_TYPE DESKTOP_SESSION GDMSESSION
+      # Inherited marks made ~/.profile skip Nix and Home Manager: load them.
+      if [ -z "''${NH_FLAKE-}" ]; then
+        unset __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+      fi
+    '';
+
+    # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
+    packages = with pkgs; [
+      dex # starts the desktop's autostart apps (startup line below)
+      xss-lock # locks the screen on suspend (lid close)
+      scrot
+      xclip
+      arandr
+    ];
+  };
 
   # Desktop notifications
   services.dunst =
@@ -102,37 +135,6 @@ in
         };
       };
     };
-
-  # kitty comes from its own installer.
-  home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
-
-  # Run by gdm before i3. The systemd user manager outlives logouts and keeps
-  # a GNOME login's variables (a dead SESSION_MANAGER, GNOME's desktop name,
-  # Home Manager's and Nix's "already loaded" marks): clear them, then give
-  # it this desktop's name. Only those: importing everything would carry
-  # this login's marks to the next.
-  home.file.".xprofile".text = /* bash */ ''
-    unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE
-    systemctl --user unset-environment SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID \
-      GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
-    dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP \
-      XDG_SESSION_TYPE DESKTOP_SESSION GDMSESSION
-    # Inherited marks made ~/.profile skip Nix and Home Manager: load them.
-    if [ -z "''${NH_FLAKE-}" ]; then
-      unset __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
-      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
-    fi
-  '';
-
-  # Helpers i3 uses. None draw with OpenGL, so Nix builds work on Ubuntu.
-  home.packages = with pkgs; [
-    dex # starts the desktop's autostart apps (startup line below)
-    xss-lock # locks the screen on suspend (lid close)
-    scrot
-    xclip
-    arandr
-  ];
 
   xsession.windowManager.i3 = {
     enable = true;
