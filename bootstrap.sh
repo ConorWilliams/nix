@@ -94,7 +94,8 @@ main() {
     if type -P brew >/dev/null || [[ -x /opt/homebrew/bin/brew ]]; then
       echo "Homebrew installed"
     elif ask "Install Homebrew (for the Mac's apps, e.g. kitty; uses sudo)?"; then
-      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/tty
+      brew_installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+      /bin/bash -c "$brew_installer" </dev/tty
     else
       echo "Homebrew is required for the Mac's declared apps; stopping before activation."
       exit 1
