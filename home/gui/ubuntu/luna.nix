@@ -1,4 +1,4 @@
-{ ... }:
+_:
 
 let
   # i3 doesn't apply GNOME's touchpad settings, so set them with xinput.
