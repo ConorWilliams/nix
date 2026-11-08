@@ -122,8 +122,8 @@ local pick = Snacks.picker
 local map = function(lhs, rhs, desc, mode) vim.keymap.set(mode or 'n', lhs, rhs, { desc = desc }) end
 
 -- Find (<leader><space>, find files, is in 70_markdown.lua: notes in a notebook)
-map('<leader>ff', pick.files, 'Files')
-map('<leader>fb', pick.buffers, 'Buffers')
+map('<leader>f', pick.files, 'Files')
+map('<leader>,', pick.buffers, 'Buffers')
 
 -- Search
 map('<leader>sg', pick.grep, 'Grep')
