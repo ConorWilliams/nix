@@ -41,7 +41,8 @@ impl ZellijPlugin for Hints {
                 hide_self();
                 self.refresh();
             }
-            Event::ModeUpdate(info) => {
+            // Views get the mode piped from the controller, which also covers new views.
+            Event::ModeUpdate(info) if self.controller => {
                 let rows = bindings(&info);
                 if self.mode != info.mode || self.rows != rows {
                     self.mode = info.mode;
