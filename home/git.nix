@@ -15,46 +15,102 @@ let
   ];
 in
 {
-  programs.git = {
-    enable = true;
-    lfs.enable = true;
+  programs = {
+    git = {
+      enable = true;
+      lfs.enable = true;
 
-    # Myrtle identity for any repo with a myrtle remote.
-    includes = map (url: {
-      condition = "hasconfig:remote.*.url:${url}";
-      contents.user.email = "conor@myrtle.ai";
-    }) myrtleRemotes;
+      # Myrtle identity for any repo with a myrtle remote.
+      includes = map (url: {
+        condition = "hasconfig:remote.*.url:${url}";
+        contents.user.email = "conor@myrtle.ai";
+      }) myrtleRemotes;
 
-    settings = {
-      # Default identity: personal.
-      user = {
-        name = "Conor Williams";
-        email = "conorwilliams@outlook.com";
+      settings = {
+        # Default identity: personal.
+        user = {
+          name = "Conor Williams";
+          email = "conorwilliams@outlook.com";
+        };
+
+        init.defaultBranch = "main";
+
+        diff = {
+          algorithm = "histogram"; # clearer diffs when code moves around
+          colorMoved = "blocks"; # moved lines get their own colour (no alternating)...
+          colorMovedWS = "allow-indentation-change"; # ...even if re-indented
+        };
+
+        # Conflict markers also show the original (common ancestor) version.
+        merge.conflictStyle = "zdiff3";
+
+        pull.rebase = true; # `git pull` replays local commits, no merge commits
+        push.autoSetupRemote = true; # first push of a new branch needs no -u
+        fetch.prune = true; # drop refs to branches deleted on the remote
+
+        branch.sort = "-committerdate"; # `git branch`: most recent first
+        tag.sort = "version:refname"; # v1.10 sorts after v1.9
+        column.ui = "auto"; # list branches/tags in columns
+        help.autocorrect = "prompt"; # `git stauts` -> "did you mean status?"
+
+        # Worktrees and their repo point at each other with relative paths, so
+        # a project folder still works after it's moved or copied.
+        worktree.useRelativePaths = true;
       };
+    };
 
-      init.defaultBranch = "main";
-
-      diff = {
-        algorithm = "histogram"; # clearer diffs when code moves around
-        colorMoved = "blocks"; # moved lines get their own colour (no alternating)...
-        colorMovedWS = "allow-indentation-change"; # ...even if re-indented
+    # Pager for git diff/log/show/blame and `git add -p`.
+    delta = {
+      enable = true;
+      enableGitIntegration = true;
+      options = {
+        navigate = true; # n / N jump between files
+        light = true; # detection fails inside lazygit/zellij
+        # Lines git marks as moved arrive in git's own bold magenta / cyan, which
+        # delta would show unstyled; give them soft backgrounds instead: yellow
+        # where they left, light blue where they arrived.
+        map-styles = "bold purple => syntax #fff3c4, bold cyan => syntax #dff0ff";
       };
+    };
 
-      # Conflict markers also show the original (common ancestor) version.
-      merge.conflictStyle = "zdiff3";
-
-      pull.rebase = true; # `git pull` replays local commits, no merge commits
-      push.autoSetupRemote = true; # first push of a new branch needs no -u
-      fetch.prune = true; # drop refs to branches deleted on the remote
-
-      branch.sort = "-committerdate"; # `git branch`: most recent first
-      tag.sort = "version:refname"; # v1.10 sorts after v1.9
-      column.ui = "auto"; # list branches/tags in columns
-      help.autocorrect = "prompt"; # `git stauts` -> "did you mean status?"
-
-      # Worktrees and their repo point at each other with relative paths, so
-      # a project folder still works after it's moved or copied.
-      worktree.useRelativePaths = true;
+    # Git TUI, showing diffs through delta.
+    lazygit = {
+      enable = true;
+      # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE (later ones
+      # win), so the command is wrapped to read the official port's theme and
+      # then its config (settings below, which adjust the theme).
+      package =
+        let
+          configDir =
+            if pkgs.stdenv.hostPlatform.isDarwin && !config.xdg.enable then
+              "${config.home.homeDirectory}/Library/Application Support"
+            else
+              config.xdg.configHome;
+        in
+        pkgs.symlinkJoin {
+          name = "lazygit";
+          paths = [ pkgs.lazygit ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = /* bash */ ''
+            wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
+              "${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml,${configDir}/lazygit/config.yml"
+          '';
+        };
+      settings = {
+        git.diffRenderers = [
+          {
+            command = "delta --paging=never";
+            colorArg = "always";
+          }
+        ];
+        os.editPreset = "nvim-remote";
+        gui = {
+          nerdFontsVersion = "3"; # file icons
+          showCommandLog = false; # the git commands it runs; @ shows it
+          # Stronger selection contrast than the official port.
+          theme.selectedLineBgColor = [ dawn.highlight-high ];
+        };
+      };
     };
   };
 
@@ -97,58 +153,4 @@ in
       '';
     })
   ];
-
-  # Pager for git diff/log/show/blame and `git add -p`.
-  programs.delta = {
-    enable = true;
-    enableGitIntegration = true;
-    options = {
-      navigate = true; # n / N jump between files
-      light = true; # detection fails inside lazygit/zellij
-      # Lines git marks as moved arrive in git's own bold magenta / cyan, which
-      # delta would show unstyled; give them soft backgrounds instead: yellow
-      # where they left, light blue where they arrived.
-      map-styles = "bold purple => syntax #fff3c4, bold cyan => syntax #dff0ff";
-    };
-  };
-
-  # Git TUI, showing diffs through delta.
-  programs.lazygit = {
-    enable = true;
-    # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE (later ones
-    # win), so the command is wrapped to read the official port's theme and
-    # then its config (settings below, which adjust the theme).
-    package =
-      let
-        configDir =
-          if pkgs.stdenv.hostPlatform.isDarwin && !config.xdg.enable then
-            "${config.home.homeDirectory}/Library/Application Support"
-          else
-            config.xdg.configHome;
-      in
-      pkgs.symlinkJoin {
-        name = "lazygit";
-        paths = [ pkgs.lazygit ];
-        nativeBuildInputs = [ pkgs.makeWrapper ];
-        postBuild = /* bash */ ''
-          wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
-            "${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml,${configDir}/lazygit/config.yml"
-        '';
-      };
-    settings = {
-      git.diffRenderers = [
-        {
-          command = "delta --paging=never";
-          colorArg = "always";
-        }
-      ];
-      os.editPreset = "nvim-remote";
-      gui = {
-        nerdFontsVersion = "3"; # file icons
-        showCommandLog = false; # the git commands it runs; @ shows it
-        # Stronger selection contrast than the official port.
-        theme.selectedLineBgColor = [ dawn.highlight-high ];
-      };
-    };
-  };
 }
