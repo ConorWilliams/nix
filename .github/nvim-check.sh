@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CI's Neovim check, for one Home Manager config (default: conix):
-#   .github/nvim-check.sh [config]
+#   nix develop -c .github/nvim-check.sh [config]
 # Builds the config's home files (which builds the Zellij plugins too), starts
 # its Neovim headless and fails on any startup error, then runs lua_ls over
 # home/nvim with the settings and runtime files the editor gives it.
@@ -10,7 +10,6 @@ config=${1:-conix}
 cfg=".#homeConfigurations.\"${config}\".config"
 home_files=$(nix build --no-link --print-out-paths "${cfg}.home-files")
 nvim=$(nix build --no-link --print-out-paths "${cfg}.programs.neovim.finalPackage")/bin/nvim
-lua_ls=$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#lua-language-server)/bin/lua-language-server
 
 tmp=$(mktemp -d)
 trap 'rm -rf "${tmp}"' EXIT
@@ -30,5 +29,5 @@ echo "Neovim starts cleanly."
 # over nvim-lspconfig's), runtime files included.
 "${nvim}" --headless -i NONE \
   -c "lua io.open('${tmp}/luarc.json', 'w'):write(vim.json.encode(vim.lsp.config.lua_ls.settings.Lua))" +qa
-"${lua_ls}" --check=home/nvim --configpath="${tmp}/luarc.json" --checklevel=Hint \
+lua-language-server --check=home/nvim --configpath="${tmp}/luarc.json" --checklevel=Hint \
   --check_format=pretty --logpath="${tmp}/lua_ls"

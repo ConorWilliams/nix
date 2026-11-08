@@ -163,7 +163,8 @@
           )
         ) hosts;
 
-      # The repo's dev shell (.envrc): the Zellij plugins' host toolchain
+      # The repo's dev shell (.envrc): CI's linters and the Zellij plugins'
+      # host toolchain
       devShells = lib.genAttrs systems (
         system:
         let
@@ -179,6 +180,14 @@
               pkg-config
               openssl
               curl
+              # Linters
+              statix
+              deadnix
+              nixf-diagnose
+              shellcheck
+              rumdl
+              actionlint
+              lua-language-server
             ];
           };
         }
