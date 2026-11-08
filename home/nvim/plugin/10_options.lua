@@ -37,3 +37,6 @@ vim.o.virtualedit = 'block' -- Visual block can go past line ends
 vim.o.ignorecase = true -- Case-insensitive search...
 vim.o.smartcase = true -- ...unless the pattern has capitals
 vim.o.inccommand = 'split' -- Live preview of :s substitutions
+-- LazyVim's: continue comments on Enter and o/O (r, o), even where the
+-- ftplugin doesn't (e.g. nix); ftplugins can still adjust it per language
+vim.o.formatoptions = 'jcroqlnt'
