@@ -7,6 +7,7 @@
 }:
 
 let
+  anon = import ./zellij/anon { inherit pkgs; };
   keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
@@ -91,6 +92,9 @@ in
         controller = true;
       };
       load_plugins.key-hints-controller = { };
+      # Runs in the server, including after the last client disconnects.
+      plugins.anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
+      load_plugins.anon = { };
       plugins.new-session = manager {
         multi_screen = false;
       };

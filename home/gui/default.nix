@@ -13,21 +13,7 @@ let
     inherit pkgs;
     zellij = config.programs.zellij.package;
   };
-  # Kitty needs a shell after the disposable client exits. Keep this GUI-only
-  # fallback here; invoking anon-zellij by hand returns to its calling shell.
-  zellijTerminal = pkgs.writeShellApplication {
-    name = "zellij-terminal";
-    runtimeInputs = [ anonZellij ];
-    text = /* bash */ ''
-      # Also clear these for the fallback shell, not just anon-zellij's child.
-      unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
-      anon-zellij
-      # Use the normal login-shell -> Fish hand-off, including Nix's environment.
-      exec ${
-        if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else lib.getExe config.programs.bash.package
-      } --login
-    '';
-  };
+
 in
 {
   imports = [
@@ -55,7 +41,7 @@ in
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     settings.confirm_os_window_close = 0;
-    settings.shell = lib.getExe zellijTerminal;
+    settings.shell = lib.getExe anonZellij;
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
