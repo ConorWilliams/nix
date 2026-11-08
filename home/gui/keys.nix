@@ -1,11 +1,4 @@
-# The window manager's keys, the same on Linux (i3, leader Alt) and the Mac
-# (AeroSpace, leader Cmd): which key each action uses after the leader,
-# spelled as i3 spells it. Each layer binds them to its own commands
-# (gui/ubuntu/default.nix, gui/mac/default.nix), so a key changes here once.
-# On the Mac they leave copy, paste, save, find, quit, Cmd+W/T/Tab and
-# Spotlight's Cmd+Space alone, but take over some of macOS's: Cmd+arrows in
-# text (line and document start/end), Cmd+number (tabs), Cmd+Shift+3/4/5
-# (screenshots: the screenshot key below instead), Cmd+N, Cmd+P, Cmd+Enter.
+# The window manager's keys, the same on Linux  and the Mac
 {
   keys = {
     terminal = "Return"; # kitty, in its own zellij session
@@ -32,6 +25,6 @@
     "Right"
   ];
 
-  # Workspaces 1-9 and 0 (the tenth); Shift+number moves the window there.
+  # Workspaces 0-9; Shift+number moves the window there.
   workspaces = builtins.genList (i: toString (i + 1)) 9 ++ [ "0" ];
 }
