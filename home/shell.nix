@@ -82,17 +82,40 @@ in
 
   programs.fish = {
     enable = true;
-    interactiveShellInit = /* fish */ ''
-      set -g fish_greeting # no startup banner
-      fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
-      # Vim keys: starts in insert mode, Esc for normal mode. The cursor
-      # shape shows the mode, as in nvim (starship's ❯ turns to ❮ too).
-      set -g fish_key_bindings fish_vi_key_bindings
-      set -g fish_cursor_default block
-      set -g fish_cursor_insert line
-      set -g fish_cursor_replace_one underscore
-      set -g fish_cursor_visual block
-      # Space's empty-prompt Zellij hand-off and `g ` picker: zellij.nix.
+    interactiveShellInit = lib.mkMerge [
+      (/* fish */ ''
+        set -g fish_greeting # no startup banner
+        fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
+        # Vim keys: starts in insert mode, Esc for normal mode. The cursor
+        # shape shows the mode, as in nvim (starship's ❯ turns to ❮ too).
+        set -g fish_key_bindings fish_vi_key_bindings
+        set -g fish_cursor_default block
+        set -g fish_cursor_insert line
+        set -g fish_cursor_replace_one underscore
+        set -g fish_cursor_visual block
+      '')
+      (lib.mkAfter /* fish */ ''
+        bind -M insert space __space
+        bind -M default space __space
+      '')
+    ];
+
+    # Only Fish knows whether the command line is empty. Everything after
+    # this hand-off is handled by Zellij's native modes.
+    functions.__space = /* fish */ ''
+      if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end
+        ${lib.getExe config.programs.zellij.package} action switch-mode normal
+      else if test "$fish_bind_mode" = default
+        commandline -f forward-char
+      else
+        commandline --insert ' '
+        commandline -f expand-abbr
+        if test "$(commandline)" = "g "
+          commandline ""
+          __zoxide_zi
+        end
+      end
+      commandline -f repaint
     '';
 
     # c: fend, a calculator
