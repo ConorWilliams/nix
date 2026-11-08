@@ -9,6 +9,10 @@
 let
   anon = import ./zellij/anon { inherit pkgs; };
   hints = import ./zellij/hints { inherit pkgs; };
+  zellij = lib.getExe config.programs.zellij.package;
+  # Shells keep the ZELLIJ_SESSION_NAME they started with, so a rename
+  # leaves a forwarding note: old name -> new name.
+  renamed = "${config.xdg.stateHome}/zellij/renamed";
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
@@ -16,11 +20,15 @@ let
         echo 'Session names cannot contain /.' >&2
         continue
       end
-      if contains -- "$name" (${lib.getExe config.programs.zellij.package} list-sessions -sn)
+      if contains -- "$name" (${zellij} list-sessions -sn)
         echo 'A session by this name already exists.' >&2
         continue
       end
-      ${lib.getExe config.programs.zellij.package} action rename-session "$name"; and break
+      ${zellij} action rename-session "$name"; or continue
+      mkdir -p ${renamed}
+      echo $name >${renamed}/$ZELLIJ_SESSION_NAME
+      rm -f ${renamed}/$name # no forwarding loops
+      break
     end
   '';
   bind = keys: actions: {
@@ -57,9 +65,19 @@ in
     description = "Start an anonymous Zellij session";
     wraps = "zellij";
     body = /* fish */ ''
-      ${lib.getExe config.programs.zellij.package} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
+      ${zellij} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
     '';
   };
+
+  # `zellij action` hangs on a missing session, so check first and follow
+  # renames. Fails if this shell's session is gone.
+  programs.fish.functions.__zellij_session = /* fish */ ''
+    set -l sessions (${zellij} list-sessions -sn 2>/dev/null)
+    while not contains -- "$ZELLIJ_SESSION_NAME" $sessions
+      test -r ${renamed}/$ZELLIJ_SESSION_NAME; or return 1
+      set -gx ZELLIJ_SESSION_NAME (cat ${renamed}/$ZELLIJ_SESSION_NAME)
+    end
+  '';
 
   programs.zellij = {
     enable = true;
