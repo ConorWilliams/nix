@@ -5,11 +5,11 @@
     launcher = "space"; # rofi; on the Mac, Spotlight's own Cmd+Space
     close = "Shift+q";
     fullscreen = "Shift+f";
-    resize = "Shift+r"; # a mode: arrows resize, Esc or Enter leaves
+    resize = "r"; # a mode: arrows resize, Esc or Enter leaves
+    reload = "Shift+r"; # the window manager's config
     flipSplit = "e"; # the focused group: side by side <-> stacked
     lock = "n";
     screenshot = "p"; # of a region, into ~/Pictures
-    reload = "Shift+c"; # the window manager's config
     # The whole workspace to the screen on the left/right (the arrows: plain
     # focuses, Shift moves the window, Ctrl+Shift moves the workspace).
     monitorLeft = "Ctrl+Shift+Left";
