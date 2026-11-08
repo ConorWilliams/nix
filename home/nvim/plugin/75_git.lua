@@ -66,6 +66,8 @@ local switch_worktree = function(dir)
     vim.api.nvim_list_bufs()
   )
   if #restored == 0 then
+    -- The rest (sections, formats) comes from the setup() config.
+    ---@diagnostic disable-next-line: missing-fields
     Snacks.dashboard.open({
       buf = vim.api.nvim_get_current_buf(),
       win = vim.api.nvim_get_current_win(),
