@@ -86,14 +86,16 @@ local lazygit = function(cwd)
     },
   })
 end
--- The current file's repo, or else the folder's (the scratch buffer, help
--- etc. aren't in one: with no repo to compare, quitting would always look
--- like a worktree switch)
+-- The current file's repo. Not the scratch buffer's: its file sits under
+-- ~/.local/share, so that would be the home folder's repo, if any.
+local file_repo = function() return not vim.b.scratch and Snacks.git.get_root() or nil end
+-- Or else the folder's (help etc. aren't in a repo: with no repo to
+-- compare, quitting would always look like a worktree switch)
 map('<leader>g', function()
-  lazygit(Snacks.git.get_root() or Snacks.git.get_root(vim.fn.getcwd()))
+  lazygit(file_repo() or Snacks.git.get_root(vim.fn.getcwd()))
 end, 'Lazygit')
 map('<leader>B', function()
-  if not Snacks.git.get_root() then
+  if not file_repo() then
     return vim.notify('Not in a git repo', vim.log.levels.WARN)
   end
   Snacks.picker.git_log_line()
