@@ -98,12 +98,7 @@ impl ZellijPlugin for Hints {
     }
 
     fn render(&mut self, rows: usize, cols: usize) {
-        let key_width = self
-            .rows
-            .iter()
-            .map(|(k, _)| k.chars().count())
-            .max()
-            .unwrap_or(0);
+        let key_width = self.key_width();
         print_text_with_coordinates(
             Text::new(format!("{:?}", self.mode)).color_all(0),
             1,
@@ -125,6 +120,14 @@ impl ZellijPlugin for Hints {
 }
 
 impl Hints {
+    fn key_width(&self) -> usize {
+        self.rows
+            .iter()
+            .map(|(k, _)| k.chars().count())
+            .max()
+            .unwrap_or(0)
+    }
+
     fn refresh(&mut self) {
         if !self.ready {
             return;
@@ -162,12 +165,7 @@ impl Hints {
             self.visible = true;
             show_pane_with_id(pane, true, false); // leave input focused on the terminal
         }
-        let key_width = self
-            .rows
-            .iter()
-            .map(|(k, _)| k.chars().count())
-            .max()
-            .unwrap_or(0);
+        let key_width = self.key_width();
         let description_width = self
             .rows
             .iter()

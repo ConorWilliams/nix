@@ -7,8 +7,9 @@
 }:
 
 let
-  anon = import ./zellij/anon { inherit pkgs; };
-  hints = import ./zellij/hints { inherit pkgs; };
+  plugin = import ./zellij/plugin.nix { inherit pkgs; };
+  anon = plugin ./zellij/anon;
+  hints = plugin ./zellij/hints;
   zellij = lib.getExe config.programs.zellij.package;
   # Shells keep the ZELLIJ_SESSION_NAME they started with, so a rename
   # leaves a forwarding note: old name -> new name.
