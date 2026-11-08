@@ -22,29 +22,6 @@ let
       fi
     '';
 
-  # zzh/zosh: zellij on a host (`zzh host [session]`), over ssh or mosh. Not
-  # from inside zellij: the host's zellij would be nested in this one,
-  # which catches its keys. Machines with a screen open a window of their
-  # own for it instead (home/gui).
-  zellijOn =
-    {
-      name,
-      description,
-      wraps,
-      connect,
-    }:
-    {
-      inherit description wraps;
-      body = /* fish */ ''
-        if set -q ZELLIJ
-          echo "${name}: not from inside zellij (it would nest); use a terminal outside it" >&2
-          return 1
-        end
-        set -l zellij zellij # a new session,
-        set -q argv[2]; and set zellij zellij attach -c $argv[2] # or join/create one
-        ${connect}
-      '';
-    };
 in
 
 {
@@ -101,7 +78,8 @@ in
     ];
 
     # Only Fish knows whether the command line is empty. Everything after
-    # this hand-off is handled by Zellij's native modes.
+    # this hand-off is handled by Zellij's native modes. This targets the
+    # shell's own session; Alt-g also works while a remote program owns input.
     functions.__space = /* fish */ ''
       if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end
         ${lib.getExe config.programs.zellij.package} action switch-mode normal
@@ -144,17 +122,30 @@ in
       '';
     };
 
-    functions.zzh = zellijOn {
-      name = "zzh";
-      description = "zellij on a host over ssh: new session, or join/create one";
-      wraps = "ssh"; # complete hostnames like ssh
-      connect = "ssh -t $argv[1] $zellij";
+    functions.zzh = {
+      description = "Zellij over SSH: new session, or join/create a named one";
+      wraps = "ssh";
+      body = /* fish */ ''
+        if test (count $argv) -lt 1; or test (count $argv) -gt 2; or test -z "$argv[1]"; or string match -q -- '-*' $argv[1]
+          echo 'Usage: zzh host [session]' >&2
+          return 2
+        end
+        set -l remote zellij
+        if set -q argv[2]
+          if test -z "$argv[2]"; or string match -qr '[/\r\n]' -- $argv[2]
+            echo 'zzh: session names must be nonempty and cannot contain / or line breaks' >&2
+            return 2
+          end
+          # SSH joins its command arguments into shell text: quote for the remote shell.
+          set -l session (string replace --all "'" "'\\'''" -- $argv[2])
+          set remote "zellij attach -c -- '$session'"
+        end
+        ssh -t -- $argv[1] $remote
+      '';
     };
-    functions.zosh = zellijOn {
-      name = "zosh";
-      description = "zellij on a host over mosh: new session, or join/create one";
-      wraps = "mosh"; # (mosh is the alias that adds --ssh=ssh)
-      connect = "mosh $argv[1] -- $zellij";
+    functions.zosh = {
+      wraps = "mosh";
+      body = "mosh $argv -- zellij";
     };
   };
 
