@@ -31,15 +31,41 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/target # the crates share their dependencies
+      CARGO_INCREMENTAL: 0 # no use from scratch; it would only grow the cache
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
+      # Compiled dependencies, rebuilt when the toolchain (flake.lock) or a
+      # Cargo.lock changes; otherwise only the crates themselves compile.
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('flake.lock', 'home/zellij/*/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
       - run: .github/check.sh rust
 
   # Neovim starts without errors and lua_ls finds no problems.
   nvim:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write # to purge superseded Nix store caches
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
+      # The Nix store: the home files' builds (the WASI plugins above all)
+      # took minutes. Only the newest store is kept (GitHub allows 10 GB).
+      - uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-nvim-${{ runner.os }}-${{ hashFiles('flake.lock', '**/*.nix', 'home/zellij/**') }}
+          restore-prefixes-first-match: nix-nvim-${{ runner.os }}-
+          gc-max-store-size-linux: 6G
+          purge: true
+          purge-prefixes: nix-nvim-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
       - run: .github/check.sh nvim
