@@ -15,7 +15,8 @@ local hide_dot_folders = function(item, ctx)
   -- doesn't hide everything. (files/grep give paths relative to the
   -- picker's folder, the explorer absolute ones; util.path makes both
   -- absolute, as relpath would resolve a relative one from nvim's cwd.)
-  local path = vim.fs.relpath(ctx.filter.cwd, Snacks.picker.util.path(item)) or item.file
+  local abs = Snacks.picker.util.path(item)
+  local path = abs and vim.fs.relpath(ctx.filter.cwd, abs) or item.file
   local parts = vim.split(path, '/', { plain = true })
   local last = item.dir and #parts or #parts - 1 -- folders only, not the file name
   for i = 1, last do
