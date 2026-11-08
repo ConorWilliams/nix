@@ -163,8 +163,7 @@
           )
         ) hosts;
 
-      # The repo's dev shell (.envrc): CI's linters and the Zellij plugins'
-      # host toolchain
+      # The repo's dev shell
       devShells = lib.genAttrs systems (
         system:
         let
@@ -173,6 +172,7 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
+              # Toolchain for Zellij plugins
               cargo
               clippy
               rustc
