@@ -84,6 +84,7 @@ local layouts = {
 local shape = function() return vim.o.columns > 2 * vim.o.lines and 'wide' or 'tall' end
 
 require('snacks').setup({
+  toggle = { wk_desc = '' }, -- which-key: just the name; the icon shows on/off
   explorer = {}, -- also opens directories (`nvim .`) instead of netrw
   scroll = {}, -- animated C-d, C-u, zz, jumps (as in LazyVim; not the mouse)
   -- Files over 1.5 MB or with very long lines (minified JSON, logs) open
