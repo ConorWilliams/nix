@@ -26,8 +26,6 @@ gs.setup({
     map('n', '<leader>ghS', gs.stage_buffer, 'Stage buffer')
     map('n', '<leader>ghR', gs.reset_buffer, 'Reset buffer')
     map('n', '<leader>ghp', gs.preview_hunk_inline, 'Preview hunk')
-    map('n', '<leader>ghb', function() gs.blame_line({ full = true }) end, 'Blame line')
-    map('n', '<leader>ghB', gs.blame, 'Blame buffer')
     map('n', '<leader>ghd', gs.diffthis, 'Diff against index')
     map('n', '<leader>ghD', function() gs.diffthis('~') end, 'Diff against last commit')
     map({ 'o', 'x' }, 'ih', ':<C-u>Gitsigns select_hunk<cr>', 'Hunk') -- e.g. dih, vih

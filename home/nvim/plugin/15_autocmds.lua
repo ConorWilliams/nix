@@ -19,10 +19,10 @@ autocmd('BufReadPost', {
   end,
 })
 
--- q closes help, quickfix and blame windows (man and checkhealth map q
+-- q closes help and quickfix windows (man and checkhealth map q
 -- themselves, more carefully)
 autocmd('FileType', {
-  pattern = { 'help', 'qf', 'gitsigns-blame' },
+  pattern = { 'help', 'qf' },
   callback = function(ev)
     vim.keymap.set('n', 'q', '<cmd>close<cr>', { buffer = ev.buf, desc = 'Close window' })
   end,
