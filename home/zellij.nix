@@ -108,21 +108,25 @@ in
         show_release_notes = false;
         on_force_close = "detach";
         session_serialization = false;
-        plugins.compact-bar._props.location = "zellij:compact-bar";
-        plugins.hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
-        plugins.hints-controller = {
-          _props.location = "file:${hints}/bin/zellij-hints.wasm";
-          controller = true;
+        plugins = {
+          compact-bar._props.location = "zellij:compact-bar";
+          hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
+          hints-controller = {
+            _props.location = "file:${hints}/bin/zellij-hints.wasm";
+            controller = true;
+          };
+          anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
+          new-session = manager {
+            multi_screen = false;
+          };
+          find-tabs = manager { multi_screen = true; };
+          find-sessions = manager { multi_screen = false; };
         };
-        load_plugins.hints-controller = { };
-        # Runs in the server, including after the last client disconnects.
-        plugins.anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
-        load_plugins.anon = { };
-        plugins.new-session = manager {
-          multi_screen = false;
+        load_plugins = {
+          hints-controller = { };
+          # Runs in the server, including after the last client disconnects.
+          anon = { };
         };
-        plugins.find-tabs = manager { multi_screen = true; };
-        plugins.find-sessions = manager { multi_screen = false; };
         keybinds = {
           _props.clear-defaults = true;
           locked._children = [ (bind "Alt g" (mode "normal")) ];
