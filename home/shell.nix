@@ -81,7 +81,7 @@ in
     # this hand-off is handled by Zellij's native modes. This targets the
     # shell's own session; Alt-g also works while a remote program owns input.
     functions.__space = /* fish */ ''
-      if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end
+      if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end; and __zellij_session
         ${lib.getExe config.programs.zellij.package} action switch-mode normal
       else if test "$fish_bind_mode" = default
         commandline -f forward-char
