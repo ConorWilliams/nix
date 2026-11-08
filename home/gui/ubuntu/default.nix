@@ -200,7 +200,6 @@ in
           ${key k.launcher} = "exec rofi -show run";
           ${key k.close} = "kill";
           ${key k.fullscreen} = "fullscreen toggle";
-          ${key k.floating} = "floating toggle";
           ${key k.resize} = "mode resize";
           ${key k.flipSplit} = "layout toggle split";
           ${key k.lock} = "exec ${lock}";

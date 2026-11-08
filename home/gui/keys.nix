@@ -5,7 +5,6 @@
     launcher = "space"; # rofi; on the Mac, Spotlight's own Cmd+Space
     close = "Shift+q";
     fullscreen = "Shift+f";
-    floating = "Shift+space"; # floating on/off
     resize = "Shift+r"; # a mode: arrows resize, Esc or Enter leaves
     flipSplit = "e"; # the focused group: side by side <-> stacked
     lock = "n";

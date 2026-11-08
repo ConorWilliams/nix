@@ -56,7 +56,6 @@
             # (k.launcher: Spotlight's own Cmd+Space, nothing to bind)
             ${key k.close} = "exec-and-forget ${closeWindow}";
             ${key k.fullscreen} = "fullscreen";
-            ${key k.floating} = "layout floating tiling";
             ${key k.resize} = "mode resize";
             ${key k.flipSplit} = "layout tiles horizontal vertical";
             # Lock first (Ctrl+Cmd+Q), then turn off the display.
