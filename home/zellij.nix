@@ -52,12 +52,15 @@ let
 
 in
 {
-  home.packages = [
-    (import ./zellij/anon.nix {
-      inherit pkgs;
-      zellij = config.programs.zellij.package;
-    })
-  ];
+  # Naming only: the background plugin owns cleanup when the last client leaves.
+  programs.fish.functions.anon-zellij = {
+    description = "Start an anonymous Zellij session";
+    wraps = "zellij";
+    body = /* fish */ ''
+      command env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
+        ${lib.getExe config.programs.zellij.package} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
+    '';
+  };
 
   programs.zellij = {
     enable = true;
