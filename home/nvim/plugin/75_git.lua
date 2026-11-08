@@ -1,5 +1,5 @@
 -- Git: gitsigns for changes in the gutter and hunk actions, lazygit in a
--- float, and snacks' git pickers. Keys as in LazyVim.
+-- float, and snacks' log picker for blame. Keys as in LazyVim.
 
 local gs = require('gitsigns')
 local bar = { text = '▎' }
@@ -19,8 +19,6 @@ gs.setup({
     end
     map('n', ']h', nav('next', ']c'), 'Next hunk')
     map('n', '[h', nav('prev', '[c'), 'Prev hunk')
-    map('n', ']H', function() gs.nav_hunk('last') end, 'Last hunk')
-    map('n', '[H', function() gs.nav_hunk('first') end, 'First hunk')
     map({ 'n', 'x' }, '<leader>ghs', ':Gitsigns stage_hunk<cr>', 'Stage/unstage hunk')
     map({ 'n', 'x' }, '<leader>ghr', ':Gitsigns reset_hunk<cr>', 'Reset hunk')
     map('n', '<leader>ghS', gs.stage_buffer, 'Stage buffer')
@@ -52,9 +50,9 @@ local switch_worktree = function(dir)
     if choice ~= 1 then return end
     vim.cmd('wall')
   end
-  -- Saved as on exit (persistence's own VimLeavePre autocmd), so not when
-  -- stopped (<leader>qd) or with no files open: the start screen would
-  -- replace a saved session with an empty one.
+  -- Saved as on exit (persistence's own VimLeavePre autocmd), so not with no
+  -- files open: the start screen would replace a saved session with an
+  -- empty one.
   local persistence = require('persistence')
   if persistence.active() then
     vim.api.nvim_exec_autocmds('VimLeavePre', { group = 'persistence' })
@@ -96,19 +94,4 @@ local lazygit = function(cwd)
   })
 end
 map('<leader>gg', function() lazygit(Snacks.git.get_root()) end, 'Lazygit')
-map('<leader>gG', function() lazygit(vim.fn.getcwd()) end, 'Lazygit (cwd)')
-
--- Pickers
-local pick = Snacks.picker
-map('<leader>gs', pick.git_status, 'Status')
-map('<leader>gd', pick.git_diff, 'Diff (hunks)')
-map('<leader>gl', pick.git_log, 'Log')
-map('<leader>gf', pick.git_log_file, 'File history')
-map('<leader>gb', pick.git_log_line, 'Blame line (log)')
-map('<leader>gS', pick.git_stash, 'Stash')
-
--- Open the file on GitHub (at the cursor line or selection), or copy the URL
-map('<leader>gB', function() Snacks.gitbrowse() end, 'Browse on GitHub', { 'n', 'x' })
-map('<leader>gY', function()
-  Snacks.gitbrowse({ open = function(url) vim.fn.setreg('+', url) end, notify = false })
-end, 'Copy GitHub URL', { 'n', 'x' })
+map('<leader>gb', Snacks.picker.git_log_line, 'Blame line (log)')
