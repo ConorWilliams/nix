@@ -45,8 +45,8 @@ map({ 'o', 'x' }, 'R', flash.treesitter_search, { desc = 'Treesitter search' })
 -- one from the history. ]p [p paste on the line below / above, indented
 -- like this one, even a word.
 require('yanky').setup({
-  -- Clipboard changes (copied outside nvim) join the history
-  system_clipboard = { sync_with_ring = true },
+  -- (Nothing to sync from the clipboard: nvim never reads it, 10_options.lua)
+  system_clipboard = { sync_with_ring = false },
   -- Pastes flash briefly; yanks already do (15_autocmds.lua)
   highlight = { on_yank = false, timer = 150 },
 })
