@@ -141,7 +141,7 @@ map('<leader>sC', pick.commands, 'Commands')
 map('<leader>sq', pick.qflist, 'Quickfix list')
 map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
-map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
+map('<leader>sy', function() pick.pick('yanky') end, 'Yank history', { 'n', 'x' })
 
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
