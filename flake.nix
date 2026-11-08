@@ -186,7 +186,7 @@
             };
             rustfmt = {
               command = "rustfmt";
-              options = [ "--edition=2021" ];
+              options = [ "--edition=2024" ];
               includes = [ "*.rs" ];
             };
             rumdl = {
