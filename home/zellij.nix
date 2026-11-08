@@ -212,8 +212,9 @@ in
     };
   };
 
-  # Named Unix sockets need a short path on macOS (its TMPDIR is long).
+  # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
+  # for the session name. Home is short too, and private, unlike /tmp.
   home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    ZELLIJ_SOCKET_DIR = "/tmp/zellij-${config.home.username}";
+    ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
   };
 }
