@@ -108,9 +108,7 @@ main() {
     if [[ ${has_darwin_config} != true ]]; then
       echo "flake.nix has no darwinConfigurations.${host} (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
-      # The darwin-rebuild in this flake's own system, built with its
-      # nixpkgs. (`nix run nix-darwin#darwin-rebuild` would use nix-darwin's
-      # own nixpkgs pin, fetching a whole second toolchain to build it.)
+      # The darwin-rebuild in this flake's own system, built with its nixpkgs.
       darwin_system=$(nix build --no-link --print-out-paths \
         "${dir}#darwinConfigurations.\"${host}\".system")
       sudo -H "${darwin_system}/sw/bin/darwin-rebuild" switch --flake "${dir}#${host}"
@@ -121,16 +119,14 @@ main() {
   fi
 
   say "Home Manager: ${config}"
-  # The generation built above, activated directly (as `home-manager switch`
-  # would, without fetching home-manager's own nixpkgs pin to build it).
-  # Existing dotfiles in the way are kept, renamed with a suffix unique to
-  # this run.
+  # The generation built above, activated directly . Existing dotfiles in the
+  # way are kept, renamed with a suffix unique to this run.
   backup_suffix="before-home-manager-$(date +%Y%m%d-%H%M%S)-$$"
   HOME_MANAGER_BACKUP_EXT=${backup_suffix} "${hm_generation}/activate"
   export PATH=${HOME}/.nix-profile/bin:${PATH} # the tools it just installed
 
   say "Logins"
-  # git authenticates to GitHub through gh's token, over HTTPS (programs.gh in home/default.nix).
+  # git authenticates to GitHub through gh's token, over HTTPS.
   if gh auth status >/dev/null 2>&1; then
     echo "gh logged in"
   elif ${desk}; then
