@@ -93,24 +93,18 @@ in
   # kitty comes from its own installer.
   home.sessionPath = [ "$HOME/.local/kitty.app/bin" ];
 
-  # Desktop login (/etc/gdm3/Xsession reads this after ~/.profile, before
-  # i3). Each login starts from the systemd user manager's environment, and
-  # the manager outlives logouts, keeping whatever was put there: a GNOME
-  # login puts all of its own (a dead SESSION_MANAGER, which programs then
-  # try to reach; GNOME's desktop name, which services the manager starts,
-  # like dunst and the portals, then act on; and the "already loaded" marks
-  # of Home Manager's variables and Nix's setup, which made later logins
-  # skip them). So drop GNOME's session here, clear those from the manager,
-  # and tell it this desktop's name. (Not everything, as GNOME does: this
-  # login's marks would then reach the next.)
+  # Run by gdm before i3. The systemd user manager outlives logouts and keeps
+  # a GNOME login's variables (a dead SESSION_MANAGER, GNOME's desktop name,
+  # Home Manager's and Nix's "already loaded" marks): clear them, then give
+  # it this desktop's name. Only those: importing everything would carry
+  # this login's marks to the next.
   home.file.".xprofile".text = /* bash */ ''
     unset SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID GNOME_SHELL_SESSION_MODE
     systemctl --user unset-environment SESSION_MANAGER SYSTEMD_EXEC_PID GNOME_DESKTOP_SESSION_ID \
       GNOME_SHELL_SESSION_MODE __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
     dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP \
       XDG_SESSION_TYPE DESKTOP_SESSION GDMSESSION
-    # If this login inherited those marks (the manager had them), ~/.profile
-    # skipped Nix's setup and Home Manager's variables: load them now.
+    # Inherited marks made ~/.profile skip Nix and Home Manager: load them.
     if [ -z "''${NH_FLAKE-}" ]; then
       unset __HM_SESS_VARS_SOURCED __ETC_PROFILE_NIX_SOURCED
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -118,9 +112,8 @@ in
     fi
   '';
 
-  # Not GNOME's geoclue demo agent (an autostart app outside GNOME): it
-  # outlives logouts, so they never finish and the systemd user manager
-  # never restarts afresh (the GNOME session left in it above).
+  # No geoclue demo agent: it outlives logouts, keeping the user manager
+  # (and the stale variables above) alive.
   xdg.configFile."autostart/geoclue-demo-agent.desktop".text = /* ini */ ''
     [Desktop Entry]
     Type=Application
