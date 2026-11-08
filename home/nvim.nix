@@ -1,7 +1,7 @@
 # Neovim: plain Lua config in ./nvim; plugins, language servers and tools
-# from Nix, so `nix flake update` updates them with everything else.
 {
   config,
+  lib,
   pkgs,
   inputs,
   ...
@@ -16,6 +16,15 @@ let
       version = input.shortRev;
       src = input;
     };
+
+  # rust-analyzer, with std's source when the fallback rustc below is the
+  # one in use (a project's own toolchain, earlier on PATH, brings its own).
+  rust-analyzer = pkgs.writeShellScriptBin "rust-analyzer" ''
+    if [ "$(command -v rustc)" = ${lib.getExe' pkgs.rustc "rustc"} ]; then
+      export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
+    fi
+    exec ${lib.getExe pkgs.rust-analyzer} "$@"
+  '';
 in
 
 {
@@ -39,6 +48,11 @@ in
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
       ty
+      # Rust: fallbacks; a project's toolchain (devshell, rustup) is preferred
+      rust-analyzer
+      cargo
+      rustc
+      rustfmt # rust-analyzer formats with it
       # Markdown (zk's server comes with zk, in default.nix)
       marksman
       rumdl
@@ -88,6 +102,8 @@ in
           toml
           yaml
           json
+          # Rust
+          rust
           # C++
           c
           cpp

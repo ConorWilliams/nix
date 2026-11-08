@@ -9,6 +9,7 @@ vim.lsp.enable({
   'bashls', -- bash-language-server (sh and bash)
   'ty', -- Python types
   'ruff', -- Python lint and format
+  'rust_analyzer', -- Rust (formats with rustfmt)
   'marksman', -- Markdown links, headings, references
   'rumdl', -- Markdown lint and format
   'copilot', -- inline suggestions (80_ai.lua)
