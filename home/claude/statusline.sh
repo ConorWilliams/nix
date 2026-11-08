@@ -8,7 +8,7 @@
 
 # All fields in one jq call. \x1f (not tab) as separator, because bash's read
 # merges runs of whitespace separators, which would shift empty fields.
-IFS=$'\x1f' read -r model dir pct used size h5 d7 < <(jq -r '
+fields=$(jq -r '
   def pct: if . == null then "" else round end;
   [ .model.display_name,
     .workspace.current_dir,
@@ -18,6 +18,7 @@ IFS=$'\x1f' read -r model dir pct used size h5 d7 < <(jq -r '
     (.rate_limits.five_hour.used_percentage | pct),
     (.rate_limits.seven_day.used_percentage | pct)
   ] | map(. // "" | tostring) | join("\u001f")')
+IFS=$'\x1f' read -r model dir pct used size h5 d7 <<<"$fields"
 
 # Colour a percentage: green under 50, yellow 50-79, red 80+.
 color() {
