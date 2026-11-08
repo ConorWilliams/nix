@@ -23,7 +23,6 @@ let
     '';
 
 in
-
 {
   programs.bash = {
     enable = true;
@@ -61,10 +60,10 @@ in
     enable = true;
     interactiveShellInit = lib.mkMerge [
       (/* fish */ ''
-        set -g fish_greeting # no startup banner
-        fish_config theme choose "Rosé Pine Dawn" # syntax colours (theme file below)
-        # Vim keys: starts in insert mode, Esc for normal mode. The cursor
-        # shape shows the mode, as in nvim (starship's ❯ turns to ❮ too).
+        set -g fish_greeting
+        # Syntax colours (theme file below)
+        fish_config theme choose "Rosé Pine Dawn"
+        # Vim keys: starts in insert mode, Esc for normal mode.
         set -g fish_key_bindings fish_vi_key_bindings
         set -g fish_cursor_default block
         set -g fish_cursor_insert line
@@ -77,9 +76,10 @@ in
       '')
     ];
 
-    # Only Fish knows whether the command line is empty. Everything after
-    # this hand-off is handled by Zellij's native modes. This targets the
-    # shell's own session; Alt-g also works while a remote program owns input.
+    # Fish space binding:
+    #   - In Normal mode, space -> Zellij to normal mode
+    #   - Insert mode, Empty prompt, space -> Zelij to normal mode
+    #   - Insert mode, "g", space -> zoxide's zi (fzf)
     functions.__space = /* fish */ ''
       if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end; and __zellij_session
         ${lib.getExe config.programs.zellij.package} action switch-mode normal
