@@ -100,7 +100,8 @@ main() {
       echo "Homebrew is required for the Mac's declared apps; stopping before activation."
       exit 1
     fi
-    if [[ $(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"") != true ]]; then
+    has_darwin_config=$(nix eval "$dir#darwinConfigurations" --apply "c: c ? \"$host\"")
+    if [[ $has_darwin_config != true ]]; then
       echo "flake.nix has no darwinConfigurations.$host (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
       sudo -H "$(type -P nix)" --extra-experimental-features 'nix-command flakes' \
