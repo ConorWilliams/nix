@@ -76,62 +76,65 @@ in
       '')
     ];
 
-    # Fish space binding:
-    #   - In Normal mode, space -> Zellij to normal mode
-    #   - Insert mode, Empty prompt, space -> Zelij to normal mode
-    #   - Insert mode, "g", space -> zoxide's zi (fzf)
-    functions.__space = /* fish */ ''
-      if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end; and __zellij_session
-        ${lib.getExe config.programs.zellij.package} action switch-mode normal
-      else if test "$fish_bind_mode" = default
-        commandline -f forward-char
-      else
-        commandline --insert ' '
-        commandline -f expand-abbr
-        if test "$(commandline)" = "g "
-          commandline ""
-          __zoxide_zi
-        end
-      end
-      commandline -f repaint
-    '';
-
-    # c: fend, a calculator
-    functions.c = {
-      description = "Calculator (fend): a REPL, or evaluate the arguments";
-      wraps = "fend";
-      body = "fend $argv";
-    };
-
-    # starship's shrunk prompt after a command runs
-    functions.starship_transient_prompt_func = "starship module character $argv";
-
-    # sudo searches its own PATH (secure_path), without ~/.nix-profile/bin,
-    # so `sudo dust` isn't found: give it the program's full path from this
-    # shell's PATH.
-    functions.sudo = {
-      description = "sudo, finding programs on this shell's PATH (Nix's too)";
-      wraps = "sudo";
-      body = /* fish */ ''
-        # (an option such as -u is no program, so it fails `command -s` too)
-        if set -q argv[1]; and set -l exe (command -s -- $argv[1])
-          command sudo $exe $argv[2..]
+    functions = {
+      # Fish space binding:
+      #   - In Normal mode, space -> Zellij to normal mode
+      #   - Insert mode, Empty prompt, space -> Zelij to normal mode
+      #   - Insert mode, "g", space -> zoxide's zi (fzf)
+      __space = /* fish */ ''
+        if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end; and __zellij_session
+          ${lib.getExe config.programs.zellij.package} action switch-mode normal
+        else if test "$fish_bind_mode" = default
+          commandline -f forward-char
         else
-          command sudo $argv
+          commandline --insert ' '
+          commandline -f expand-abbr
+          if test "$(commandline)" = "g "
+            commandline ""
+            __zoxide_zi
+          end
         end
+        commandline -f repaint
       '';
-    };
 
-    # zzh/zosh host [session]: join or create a Zellij session on a host.
-    functions.zzh = {
-      description = "zellij on a host over ssh: join/create a session (default main)";
-      wraps = "ssh";
-      body = "ssh -t $argv[1] zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
-    };
-    functions.zosh = {
-      description = "zellij on a host over mosh: join/create a session (default main)";
-      wraps = "mosh";
-      body = "mosh $argv[1] -- zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
+      # c: fend, a calculator
+      c = {
+        description = "Calculator (fend): a REPL, or evaluate the arguments";
+        wraps = "fend";
+        body = "fend $argv";
+      };
+
+      # starship's shrunk prompt after a command runs
+      starship_transient_prompt_func = "starship module character $argv";
+
+      # sudo searches its own PATH (secure_path), without ~/.nix-profile/bin,
+      # so `sudo dust` isn't found: give it the program's full path from this
+      # shell's PATH.
+      sudo = {
+        description = "sudo, finding programs on this shell's PATH (Nix's too)";
+        wraps = "sudo";
+        body = /* fish */ ''
+          # (an option such as -u is no program, so it fails `command -s` too)
+          if set -q argv[1]; and set -l exe (command -s -- $argv[1])
+            command sudo $exe $argv[2..]
+          else
+            command sudo $argv
+          end
+        '';
+      };
+
+      # zzh/zosh host [session]: join or create a Zellij session on a host.
+      zzh = {
+        description = "zellij on a host over ssh: join/create a session (default main)";
+        wraps = "ssh";
+        body = "ssh -t $argv[1] zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
+      };
+
+      zosh = {
+        description = "zellij on a host over mosh: join/create a session (default main)";
+        wraps = "mosh";
+        body = "mosh $argv[1] -- zellij attach -c (set -q argv[2]; and echo $argv[2]; or echo main)";
+      };
     };
   };
 
