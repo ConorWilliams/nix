@@ -134,14 +134,10 @@ in
     enable = true;
     config = {
       modifier = mod;
-      # The bar's (and title bars') font: the terminal's, at the machine's
-      # bar size (i3's default, monospace 8, is tiny on 4K).
       fonts = {
         names = [ config.programs.kitty.font.name ];
         size = config.desktop.barFontSize * 1.0; # (i3 wants a decimal)
       };
-      # The bar: i3's own defaults (colours, at the bottom...), with that font,
-      # i3status (below), and the tray on the primary monitor.
       bars = [
         {
           inherit (config.xsession.windowManager.i3.config) fonts;
@@ -153,8 +149,6 @@ in
       window.titlebar = false;
       floating.titlebar = false;
 
-      # Every key, not i3's defaults plus some: the shared ones (../keys.nix,
-      # the Mac's AeroSpace uses the same keys) and a few of i3's own.
       keybindings =
         let
           k = wm.keys;
@@ -205,11 +199,7 @@ in
           ${key "Shift+minus"} = "move scratchpad";
           ${key "Shift+e"} = "exec i3-nagbar -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'";
 
-          # Volume, mute and brightness keys (under GNOME its settings daemon
-          # handles them; it doesn't run under i3). Brightness asks logind, so
-          # no root; on a desk without a backlight it does nothing.
-          # The volume ones also refresh the bar at once (USR1), rather than at
-          # its next 5-second update.
+          # Volume, mute and brightness keys
           "XF86AudioRaiseVolume" =
             "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && ${refreshBar}";
           "XF86AudioLowerVolume" =
