@@ -2,18 +2,12 @@
 
 -- persistence: on exit, saves the open buffers, windows and tabs as a
 -- session for this folder (and git branch). Nothing is restored unless
--- asked for, with these keys (LazyVim's) or from the start screen.
+-- asked for, from the start screen.
 local persistence = require('persistence')
 persistence.setup()
 -- Not terminals (restoring would re-run e.g. a hidden lazygit) or empty
 -- windows; as in LazyVim.
 vim.opt.sessionoptions:remove({ 'terminal', 'blank' })
-
-local map = function(lhs, rhs, desc) vim.keymap.set('n', lhs, rhs, { desc = desc }) end
-map('<leader>qs', persistence.load, 'Restore session (this folder)')
-map('<leader>qS', persistence.select, 'Pick a session')
-map('<leader>ql', function() persistence.load({ last = true }) end, 'Restore last session')
-map('<leader>qd', persistence.stop, "Don't save this session")
 
 -- Start screen (snacks dashboard, LazyVim's look): shown when nvim starts
 -- without files. Snacks reads this at startup, so it can be set here rather
