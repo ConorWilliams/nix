@@ -42,7 +42,7 @@ map({ 'o', 'x' }, 'R', flash.treesitter_search, { desc = 'Treesitter search' })
 map('c', '<C-s>', flash.toggle, { desc = 'Toggle flash in / search' })
 
 -- yanky: yank history, and puts that know about it (LazyVim's yanky extra).
--- After a paste, [y ]y swap it for an earlier / later yank; <leader>p picks
+-- After a paste, [y ]y swap it for an earlier / later yank; <leader>sy picks
 -- one from the history. ]p [p paste on the line below / above, indented
 -- like this one, even a word; >p <p paste and indent.
 require('yanky').setup({
@@ -53,7 +53,6 @@ require('yanky').setup({
   highlight = { on_yank = false, timer = 150 },
 })
 local plug = function(name) return '<Plug>(Yanky' .. name .. ')' end
-map({ 'n', 'x' }, '<leader>p', function() Snacks.picker.yanky() end, { desc = 'Yank history' })
 map({ 'n', 'x' }, 'y', plug('Yank'), { desc = 'Yank' })
 map({ 'n', 'x' }, 'p', plug('PutAfter'), { desc = 'Put after' })
 map({ 'n', 'x' }, 'P', plug('PutBefore'), { desc = 'Put before' })

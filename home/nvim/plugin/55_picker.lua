@@ -159,6 +159,7 @@ map('<leader>sm', pick.marks, 'Marks')
 map('<leader>sq', pick.qflist, 'Quickfix list')
 map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
+map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
 map('<leader>uC', pick.colorschemes, 'Colour schemes')
 
 Snacks.toggle.scroll():map('<leader>uS')
