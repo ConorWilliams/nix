@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2310 # ask and git (below) are meant as conditions
 
 set -euo pipefail
 
@@ -8,7 +9,9 @@ dir=$HOME/nix
 # Pretty output
 say() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
-# Read prompts from the terminal, even when stdin is redirected.
+# Read prompts from the terminal, even when stdin is redirected. Used as a
+# condition, so set -e is off inside it; its last command's status is its
+# answer either way.
 ask() {
   local answer
   read -rp "$1 [y/N] " answer </dev/tty || return 1
