@@ -199,9 +199,6 @@ in
           ${key k.monitorRight} = "move workspace to output right";
 
           # i3's own, with no AeroSpace counterpart.
-          ${key "a"} = "focus parent";
-          ${key "minus"} = "scratchpad show";
-          ${key "Shift+minus"} = "move scratchpad";
           ${key "Shift+e"} = "exec i3-nagbar -t warning -m 'Exit i3?' -b Yes 'i3-msg exit'";
 
           # Volume, mute and brightness keys
