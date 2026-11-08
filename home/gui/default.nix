@@ -39,10 +39,12 @@
     # the usual login-shell -> Fish hand-off for Nix's full environment.
     settings.shell =
       let
-        login =
-          if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else lib.getExe config.programs.bash.package;
+        unset = "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID";
+        fish = lib.getExe config.programs.fish.package;
+        bash = lib.getExe config.programs.bash.package;
+        login = if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else bash;
       in
-      "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ${lib.getExe config.programs.fish.package} -c 'anon-zellij; exec ${login} --login'";
+      "${unset} ${fish} -c 'anon-zellij; exec ${login} --login'";
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 }
