@@ -174,6 +174,7 @@ in
           (once "h" { NewPane = "Right"; })
           (once "v" { NewPane = "Down"; })
           (once "d" { CloseFocus = { }; })
+          (once "e" { EditScrollback = { }; })
           (bind "r" (mode "resize"))
         ];
         resize._children = map (dir: bind dir { Resize = "Increase ${dir}"; }) [
