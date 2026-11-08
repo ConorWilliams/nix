@@ -59,7 +59,7 @@ in
   programs.fish = {
     enable = true;
     interactiveShellInit = lib.mkMerge [
-      (/* fish */ ''
+      /* fish */ ''
         set -g fish_greeting
         # Syntax colours (theme file below)
         fish_config theme choose "Rosé Pine Dawn"
@@ -69,7 +69,7 @@ in
         set -g fish_cursor_insert line
         set -g fish_cursor_replace_one underscore
         set -g fish_cursor_visual block
-      '')
+      ''
       (lib.mkAfter /* fish */ ''
         bind -M insert space __space
         bind -M default space __space
