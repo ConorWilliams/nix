@@ -64,7 +64,7 @@ impl ZellijPlugin for Hints {
                 for panes in manifest.panes.values() {
                     let mut hints = panes
                         .iter()
-                        .filter(|p| p.is_plugin && p.plugin_url.as_deref() == Some("key-hints"));
+                        .filter(|p| p.is_plugin && p.plugin_url.as_deref() == Some("hints"));
                     if let Some(pane) = hints.next() {
                         views.insert(pane.id);
                     }
