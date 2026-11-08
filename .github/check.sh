@@ -8,8 +8,19 @@ set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 cd "${root}"
+# With CHECK_GC_ROOTS (CI sets it), what's built is kept there as GC roots,
+# so the Nix store cache's garbage collection keeps it.
+# keep FLAG NAME [DEFAULT]: kept is FLAG and the root's path, else DEFAULT.
+keep() {
+  kept=("${@:3}")
+  if [[ -n ${CHECK_GC_ROOTS:-} ]]; then
+    mkdir -p "${CHECK_GC_ROOTS}"
+    kept=("$1" "${CHECK_GC_ROOTS}/$2")
+  fi
+}
 if [[ -z ${CHECK_SH_IN_DEV_SHELL:-} ]]; then
-  CHECK_SH_IN_DEV_SHELL=1 exec nix develop "${root}" -c "$0" "$@"
+  keep --profile dev-shell
+  CHECK_SH_IN_DEV_SHELL=1 exec nix develop "${kept[@]}" "${root}" -c "$0" "$@"
 fi
 
 failed=()
@@ -68,8 +79,10 @@ nvim() {
 # (Steps run as conditions, where set -e is off: each failure returns.)
 nvim_startup() {
   local cfg=".#homeConfigurations.\"$1\".config" home_files package
-  home_files=$(nix build --no-link --print-out-paths "${cfg}.home-files") || return
-  package=$(nix build --no-link --print-out-paths "${cfg}.programs.neovim.finalPackage") || return
+  keep --out-link home-files --no-link
+  home_files=$(nix build "${kept[@]}" --print-out-paths "${cfg}.home-files") || return
+  keep --out-link neovim --no-link
+  package=$(nix build "${kept[@]}" --print-out-paths "${cfg}.programs.neovim.finalPackage") || return
   nvim_tmp=$(mktemp -d) || return
   # The plugins as the switch would install them. The config itself is this
   # checkout's: the home files link ~/.config/nvim to ~/nix/home/nvim, which

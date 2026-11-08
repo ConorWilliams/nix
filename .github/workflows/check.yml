@@ -59,9 +59,10 @@ jobs:
       - uses: cachix/install-nix-action@v31
       # The Nix store: the home files' builds (the WASI plugins above all)
       # took minutes. Only the newest store is kept (GitHub allows 10 GB).
+      # Its garbage collection keeps what check.sh roots in CHECK_GC_ROOTS.
       - uses: nix-community/cache-nix-action@v7
         with:
-          primary-key: nix-nvim-${{ runner.os }}-${{ hashFiles('flake.lock', '**/*.nix', 'home/zellij/**') }}
+          primary-key: nix-nvim-${{ runner.os }}-${{ hashFiles('flake.lock', '**/*.nix', 'home/zellij/**', '.github/check.sh') }}
           restore-prefixes-first-match: nix-nvim-${{ runner.os }}-
           gc-max-store-size-linux: 6G
           purge: true
@@ -69,3 +70,5 @@ jobs:
           purge-created: 0
           purge-primary-key: never
       - run: .github/check.sh nvim
+        env:
+          CHECK_GC_ROOTS: ${{ runner.temp }}/gcroots
