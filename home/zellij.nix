@@ -8,7 +8,7 @@
 
 let
   anon = import ./zellij/anon { inherit pkgs; };
-  keyHints = import ./zellij/key-hints.nix { inherit pkgs; };
+  hints = import ./zellij/hints { inherit pkgs; };
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
@@ -72,7 +72,7 @@ in
         }
         floating_panes {
           pane {
-            plugin location="key-hints"
+            plugin location="hints"
           }
         }
       }
@@ -86,12 +86,12 @@ in
       on_force_close = "detach";
       session_serialization = false;
       plugins.compact-bar._props.location = "zellij:compact-bar";
-      plugins.key-hints._props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
-      plugins.key-hints-controller = {
-        _props.location = "file:${keyHints}/bin/zellij-key-hints.wasm";
+      plugins.hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
+      plugins.hints-controller = {
+        _props.location = "file:${hints}/bin/zellij-hints.wasm";
         controller = true;
       };
-      load_plugins.key-hints-controller = { };
+      load_plugins.hints-controller = { };
       # Runs in the server, including after the last client disconnects.
       plugins.anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
       load_plugins.anon = { };
