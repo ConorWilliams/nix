@@ -158,8 +158,15 @@ map('<leader>bs', function()
   vim.fn.mkdir(scratch_dir, 'p')
   vim.cmd.edit(vim.fn.fnameescape(scratch_file))
 end, 'Scratch buffer')
+local scratch_group = vim.api.nvim_create_augroup('config-scratch', {})
+-- (also when a session brings it back) for the tabline to spot
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+  group = scratch_group,
+  pattern = scratch_dir .. '/*',
+  callback = function(ev) vim.b[ev.buf].scratch = true end,
+})
 vim.api.nvim_create_autocmd('BufHidden', {
-  group = vim.api.nvim_create_augroup('config-scratch', {}),
+  group = scratch_group,
   pattern = scratch_dir .. '/*',
   callback = function(ev)
     -- only when changed; silent, but a failed write still shows its error
