@@ -37,21 +37,13 @@ in
   # Lets every app (not just Nix ones) find fonts installed by Nix.
   fonts.fontconfig.enable = true;
 
-  # Non-NixOS Linux: the desktop finds apps, icons and cursors installed by
-  # Nix (as well as Ubuntu's own). These are the parts of Home Manager's
-  # targets.genericLinux wanted here. Not the rest: it also sources a
-  # single-user Nix's nix.sh in every shell, on top of the multi-user one
-  # Ubuntu's /etc/profile loads (doubling PATH entries), points <nixpkgs>
-  # at unpinned channels, sets a TERMINFO_DIRS for systemd's services that
-  # none here use (and that names a folder that doesn't exist), and
-  # installs GPU drivers for Nix programs (GUI apps stay with apt; README).
-  # TODO: once Home Manager PR #9925 is merged (genericLinux stops sourcing
-  # nix.sh: https://github.com/nix-community/home-manager/pull/9925), drop
-  # xdg.systemDirs.data and XCURSOR_PATH below for
-  # `targets.genericLinux.enable = true`, overriding its NIX_PATH (it can't
-  # be unset; the flake's pinned nixpkgs instead:
-  # `systemd.user.sessionVariables.NIX_PATH = lib.mkForce "nixpkgs=flake:nixpkgs"`)
-  # and turning off its GPU drivers (`targets.genericLinux.gpu.enable = false`).
+  # The desktop finds apps, icons and cursors installed by Nix: the parts of
+  # targets.genericLinux wanted here (the rest sources nix.sh a second time).
+  # TODO: once https://github.com/nix-community/home-manager/pull/9925 is
+  # merged, replace these two with:
+  #   targets.genericLinux.enable = true;
+  #   targets.genericLinux.gpu.enable = false;
+  #   systemd.user.sessionVariables.NIX_PATH = lib.mkForce "nixpkgs=flake:nixpkgs";
   xdg.systemDirs.data = [
     "\${NIX_STATE_DIR:-/nix/var/nix}/profiles/default/share"
     "${config.home.profileDirectory}/share"
