@@ -14,8 +14,31 @@ in
 {
   imports = [ ./. ];
 
-  # nix-darwin's equivalent of home.stateVersion. Set once, never bump.
-  system.stateVersion = 6;
+  system = {
+    # nix-darwin's equivalent of home.stateVersion. Set once, never bump.
+    stateVersion = 6;
+
+    activationScripts.postActivation.text = lib.mkAfter /* bash */ ''
+      '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || echo "warning: Mullvad auto-connect not set" >&2
+    '';
+
+    # It's a British keyboard.
+    defaults.CustomUserPreferences."com.apple.HIToolbox" = {
+      AppleCurrentKeyboardLayoutInputSourceID = "com.apple.keylayout.British";
+      AppleEnabledInputSources = [
+        britishKeyboard
+        {
+          "Bundle ID" = "com.apple.CharacterPaletteIM";
+          InputSourceKind = "Non Keyboard Input Method";
+        }
+        pressAndHold
+      ];
+      AppleSelectedInputSources = [
+        pressAndHold
+        britishKeyboard
+      ];
+    };
+  };
 
   homebrew.casks = [
     "adobe-creative-cloud"
@@ -27,25 +50,4 @@ in
     "vlc"
     "whatsapp"
   ];
-
-  system.activationScripts.postActivation.text = lib.mkAfter /* bash */ ''
-    '/Applications/Mullvad VPN.app/Contents/Resources/mullvad' auto-connect set on || echo "warning: Mullvad auto-connect not set" >&2
-  '';
-
-  # It's a British keyboard.
-  system.defaults.CustomUserPreferences."com.apple.HIToolbox" = {
-    AppleCurrentKeyboardLayoutInputSourceID = "com.apple.keylayout.British";
-    AppleEnabledInputSources = [
-      britishKeyboard
-      {
-        "Bundle ID" = "com.apple.CharacterPaletteIM";
-        InputSourceKind = "Non Keyboard Input Method";
-      }
-      pressAndHold
-    ];
-    AppleSelectedInputSources = [
-      pressAndHold
-      britishKeyboard
-    ];
-  };
 }
