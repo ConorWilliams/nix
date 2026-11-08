@@ -43,7 +43,7 @@ in
       nixd
       nixfmt
       bash-language-server
-      shellcheck # bash-language-server's lint warnings come from it
+      shellcheck
       shfmt
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
@@ -63,59 +63,51 @@ in
     # All on the runtime path at startup, so nvim/plugin/*.lua can require()
     # and set them up.
     plugins = with pkgs.vimPlugins; [
-      rose-pine # (30_ui.lua)
+      rose-pine
       mini-nvim
       which-key-nvim
       (fromInput "go-up.nvim" inputs.go-up-nvim)
-      smart-splits-nvim # (20_keymaps.lua)
+      smart-splits-nvim
       (fromInput "smart-splits-zellij" inputs.smart-splits-zellij)
-      flash-nvim # (50_editing.lua)
-      yanky-nvim # (50_editing.lua)
-      snacks-nvim # (55_picker.lua)
-      nvim-lspconfig # (60_lsp.lua)
-      conform-nvim # (61_format.lua)
-      blink-cmp # (65_completion.lua; built with its Rust fuzzy matcher)
+      flash-nvim
+      yanky-nvim
+      snacks-nvim
+      nvim-lspconfig
+      conform-nvim
+      blink-cmp
       friendly-snippets
-      render-markdown-nvim # (70_markdown.lua)
+      render-markdown-nvim
       zk-nvim
-      gitsigns-nvim # (75_git.lua)
-      persistence-nvim # (85_start.lua)
-      # Treesitter: the plugin, prebuilt parsers and their matching queries,
-      # all from the binary cache (no compiler).
+      gitsigns-nvim
+      persistence-nvim
+      # Treesitter: the plugin, prebuilt parsers and their matching queries.
       (nvim-treesitter.withPlugins (
         p: with p; [
-          # Neovim's own languages (it ships some parsers, but these match the queries)
           lua
           vim
           vimdoc
           query
           markdown
           markdown_inline
-          # This repo and the shell
           nix
           bash
           fish
-          kdl # zellij
-          # Python and data
+          kdl # Zellij
           python
           ini
           toml
           yaml
           json
-          # Rust
           rust
-          # C++
           c
           cpp
           cmake
           make
           dockerfile
-          # Git
           diff
           gitcommit
           git_rebase
           gitignore
-          # Misc
           regex
           latex
           typst
@@ -125,9 +117,7 @@ in
     ];
   };
 
-  # rumdl (Markdown lint and format: nvim, nix fmt): not its
-  # list-item-spacing rule (it would insist on one blank-line style per
-  # list); tables with their columns aligned (opt-in).
+  # Personal preferences
   xdg.configFile."rumdl/rumdl.toml".text = /* toml */ ''
     [global]
     disable = ["MD076"]
@@ -137,8 +127,7 @@ in
     style = "aligned"
   '';
 
-  # Live symlink into the repo (not a store copy): edits apply without a
-  # switch. The repo is where nh expects it (~/nix, home/default.nix).
+  # Live symlink into the repo (not a store copy): edits apply without a switch.
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.programs.nh.flake}/home/nvim";
 }
