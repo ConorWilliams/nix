@@ -1,4 +1,4 @@
--- Look and feel. Plugins come from Nix (home/neovim.nix) and are already
+-- Look and feel. Plugins come from Nix (home/nvim.nix) and are already
 -- loaded; each file here sets up its own.
 
 -- Colour scheme: Rose Pine Dawn, always (detecting the terminal's

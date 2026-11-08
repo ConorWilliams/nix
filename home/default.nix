@@ -15,7 +15,7 @@
     ./shell.nix
     ./zellij.nix
     ./claude.nix
-    ./neovim.nix
+    ./nvim.nix
   ];
 
   # Complete Dawn palette, including highlights omitted from palette.json.

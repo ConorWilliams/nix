@@ -1,4 +1,4 @@
--- Completion with blink.cmp, from nixpkgs (home/neovim.nix: built with its
+-- Completion with blink.cmp, from nixpkgs (home/nvim.nix: built with its
 -- Rust fuzzy matcher, nothing downloaded). It also tells every language
 -- server what it supports, so no LSP glue is needed.
 

@@ -1,5 +1,5 @@
 -- GitHub Copilot via Neovim 0.12's built-in inline completion: no plugin,
--- just the copilot language server (see home/neovim.nix; enabled in
+-- just the copilot language server (see home/nvim.nix; enabled in
 -- 60_lsp.lua, config in after/lsp/copilot.lua). Suggestions show as grey
 -- ghost text.
 -- Right arrow accepts one (like fish's autosuggestions), so Tab stays with
