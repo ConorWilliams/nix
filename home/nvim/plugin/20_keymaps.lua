@@ -64,8 +64,6 @@ map('x', '>', '>gv')
 for _, c in ipairs({ ',', '.', ';' }) do
   map('i', c, c .. '<C-g>u') -- Undo breakpoints, so u doesn't undo a whole paragraph
 end
-map('n', 'gco', 'o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add comment below' })
-map('n', 'gcO', 'O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add comment above' })
 
 -- n always searches forward and N backward, whether the search began with / or ?
 map({ 'n', 'x', 'o' }, 'n', "'Nn'[v:searchforward]", { expr = true, desc = 'Next match' })
