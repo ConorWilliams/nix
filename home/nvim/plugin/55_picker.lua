@@ -162,7 +162,8 @@ vim.api.nvim_create_autocmd('BufHidden', {
   group = vim.api.nvim_create_augroup('config-scratch', {}),
   pattern = scratch_dir .. '/*',
   callback = function(ev)
-    vim.api.nvim_buf_call(ev.buf, function() vim.cmd('silent! write') end)
+    -- only when changed; silent, but a failed write still shows its error
+    vim.api.nvim_buf_call(ev.buf, function() vim.cmd('silent update') end)
   end,
 })
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
