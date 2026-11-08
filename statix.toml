@@ -1,0 +1,2 @@
+# Not this repo's code: nix-direnv links the flake's inputs in there.
+ignore = [".direnv"]
