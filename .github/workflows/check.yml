@@ -99,8 +99,10 @@ jobs:
           sudo useradd --create-home --shell /bin/bash conix
           sudo cp -a . /home/conix/nix
           sudo chown -R conix: /home/conix/nix
+      # A clean environment, as a login's (the runner's XDG_* got through).
       - run: >-
-          sudo -u conix -H env PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+          sudo -u conix env -i HOME=/home/conix USER=conix LOGNAME=conix
+          PATH="/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin:/bin"
           bash /home/conix/nix/bootstrap.sh </dev/null
       # Home Manager switched: its profile, fish, and the dotfiles linked.
       - run: |
