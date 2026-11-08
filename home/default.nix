@@ -25,8 +25,58 @@
     in
     (builtins.fromJSON (lib.removePrefix "export default " preset)).theme.colors.rp-dawn;
 
-  # Compatibility marker for Home Manager's defaults, not a version pin.
-  home.stateVersion = "26.11";
+  home = {
+    # Compatibility marker for Home Manager's defaults, not a version pin.
+    stateVersion = "26.11";
+
+    # Programs installed with `uv tool install` (and the like) land here.
+    sessionPath = [ "$HOME/.local/bin" ];
+
+    # kitty's terminfo where ncurses looks by default, so programs can drive kitty
+    # (over SSH and under sudo too).
+    file.".terminfo".source = "${pkgs.kitty.terminfo}/share/terminfo";
+
+    # Plain command-line tools with no config of their own. Tools with config
+    # or shell integration get a `programs.<name>` block below or in their own
+    # file.
+    packages = with pkgs; [
+      fd
+      dust
+      duf
+      uv
+      mosh
+      tokei # code count
+      fend # calculator, with units (`c` in fish: shell.nix)
+      rsync
+      kitty.kitten # kitty's helper (icat etc.), without the GUI app
+      htop
+      zk
+      # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
+      (fuc.overrideAttrs {
+        cargoBuildFeatures = [
+          "rmz/progress"
+          "cpz/progress"
+        ];
+      })
+    ];
+
+    file.".codex/themes/rose-pine-dawn.tmTheme".source =
+      "${inputs.rose-pine-tm-theme}/dist/rose-pine-dawn.tmTheme";
+
+    # Shell aliases, for every shell Home Manager manages.
+    shellAliases = {
+      hms = "nh home switch"; # the flake comes from NH_FLAKE (programs.nh)
+      icat = "kitten icat";
+      # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
+      # about Ubuntu's /etc/ssh/ssh_config; use the system's ssh instead.
+      mosh = "mosh --ssh=ssh";
+    };
+
+    sessionVariables = {
+      # Tell programs the terminal supports 24-bit colour.
+      COLORTERM = "truecolor";
+    };
+  };
 
   # Lets Home Manager put its own `home-manager` command on PATH.
   programs.home-manager.enable = true;
@@ -66,38 +116,6 @@
       "en_US.UTF-8/UTF-8"
     ];
   };
-
-  # Programs installed with `uv tool install` (and the like) land here.
-  home.sessionPath = [ "$HOME/.local/bin" ];
-
-  # kitty's terminfo where ncurses looks by default, so programs can drive kitty
-  # (over SSH and under sudo too).
-  home.file.".terminfo".source = "${pkgs.kitty.terminfo}/share/terminfo";
-
-  # Plain command-line tools with no config of their own. Tools with config
-  # or shell integration get a `programs.<name>` block below or in their own
-  # file.
-  home.packages = with pkgs; [
-    fd
-    dust
-    duf
-    uv
-    mosh
-    tokei # code count
-    fend # calculator, with units (`c` in fish: shell.nix)
-    rsync
-    kitty.kitten # kitty's helper (icat etc.), without the GUI app
-    htop
-    zk
-    # rmz / cpz: fast rm and cp for big trees, built with their progress bars.
-    (fuc.overrideAttrs {
-      cargoBuildFeatures = [
-        "rmz/progress"
-        "cpz/progress"
-      ];
-    })
-  ];
-
   programs.codex = {
     enable = true;
     mutableSettings = true; # preserve settings added by Codex or the user
@@ -115,18 +133,6 @@
     };
   };
 
-  home.file.".codex/themes/rose-pine-dawn.tmTheme".source =
-    "${inputs.rose-pine-tm-theme}/dist/rose-pine-dawn.tmTheme";
-
-  # Shell aliases, for every shell Home Manager manages.
-  home.shellAliases = {
-    hms = "nh home switch"; # the flake comes from NH_FLAKE (programs.nh)
-    icat = "kitten icat";
-    # mosh from Nix would use Nix's own ssh, which lacks GSSAPI and warns
-    # about Ubuntu's /etc/ssh/ssh_config; use the system's ssh instead.
-    mosh = "mosh --ssh=ssh";
-  };
-
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false; # (Home Manager's old defaults, being retired)
@@ -134,11 +140,6 @@
       ServerAliveInterval = 60;
       ServerAliveCountMax = 3;
     };
-  };
-
-  home.sessionVariables = {
-    # Tell programs the terminal supports 24-bit colour.
-    COLORTERM = "truecolor";
   };
 
   programs.gh = {
