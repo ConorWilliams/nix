@@ -19,14 +19,9 @@ let
 
   # rust-analyzer, with std's source when the fallback rustc below is the
   # one in use (a project's own toolchain, earlier on PATH, brings its own).
-  # Also OpenSSL, found through pkg-config, for crates whose build scripts
-  # link it (openssl-sys: zellij-tile pulls it in for the Mac build that
-  # rust-analyzer checks, though not for the WASI one Nix builds).
   rust-analyzer = pkgs.writeShellScriptBin "rust-analyzer" ''
     if [ "$(command -v rustc)" = ${lib.getExe' pkgs.rustc "rustc"} ]; then
       export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
-      export PATH="$PATH:${lib.getBin pkgs.pkg-config}/bin"
-      export PKG_CONFIG_PATH="''${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}${lib.getDev pkgs.openssl}/lib/pkgconfig"
     fi
     exec ${lib.getExe pkgs.rust-analyzer} "$@"
   '';
