@@ -85,7 +85,6 @@
     # `, cowsay hi` runs a program from nixpkgs without installing it, and a
     # command that isn't installed says which package has it.
     nix-index.enable = true;
-
     nix-index-database.comma.enable = true;
 
     # nh: a friendlier front end for switching.
