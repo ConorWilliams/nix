@@ -57,8 +57,7 @@ in
     description = "Start an anonymous Zellij session";
     wraps = "zellij";
     body = /* fish */ ''
-      command env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
-        ${lib.getExe config.programs.zellij.package} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
+      ${lib.getExe config.programs.zellij.package} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
     '';
   };
 
@@ -82,6 +81,7 @@ in
     '';
     settings = {
       default_mode = "locked";
+      nested_session_handling = "descend";
       default_layout = "compact";
       theme = "rose-pine-dawn";
       show_startup_tips = false;
@@ -115,6 +115,10 @@ in
         session._children = [
           (once "n" (launch "new-session"))
           (once "q" { Quit = { }; })
+          (once "d" { Detach = { }; })
+          (once "[" { FocusGuestSession = { }; })
+          (once "]" { FocusHostSession = { }; })
+          (once "z" { ToggleHostFullscreen = { }; })
           (once "f" (launch "find-sessions"))
           (once "r" {
             Run = {
