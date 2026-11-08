@@ -123,29 +123,12 @@ in
     };
 
     functions.zzh = {
-      description = "Zellij over SSH: new session, or join/create a named one";
       wraps = "ssh";
-      body = /* fish */ ''
-        if test (count $argv) -lt 1; or test (count $argv) -gt 2; or test -z "$argv[1]"; or string match -q -- '-*' $argv[1]
-          echo 'Usage: zzh host [session]' >&2
-          return 2
-        end
-        set -l remote zellij
-        if set -q argv[2]
-          if test -z "$argv[2]"; or string match -qr '[/\r\n]' -- $argv[2]
-            echo 'zzh: session names must be nonempty and cannot contain / or line breaks' >&2
-            return 2
-          end
-          # SSH joins its command arguments into shell text: quote for the remote shell.
-          set -l session (string replace --all "'" "'\\'''" -- $argv[2])
-          set remote "zellij attach -c -- '$session'"
-        end
-        ssh -t -- $argv[1] $remote
-      '';
+      body = "ssh -t $argv zellij attach -c main";
     };
     functions.zosh = {
       wraps = "mosh";
-      body = "mosh $argv -- zellij";
+      body = "mosh $argv -- zellij attach -c main";
     };
   };
 
