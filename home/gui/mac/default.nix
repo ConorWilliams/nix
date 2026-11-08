@@ -27,6 +27,19 @@
           ${lib.getExe' pkgs.coreutils "sleep"} 0.1
           $aerospace workspace "$workspace"
         '';
+
+        # Lock first (Ctrl+Cmd+Q), then turn off the display.
+        lock = pkgs.writeShellScript "lock" ''
+          /usr/bin/osascript <<'EOF'
+            tell app "System Events" to keystroke "q" using {control down, command down}
+          EOF
+          /usr/bin/pmset displaysleepnow
+        '';
+
+        screenshot = pkgs.writeShellScript "screenshot" ''
+          mkdir -p ~/Pictures
+          /usr/sbin/screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png
+        '';
       in
       {
         # The mouse follows focus to another screen, as in i3.
@@ -50,11 +63,8 @@
             ${key k.fullscreen} = "fullscreen";
             ${key k.resize} = "mode resize";
             ${key k.flipSplit} = "layout tiles horizontal vertical";
-            # Lock first (Ctrl+Cmd+Q), then turn off the display.
-            ${key k.lock} =
-              "exec-and-forget /usr/bin/osascript -e 'tell application \"System Events\" to keystroke \"q\" using {control down, command down}' && /usr/bin/pmset displaysleepnow";
-            ${key k.screenshot} =
-              "exec-and-forget mkdir -p ~/Pictures && screencapture -i ~/Pictures/$(date +%Y-%m-%d_%H%M%S).png";
+            ${key k.lock} = "exec-and-forget ${lock}";
+            ${key k.screenshot} = "exec-and-forget ${screenshot}";
             ${key k.reload} = "reload-config";
             ${key k.monitorLeft} = "move-workspace-to-monitor --wrap-around prev";
             ${key k.monitorRight} = "move-workspace-to-monitor --wrap-around next";
