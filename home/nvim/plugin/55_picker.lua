@@ -143,20 +143,19 @@ map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
 
 -- Buffers: a scratch buffer, and delete without closing the window.
--- The scratch buffer: one markdown file per git repo nvim was started in
+-- The scratch buffer: one markdown file per git repo nvim is working in
 -- (or per folder outside one), whatever file is open, kept between
 -- sessions and named after that path. An ordinary buffer: "Scratch" in the
 -- tabline (30_ui.lua), saved whenever it's left.
 local scratch_dir = vim.fn.stdpath('data') .. '/scratch'
--- (worked out now, at startup: a later :cd or worktree switch keeps it)
-local start = vim.fn.getcwd()
-local scratch_file = scratch_dir
-  .. '/'
-  .. (Snacks.git.get_root(start) or start):gsub('/', '%%')
-  .. '.md'
 map('<leader>bs', function()
+  -- nvim's own folder, which a worktree switch (75_git.lua) changes; not a
+  -- window's or tab's (:lcd, :tcd)
+  local cwd = vim.fn.getcwd(-1, -1)
+  local root = Snacks.git.get_root(cwd) or cwd
   vim.fn.mkdir(scratch_dir, 'p')
-  vim.cmd.edit(vim.fn.fnameescape(scratch_file))
+  local file = scratch_dir .. '/' .. root:gsub('/', '%%') .. '.md'
+  vim.cmd.edit(vim.fn.fnameescape(file))
 end, 'Scratch buffer')
 local scratch_group = vim.api.nvim_create_augroup('config-scratch', {})
 -- (also when a session brings it back) for the tabline: the name of its
