@@ -58,11 +58,11 @@ vim.keymap.set('n', '<leader>z', function()
   if title == '' then return end -- Esc (or no title) cancels
   local dir = vim.fn.expand('%:p:h')
   require('zk').new({ dir = dir ~= '' and dir or vim.fn.getcwd(), title = title })
-end, { desc = 'New note (zk notebook)' })
+end, { desc = 'New zk note' })
 vim.keymap.set('n', '<leader><space>', function()
   if in_notebook() then
     vim.cmd('ZkNotes')
   else
     Snacks.picker.files()
   end
-end, { desc = 'Find files (notes in a zk notebook)' })
+end, { desc = 'Find files (or zk notes)' })
