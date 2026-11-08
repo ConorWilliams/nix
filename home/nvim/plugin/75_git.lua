@@ -92,4 +92,9 @@ end
 map('<leader>g', function()
   lazygit(Snacks.git.get_root() or Snacks.git.get_root(vim.fn.getcwd()))
 end, 'Lazygit')
-map('<leader>B', Snacks.picker.git_log_line, 'Blame line (log)')
+map('<leader>B', function()
+  if not Snacks.git.get_root() then
+    return vim.notify('Not in a git repo', vim.log.levels.WARN)
+  end
+  Snacks.picker.git_log_line()
+end, 'Blame line (log)')
