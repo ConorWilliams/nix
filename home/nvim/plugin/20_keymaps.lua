@@ -82,4 +82,3 @@ map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line diagnostics' })
 
 -- Misc
 map('n', '<leader>q', '<cmd>qa<cr>', { desc = 'Quit all' })
-require('snacks').toggle.option('spell', { name = 'Spelling' }):map('<leader>us')

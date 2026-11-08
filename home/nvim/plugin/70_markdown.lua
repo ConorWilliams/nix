@@ -23,6 +23,7 @@ vim.o.spellfile = words
 if vim.fn.getftime(words) > vim.fn.getftime(words .. '.spl') then
   vim.cmd('silent mkspell! ' .. vim.fn.fnameescape(words))
 end
+Snacks.toggle.option('spell', { name = 'Spelling' }):map('<leader>us')
 
 -- render-markdown: headings, lists, code blocks and tables drawn in place
 -- (raw text comes back on the cursor line). <leader>um toggles it.
@@ -35,12 +36,11 @@ require('render-markdown').setup({
   -- (the default), so its start and end stay visible.
   code = { border = 'thin' },
 })
-vim.keymap.set(
-  'n',
-  '<leader>um',
-  '<cmd>RenderMarkdown toggle<cr>',
-  { desc = 'Toggle markdown render' }
-)
+Snacks.toggle({
+  name = 'Markdown render',
+  get = require('render-markdown').get,
+  set = require('render-markdown').set,
+}):map('<leader>um')
 
 -- zk: notes. Its language server (links, tags, backlinks) starts in any
 -- folder with a .zk notebook.
