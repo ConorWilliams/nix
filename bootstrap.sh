@@ -74,7 +74,8 @@ main() {
 
   # Catch build failures before changing system settings.
   say "Build Home Manager: ${config}"
-  nix build --no-link "${dir}#homeConfigurations.\"${config}\".activationPackage"
+  hm_generation=$(nix build --no-link --print-out-paths \
+    "${dir}#homeConfigurations.\"${config}\".activationPackage")
 
   # Ubuntu: the few things that can't come from Nix.
   if ${desk} && [[ ${os} == Linux ]]; then
@@ -107,9 +108,12 @@ main() {
     if [[ ${has_darwin_config} != true ]]; then
       echo "flake.nix has no darwinConfigurations.${host} (name it after this Mac); skipping."
     elif ask "Apply the Mac's system settings with nix-darwin (uses sudo)?"; then
-      nix_bin=$(type -P nix)
-      sudo -H "${nix_bin}" --extra-experimental-features 'nix-command flakes' \
-        run --inputs-from "${dir}" nix-darwin#darwin-rebuild -- switch --flake "${dir}#${host}"
+      # The darwin-rebuild in this flake's own system, built with its
+      # nixpkgs. (`nix run nix-darwin#darwin-rebuild` would use nix-darwin's
+      # own nixpkgs pin, fetching a whole second toolchain to build it.)
+      darwin_system=$(nix build --no-link --print-out-paths \
+        "${dir}#darwinConfigurations.\"${host}\".system")
+      sudo -H "${darwin_system}/sw/bin/darwin-rebuild" switch --flake "${dir}#${host}"
     elif [[ ! -e /run/current-system ]]; then
       echo "The first Mac setup needs nix-darwin before Home Manager; stopping."
       exit 1
@@ -117,11 +121,12 @@ main() {
   fi
 
   say "Home Manager: ${config}"
+  # The generation built above, activated directly (as `home-manager switch`
+  # would, without fetching home-manager's own nixpkgs pin to build it).
   # Existing dotfiles in the way are kept, renamed with a suffix unique to
   # this run.
   backup_suffix="before-home-manager-$(date +%Y%m%d-%H%M%S)-$$"
-  nix run --inputs-from "${dir}" home-manager -- switch \
-    -b "${backup_suffix}" --flake "${dir}#${config}"
+  HOME_MANAGER_BACKUP_EXT=${backup_suffix} "${hm_generation}/activate"
   export PATH=${HOME}/.nix-profile/bin:${PATH} # the tools it just installed
 
   say "Logins"
