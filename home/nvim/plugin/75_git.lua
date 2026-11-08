@@ -1,4 +1,4 @@
--- Git: gitsigns for changes in the gutter and hunk actions, lazygit in a
+-- Git: gitsigns for changes in the gutter and hunk jumps, lazygit in a
 -- float, and snacks' log picker for blame. Keys as in LazyVim.
 
 local gs = require('gitsigns')
@@ -19,13 +19,6 @@ gs.setup({
     end
     map('n', ']h', nav('next', ']c'), 'Next hunk')
     map('n', '[h', nav('prev', '[c'), 'Prev hunk')
-    map({ 'n', 'x' }, '<leader>ghs', ':Gitsigns stage_hunk<cr>', 'Stage/unstage hunk')
-    map({ 'n', 'x' }, '<leader>ghr', ':Gitsigns reset_hunk<cr>', 'Reset hunk')
-    map('n', '<leader>ghS', gs.stage_buffer, 'Stage buffer')
-    map('n', '<leader>ghR', gs.reset_buffer, 'Reset buffer')
-    map('n', '<leader>ghp', gs.preview_hunk_inline, 'Preview hunk')
-    map('n', '<leader>ghd', gs.diffthis, 'Diff against index')
-    map('n', '<leader>ghD', function() gs.diffthis('~') end, 'Diff against last commit')
     map({ 'o', 'x' }, 'ih', ':<C-u>Gitsigns select_hunk<cr>', 'Hunk') -- e.g. dih, vih
   end,
 })
