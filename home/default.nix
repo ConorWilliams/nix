@@ -60,6 +60,7 @@
       })
     ];
 
+    # Rose Pine Dawn for Codex (programs.codex below picks it).
     file.".codex/themes/rose-pine-dawn.tmTheme".source =
       "${inputs.rose-pine-tm-theme}/dist/rose-pine-dawn.tmTheme";
 
@@ -217,5 +218,6 @@
     ];
   };
 
+  # Rose Pine Dawn for eza (programs.eza above points it here).
   xdg.configFile."eza/theme.yml".source = "${inputs.rose-pine-eza}/dist/rose-pine-dawn.yml";
 }
