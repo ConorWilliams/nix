@@ -16,6 +16,9 @@ ask() {
 }
 
 main() {
+  os=$(uname -s)
+  machine=$(uname -sm)
+
   say "Nix"
   if ! type -P nix >/dev/null; then
     echo "Nix isn't installed. Install it, open a new shell, re-run"
@@ -57,8 +60,8 @@ main() {
   fi
   # The plain-<user> (server) config is Linux x86_64; anything else (the
   # Mac) needs its own entry under hosts in flake.nix.
-  if [[ $config == "$user" && $(uname -sm) != "Linux x86_64" ]]; then
-    echo "No config for this machine ($host, $(uname -sm)): add it to hosts in flake.nix."
+  if [[ $config == "$user" && $machine != "Linux x86_64" ]]; then
+    echo "No config for this machine ($host, $machine): add it to hosts in flake.nix."
     exit 1
   fi
   desk=false
@@ -69,7 +72,7 @@ main() {
   nix build --no-link "$dir#homeConfigurations.\"$config\".activationPackage"
 
   # Ubuntu: the few things that can't come from Nix.
-  if $desk && [[ $(uname -s) == Linux ]]; then
+  if $desk && [[ $os == Linux ]]; then
     say "Ubuntu desk extras"
     if dpkg -s i3-wm i3lock >/dev/null 2>&1; then
       echo "i3-wm and i3lock installed"
@@ -84,7 +87,7 @@ main() {
   fi
 
   # The Mac: Homebrew, then the system settings.
-  if [[ $(uname -s) == Darwin ]]; then
+  if [[ $os == Darwin ]]; then
     say "Mac system settings"
     if type -P brew >/dev/null || [[ -x /opt/homebrew/bin/brew ]]; then
       echo "Homebrew installed"
@@ -144,7 +147,7 @@ main() {
 
   say "Done"
   echo "Open a new terminal (or log in again) to start fish with everything."
-  if $desk && [[ $(uname -s) == Linux ]]; then
+  if $desk && [[ $os == Linux ]]; then
     echo "First time on this machine: log out and pick the \"i3\" session."
   fi
 }
