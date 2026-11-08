@@ -38,7 +38,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     })
     map('n', 'gI', Snacks.picker.lsp_implementations, 'Goto implementation')
     map('n', 'gy', Snacks.picker.lsp_type_definitions, 'Goto type definition')
-    map('n', 'gK', vim.lsp.buf.signature_help, 'Signature help')
     map({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, 'Code action')
     map('n', '<leader>cr', vim.lsp.buf.rename, 'Rename')
   end,
