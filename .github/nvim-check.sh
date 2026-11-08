@@ -13,11 +13,18 @@ nvim=$(nix build --no-link --print-out-paths "${cfg}.programs.neovim.finalPackag
 
 tmp=$(mktemp -d)
 trap 'rm -rf "${tmp}"' EXIT
-# The config and plugins as the switch would install them.
-export XDG_CONFIG_HOME=${home_files}/.config XDG_DATA_HOME=${home_files}/.local/share
+# The plugins as the switch would install them. The config itself is this
+# checkout's: the home files link ~/.config/nvim to ~/nix/home/nvim, which
+# needn't exist (CI's checkout is elsewhere).
+mkdir -p "${tmp}/config"
+ln -s "${PWD}/home/nvim" "${tmp}/config/nvim"
+export XDG_CONFIG_HOME=${tmp}/config XDG_DATA_HOME=${home_files}/.local/share
 export XDG_STATE_HOME=${tmp}/state XDG_CACHE_HOME=${tmp}/cache
 
-"${nvim}" --headless -i NONE +qa 2>"${tmp}/errors"
+# Fails, too, if the config didn't load.
+"${nvim}" --headless -i NONE \
+  +'lua if not vim.lsp.config.lua_ls.settings.Lua.workspace then error("config not loaded") end' \
+  +qa 2>"${tmp}/errors"
 if [[ -s ${tmp}/errors ]]; then
   echo "Neovim reported errors at startup:"
   cat "${tmp}/errors"
