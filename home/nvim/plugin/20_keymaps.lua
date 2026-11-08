@@ -82,6 +82,4 @@ map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line diagnostics' })
 
 -- Misc
 map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit all' })
-map('n', '<leader>ui', vim.show_pos, { desc = 'Inspect highlight under cursor' })
-map('n', '<leader>uI', '<cmd>InspectTree<cr>', { desc = 'Inspect syntax tree' })
 require('snacks').toggle.option('spell', { name = 'Spelling' }):map('<leader>us')
