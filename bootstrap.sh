@@ -24,7 +24,9 @@ main() {
     echo "Nix isn't installed. Install it, open a new shell, re-run"
     exit 1
   fi
-  echo "Nix $(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+  # (just for show: a version it can't parse leaves it blank)
+  nix_version=$(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1) || true
+  echo "Nix $nix_version"
 
   # Keep flakes enabled after the first run's command-line flags.
   if ! command nix config show experimental-features 2>/dev/null | grep -qw flakes; then
