@@ -86,13 +86,13 @@ impl ZellijPlugin for Hints {
     }
 
     fn pipe(&mut self, message: PipeMessage) -> bool {
-        if !self.controller && message.name == "hints-mode" {
-            if let Some((mode, rows)) = message.payload.and_then(|p| serde_json::from_str(&p).ok())
-            {
-                self.mode = mode;
-                self.rows = rows;
-                self.refresh();
-            }
+        if !self.controller
+            && message.name == "hints-mode"
+            && let Some((mode, rows)) = message.payload.and_then(|p| serde_json::from_str(&p).ok())
+        {
+            self.mode = mode;
+            self.rows = rows;
+            self.refresh();
         }
         self.ready && self.visible
     }
