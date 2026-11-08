@@ -4,7 +4,9 @@
 return {
   settings = {
     Lua = {
-      runtime = { version = 'LuaJIT' },
+      -- Modules live under lua/ in each runtime dir. Strict, or
+      -- require('zk') also matches nvim-lspconfig's lsp/zk.lua.
+      runtime = { version = 'LuaJIT', path = { 'lua/?.lua', 'lua/?/init.lua' }, pathStrict = true },
       workspace = {
         checkThirdParty = false,
         library = vim.api.nvim_get_runtime_file('', true),
