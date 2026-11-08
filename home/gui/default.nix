@@ -35,7 +35,14 @@
     settings.confirm_os_window_close = 0;
     # A new terminal window is independent, even if launched from a Zellij pane.
     # Clear inherited session/pane identity here; direct calls may intentionally nest.
-    settings.shell = "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ${lib.getExe config.programs.fish.package} -c anon-zellij";
+    # After Zellij exits (s q, s d), the window stays as a plain shell, through
+    # the usual login-shell -> Fish hand-off for Nix's full environment.
+    settings.shell =
+      let
+        login =
+          if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else lib.getExe config.programs.bash.package;
+      in
+      "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID ${lib.getExe config.programs.fish.package} -c 'anon-zellij; exec ${login} --login'";
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 }
