@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt::Write as _;
 use zellij_tile::prelude::{actions::Action, *};
 
 #[derive(Default)]
@@ -217,7 +218,7 @@ fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
         }
         let description = describe(action);
         if let Some((keys, _)) = groups.iter_mut().find(|(_, label)| *label == description) {
-            keys.push_str(&format!(" / {key}"));
+            let _ = write!(keys, " / {key}"); // (a String write never fails)
         } else {
             groups.push((key.to_string(), description));
         }
