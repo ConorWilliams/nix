@@ -90,9 +90,17 @@ hipatterns.setup({
 require('mini.tabline').setup({
   tabpage_section = 'right',
   -- name* when the file has unsaved changes; the scratch buffer (<leader>bs,
-  -- 55_picker.lua) as "Scratch" rather than its file's hash name
+  -- 55_picker.lua) as "Scratch" rather than its file's hash name, with its
+  -- repo's name when another repo's is open too
   format = function(buf, label)
-    if vim.b[buf].scratch then label = 'Scratch' end
+    local scratch = vim.b[buf].scratch
+    if scratch then
+      local others = vim.tbl_filter(
+        function(b) return b ~= buf and vim.bo[b].buflisted and vim.b[b].scratch end,
+        vim.api.nvim_list_bufs()
+      )
+      label = #others == 0 and 'Scratch' or ('Scratch (' .. scratch .. ')')
+    end
     return MiniTabline.default_format(buf, label .. (vim.bo[buf].modified and '*' or ''))
   end,
 })

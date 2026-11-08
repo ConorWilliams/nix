@@ -159,11 +159,15 @@ map('<leader>bs', function()
   vim.cmd.edit(vim.fn.fnameescape(scratch_file))
 end, 'Scratch buffer')
 local scratch_group = vim.api.nvim_create_augroup('config-scratch', {})
--- (also when a session brings it back) for the tabline to spot
+-- (also when a session brings it back) for the tabline: the name of its
+-- repo or folder, the last part of the file name
 vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
   group = scratch_group,
   pattern = scratch_dir .. '/*',
-  callback = function(ev) vim.b[ev.buf].scratch = true end,
+  callback = function(ev)
+    local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(ev.buf), ':t:r')
+    vim.b[ev.buf].scratch = name:match('[^%%]*$')
+  end,
 })
 vim.api.nvim_create_autocmd('BufHidden', {
   group = scratch_group,
