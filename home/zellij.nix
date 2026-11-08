@@ -61,155 +61,157 @@ let
 
 in
 {
-  # Naming only: the background plugin owns cleanup when the last client leaves.
-  programs.fish.functions.anon-zellij = {
-    description = "Start an anonymous Zellij session";
-    wraps = "zellij";
-    body = /* fish */ ''
-      ${zellij} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
+  programs = {
+    # Naming only: the background plugin owns cleanup when the last client leaves.
+    fish.functions.anon-zellij = {
+      description = "Start an anonymous Zellij session";
+      wraps = "zellij";
+      body = /* fish */ ''
+        ${zellij} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
+      '';
+    };
+
+    # `zellij action` hangs on a missing session, so check first and follow
+    # renames. Fails if this shell's session is gone.
+    fish.functions.__zellij_session = /* fish */ ''
+      set -l sessions (${zellij} list-sessions -sn 2>/dev/null)
+      while not contains -- "$ZELLIJ_SESSION_NAME" $sessions
+        test -r ${renamed}/$ZELLIJ_SESSION_NAME; or return 1
+        set -gx ZELLIJ_SESSION_NAME (cat ${renamed}/$ZELLIJ_SESSION_NAME)
+      end
     '';
-  };
 
-  # `zellij action` hangs on a missing session, so check first and follow
-  # renames. Fails if this shell's session is gone.
-  programs.fish.functions.__zellij_session = /* fish */ ''
-    set -l sessions (${zellij} list-sessions -sn 2>/dev/null)
-    while not contains -- "$ZELLIJ_SESSION_NAME" $sessions
-      test -r ${renamed}/$ZELLIJ_SESSION_NAME; or return 1
-      set -gx ZELLIJ_SESSION_NAME (cat ${renamed}/$ZELLIJ_SESSION_NAME)
-    end
-  '';
-
-  programs.zellij = {
-    enable = true;
-    themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
-    # Each tab owns its hints: no cross-tab pane moves, and closing a tab
-    # cannot unload the hints in the remaining tabs.
-    layouts.compact = /* kdl */ ''
-      layout {
-        pane
-        pane size=1 borderless=true {
-          plugin location="compact-bar"
-        }
-        floating_panes {
-          pane {
-            plugin location="hints"
+    zellij = {
+      enable = true;
+      themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
+      # Each tab owns its hints: no cross-tab pane moves, and closing a tab
+      # cannot unload the hints in the remaining tabs.
+      layouts.compact = /* kdl */ ''
+        layout {
+          pane
+          pane size=1 borderless=true {
+            plugin location="compact-bar"
+          }
+          floating_panes {
+            pane {
+              plugin location="hints"
+            }
           }
         }
-      }
-    '';
-    settings = {
-      default_mode = "locked";
-      nested_session_handling = "descend";
-      default_layout = "compact";
-      theme = "rose-pine-dawn";
-      show_startup_tips = false;
-      show_release_notes = false;
-      on_force_close = "detach";
-      session_serialization = false;
-      plugins.compact-bar._props.location = "zellij:compact-bar";
-      plugins.hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
-      plugins.hints-controller = {
-        _props.location = "file:${hints}/bin/zellij-hints.wasm";
-        controller = true;
-      };
-      load_plugins.hints-controller = { };
-      # Runs in the server, including after the last client disconnects.
-      plugins.anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
-      load_plugins.anon = { };
-      plugins.new-session = manager {
-        multi_screen = false;
-      };
-      plugins.find-tabs = manager { multi_screen = true; };
-      plugins.find-sessions = manager { multi_screen = false; };
-      keybinds = {
-        _props.clear-defaults = true;
-        locked._children = [ (bind "Alt g" (mode "normal")) ];
-        normal._children = [
-          (bind "s" (mode "session"))
-          (bind "t" (mode "tab"))
-          (bind "p" (mode "pane"))
-          (once "Space" (launch "find-tabs"))
-        ];
-        session._children = [
-          (once "n" (launch "new-session"))
-          (once "q" { Quit = { }; })
-          (once "d" { Detach = { }; })
-          # Vim-style: [ back towards the root session, ] forward into the nested one.
-          (once "[" { FocusHostSession = { }; })
-          (once "]" { FocusGuestSession = { }; })
-          (once "z" { ToggleHostFullscreen = { }; })
-          (once "f" (launch "find-sessions"))
-          (once "r" {
-            Run = {
-              _args = [
-                (lib.getExe config.programs.fish.package)
-                "--no-config"
-                (toString renameSession)
-              ];
-              floating = true;
-              name = "Rename session";
-              width = "60%";
-              height = "5";
-              close_on_exit = true;
-            };
-          })
-        ];
-        tab._children = [
-          (bind "r" [
-            { TabNameInput = 0; }
-            (mode "renametab")
-          ])
-          (bind "n" [
-            { NewTab = { }; }
-            { TabNameInput = 0; }
-            (mode "renametab")
-          ])
-          (once "d" { CloseTab = { }; })
-        ];
-        renametab._children = [
-          (bind "Enter" (mode "locked"))
-          (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
-        ];
-        pane._children = [
-          (once "h" { NewPane = "Right"; })
-          (once "v" { NewPane = "Down"; })
-          (once "d" { CloseFocus = { }; })
-          (once "e" { EditScrollback = { }; })
-          (bind "r" (mode "resize"))
-        ];
-        resize._children = map (dir: bind dir { Resize = "Increase ${dir}"; }) [
-          "Left"
-          "Down"
-          "Up"
-          "Right"
-        ];
-        # The navigator forwards Ctrl+arrows to Neovim, otherwise moves panes.
-        shared._children =
-          map
-            (
-              dir:
-              bind "Ctrl ${lib.toSentenceCase dir}" {
-                MessagePlugin = {
-                  _args = [ "file:${pkgs.zellijPlugins.vim-zellij-navigator}" ];
-                  name = "move_focus";
-                  payload = dir;
-                  use_arrow_keys = "true";
-                };
-              }
-            )
-            [
-              "left"
-              "down"
-              "up"
-              "right"
-            ];
-        shared_except = {
-          _args = [
-            "locked"
-            "renametab"
+      '';
+      settings = {
+        default_mode = "locked";
+        nested_session_handling = "descend";
+        default_layout = "compact";
+        theme = "rose-pine-dawn";
+        show_startup_tips = false;
+        show_release_notes = false;
+        on_force_close = "detach";
+        session_serialization = false;
+        plugins.compact-bar._props.location = "zellij:compact-bar";
+        plugins.hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
+        plugins.hints-controller = {
+          _props.location = "file:${hints}/bin/zellij-hints.wasm";
+          controller = true;
+        };
+        load_plugins.hints-controller = { };
+        # Runs in the server, including after the last client disconnects.
+        plugins.anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
+        load_plugins.anon = { };
+        plugins.new-session = manager {
+          multi_screen = false;
+        };
+        plugins.find-tabs = manager { multi_screen = true; };
+        plugins.find-sessions = manager { multi_screen = false; };
+        keybinds = {
+          _props.clear-defaults = true;
+          locked._children = [ (bind "Alt g" (mode "normal")) ];
+          normal._children = [
+            (bind "s" (mode "session"))
+            (bind "t" (mode "tab"))
+            (bind "p" (mode "pane"))
+            (once "Space" (launch "find-tabs"))
           ];
-          _children = [ (bind [ "Esc" "Ctrl c" "Alt g" ] (mode "locked")) ];
+          session._children = [
+            (once "n" (launch "new-session"))
+            (once "q" { Quit = { }; })
+            (once "d" { Detach = { }; })
+            # Vim-style: [ back towards the root session, ] forward into the nested one.
+            (once "[" { FocusHostSession = { }; })
+            (once "]" { FocusGuestSession = { }; })
+            (once "z" { ToggleHostFullscreen = { }; })
+            (once "f" (launch "find-sessions"))
+            (once "r" {
+              Run = {
+                _args = [
+                  (lib.getExe config.programs.fish.package)
+                  "--no-config"
+                  (toString renameSession)
+                ];
+                floating = true;
+                name = "Rename session";
+                width = "60%";
+                height = "5";
+                close_on_exit = true;
+              };
+            })
+          ];
+          tab._children = [
+            (bind "r" [
+              { TabNameInput = 0; }
+              (mode "renametab")
+            ])
+            (bind "n" [
+              { NewTab = { }; }
+              { TabNameInput = 0; }
+              (mode "renametab")
+            ])
+            (once "d" { CloseTab = { }; })
+          ];
+          renametab._children = [
+            (bind "Enter" (mode "locked"))
+            (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
+          ];
+          pane._children = [
+            (once "h" { NewPane = "Right"; })
+            (once "v" { NewPane = "Down"; })
+            (once "d" { CloseFocus = { }; })
+            (once "e" { EditScrollback = { }; })
+            (bind "r" (mode "resize"))
+          ];
+          resize._children = map (dir: bind dir { Resize = "Increase ${dir}"; }) [
+            "Left"
+            "Down"
+            "Up"
+            "Right"
+          ];
+          # The navigator forwards Ctrl+arrows to Neovim, otherwise moves panes.
+          shared._children =
+            map
+              (
+                dir:
+                bind "Ctrl ${lib.toSentenceCase dir}" {
+                  MessagePlugin = {
+                    _args = [ "file:${pkgs.zellijPlugins.vim-zellij-navigator}" ];
+                    name = "move_focus";
+                    payload = dir;
+                    use_arrow_keys = "true";
+                  };
+                }
+              )
+              [
+                "left"
+                "down"
+                "up"
+                "right"
+              ];
+          shared_except = {
+            _args = [
+              "locked"
+              "renametab"
+            ];
+            _children = [ (bind [ "Esc" "Ctrl c" "Alt g" ] (mode "locked")) ];
+          };
         };
       };
     };
