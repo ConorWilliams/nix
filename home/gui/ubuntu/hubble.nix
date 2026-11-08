@@ -1,4 +1,3 @@
-# hubble: the desk with three monitors, on top of the Ubuntu layer (./.).
 { lib, pkgs, ... }:
 
 let
@@ -10,23 +9,18 @@ let
   '';
 in
 {
-  imports = [ ./. ]; # the Ubuntu layer.
+  imports = [ ./. ];
 
-  # Font sizes (the terminal's in home/gui/default.nix, the bar's in the
-  # Ubuntu layer): what reads well on these screens.
   desktop.fontSize = 16;
   desktop.barFontSize = 16;
 
   xsession.windowManager.i3.config = {
-    # Thicker window borders than i3's default 2px: on these 4K
-    # screens the focused window's thin outline is easy to miss.
+    # Thicker window borders than i3's default 2px
     window.border = 5;
     floating.border = 5;
 
-    # i3 startup list (added to the Ubuntu layer's).
     startup = [
-      # The three desk monitors, as set up in arandr: all portrait, the 4K in
-      # the middle, a 1440p either side (565 px lower), the right one primary.
+      # Set up the monitors
       {
         command = lib.concatStringsSep " " [
           "xrandr"
@@ -36,14 +30,13 @@ in
         ];
         notification = false;
       }
-      # US keyboard here; the machine's default (for all accounts) is UK, and
-      # X gives that to every keyboard it (re)connects, e.g. when the monitors
-      # (and their USB hubs) wake from sleep. So inputplug sets US each time a
-      # keyboard is enabled, and for those already there at login (-0).
+
+      # Set US keyboard on plug
       {
         command = "${lib.getExe pkgs.inputplug} -0 -c ${usKeyboard}";
         notification = false;
       }
+
       # Speed up the Logitech mouse.
       {
         command = /* bash */ ''xinput --set-prop "Logitech USB Receiver Mouse" "libinput Accel Speed" 1'';
