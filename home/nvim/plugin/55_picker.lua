@@ -114,6 +114,9 @@ require('snacks').setup({
         hidden = true,
         transform = hide_dot_folders,
         auto_close = true,
+        -- preview = true undoes the source's preview = false (Snacks types
+        -- only allow "main").
+        ---@diagnostic disable-next-line: assign-type-mismatch
         layout = { preset = shape, preview = true, reverse = false }, -- tree top-down
       },
     },
