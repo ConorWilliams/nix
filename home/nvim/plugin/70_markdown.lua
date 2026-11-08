@@ -51,7 +51,10 @@ require('zk').setup({
 -- folder), and <leader><space> finds notes instead of files
 -- (<leader>f always finds files).
 local zk_util = require('zk.util')
-local in_notebook = function() return zk_util.notebook_root(zk_util.resolve_notebook_path(0)) end
+local in_notebook = function()
+  local path = zk_util.resolve_notebook_path(0)
+  return path and zk_util.notebook_root(path)
+end
 vim.keymap.set('n', '<leader>z', function()
   if not in_notebook() then return vim.notify('Not in a zk notebook') end
   local title = vim.fn.input('Title: ')
