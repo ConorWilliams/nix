@@ -1,4 +1,3 @@
-# luna: the laptop, on top of the Ubuntu layer (./.).
 { ... }:
 
 let
@@ -10,16 +9,16 @@ let
   };
 in
 {
-  imports = [ ./. ]; # the Ubuntu layer.
+  imports = [ ./. ];
 
-  desktop.fontSize = 18; # smaller screen (home/gui/default.nix)
+  desktop.fontSize = 18;
 
   xsession.windowManager.i3.config.startup = [
-    (touchpad "Scrolling Pixel Distance" "30") # half the default scroll speed
+    # Trackpad settings
+    (touchpad "Scrolling Pixel Distance" "30")
     (touchpad "Natural Scrolling Enabled" "1")
     (touchpad "Tapping Enabled" "1")
-    # Caps Lock is Escape, as on the Mac (darwin/default.nix). Added to the
-    # keyboard's current layout and options.
+    # Caps Lock is Escape
     {
       command = "setxkbmap -option caps:escape";
       always = true;
