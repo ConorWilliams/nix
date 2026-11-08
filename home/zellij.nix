@@ -135,8 +135,9 @@ in
           (once "n" (launch "new-session"))
           (once "q" { Quit = { }; })
           (once "d" { Detach = { }; })
-          (once "[" { FocusGuestSession = { }; })
-          (once "]" { FocusHostSession = { }; })
+          # Vim-style: [ back towards the root session, ] forward into the nested one.
+          (once "[" { FocusHostSession = { }; })
+          (once "]" { FocusGuestSession = { }; })
           (once "z" { ToggleHostFullscreen = { }; })
           (once "f" (launch "find-sessions"))
           (once "r" {
