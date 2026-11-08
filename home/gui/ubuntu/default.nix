@@ -220,26 +220,22 @@ in
           command = "xss-lock --transfer-sleep-lock -- ${lock} --nofork";
           notification = false;
         }
-        # Password prompts for programs asking for admin rights (updates,
-        # mounting disks...): GNOME starts this agent, i3 doesn't.
+        # Password prompts for programs asking for admin rights.
         {
           command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
           notification = false;
         }
       ];
     };
-    # Rose Pine Dawn window borders and titles: the official port (i3
-    # config lines; later lines win over Home Manager's default colours).
+    # Rose Pine Dawn window borders and titles: the official port
     extraConfig = builtins.readFile "${inputs.rose-pine-i3}/themes/rose-pine-dawn.theme";
   };
 
-  # The bar's status line: volume, the battery (where there is one) and the
-  # time, with icons. (Ubuntu's default, for laptops, also shows Wi-Fi,
-  # IPv6, network, disk, load and memory.)
+  # The bar's status line
   programs.i3status = {
     enable = true;
     enableDefault = false;
-    general.interval = 5; # seconds between updates (i3status's default is 1)
+    general.interval = 5; # seconds between updates.
     modules = {
       # The default output's volume (PulseAudio, or PipeWire's stand-in).
       "volume master" = {
@@ -250,8 +246,6 @@ in
           format_muted = "${icons.muted} %volume";
         };
       };
-      # The icon says charging, on power (full), or on battery. Nothing at
-      # all without a battery: i3bar skips a block with no text.
       "battery all" = {
         position = 1;
         settings = {
@@ -266,13 +260,12 @@ in
       };
       "tztime local" = {
         position = 2;
-        settings.format = "%Y-%m-%d %a %H:%M"; # 2026-11-02 Mon 14:52
+        settings.format = "%Y-%m-%d %a %H:%M";
       };
     };
   };
 
-  # rofi (Alt+Space), in Rose Pine Dawn: the official port, with the terminal's
-  # font instead of the port's (which isn't installed).
+  # rofi (Alt+Space), in Rose Pine Dawn: the official port
   programs.rofi = {
     enable = true;
     theme = {
