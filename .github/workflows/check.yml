@@ -1,5 +1,6 @@
 # Runs on every push and pull request: main is what `curl | bash` installs,
 # so a broken config or a leaked secret should never get there unnoticed.
+# Tools come from the flake's own nixpkgs (--inputs-from .), as locally.
 name: check
 on: [push, pull_request]
 jobs:
@@ -12,12 +13,53 @@ jobs:
       - uses: cachix/install-nix-action@v31
       # Every config evaluates, for every system (the Mac included).
       - run: nix flake check --all-systems --no-build
-      # Every file formatted (nix fmt changes nothing).
+      # Every file formatted (nix fmt changes nothing): Nix, shell, Lua, Rust
+      # and Markdown.
       - run: nix fmt -- --ci
-      # The shell scripts. (The check above doesn't build, so the one
-      # writeShellApplication runs on statusline.sh never happens here.)
-      - run: shellcheck bootstrap.sh home/claude/statusline.sh
       # No secrets anywhere in the history.
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Linters, strict settings included.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      # Nix: statix's and deadnix's lints, and nixd's own diagnostics (what
+      # the editor shows).
+      - run: nix run --inputs-from . nixpkgs#statix -- check .
+      - run: nix run --inputs-from . nixpkgs#deadnix -- --fail .
+      - run: git ls-files -z '*.nix' | xargs -0 nix run --inputs-from . nixpkgs#nixf-diagnose --
+      # Shell scripts, with every optional check. (The flake check doesn't
+      # build, so the one writeShellApplication runs on statusline.sh never
+      # happens there.)
+      - run: git ls-files -z '*.sh' | xargs -0 nix run --inputs-from . nixpkgs#shellcheck -- -o all
+      # Markdown lint (beyond what `rumdl fmt` fixes).
+      - run: git ls-files -z '*.md' | xargs -0 nix run --inputs-from . nixpkgs#rumdl -- check
+
+  # The Zellij plugins: clippy (pedantic, warnings fail) and tests.
+  rust:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate: [anon, hints]
+    defaults:
+      run:
+        working-directory: home/zellij/${{ matrix.crate }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - run: nix develop ../../..#zellij-plugins -c cargo clippy --all-targets -- -W clippy::pedantic -D warnings
+      - run: nix develop ../../..#zellij-plugins -c cargo test
+
+  # Neovim starts without errors and lua_ls finds no problems; building the
+  # home files also builds the Zellij plugins for WASI.
+  nvim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - run: .github/nvim-check.sh conix
