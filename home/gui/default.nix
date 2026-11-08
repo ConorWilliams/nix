@@ -8,13 +8,6 @@
   ...
 }:
 
-let
-  anonZellij = import ../zellij/anon.nix {
-    inherit pkgs;
-    zellij = config.programs.zellij.package;
-  };
-
-in
 {
   imports = [
     ../. # the server layer
@@ -41,7 +34,7 @@ in
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     settings.confirm_os_window_close = 0;
-    settings.shell = lib.getExe anonZellij;
+    settings.shell = "${lib.getExe config.programs.fish.package} -c anon-zellij";
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 
