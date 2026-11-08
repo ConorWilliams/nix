@@ -148,12 +148,15 @@ map('<leader>e', function() Snacks.explorer() end, 'Explorer')
 -- sessions and named after that path. An ordinary buffer: "Scratch" in the
 -- tabline (30_ui.lua), saved whenever it's left.
 local scratch_dir = vim.fn.stdpath('data') .. '/scratch'
+-- (worked out now, at startup: a later :cd or worktree switch keeps it)
+local start = vim.fn.getcwd()
+local scratch_file = scratch_dir
+  .. '/'
+  .. (Snacks.git.get_root(start) or start):gsub('/', '%%')
+  .. '.md'
 map('<leader>bs', function()
-  local cwd = vim.fn.getcwd()
-  local root = Snacks.git.get_root(cwd) or cwd
   vim.fn.mkdir(scratch_dir, 'p')
-  local file = scratch_dir .. '/' .. root:gsub('/', '%%') .. '.md'
-  vim.cmd.edit(vim.fn.fnameescape(file))
+  vim.cmd.edit(vim.fn.fnameescape(scratch_file))
 end, 'Scratch buffer')
 vim.api.nvim_create_autocmd('BufHidden', {
   group = vim.api.nvim_create_augroup('config-scratch', {}),
