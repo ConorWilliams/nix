@@ -1,5 +1,4 @@
-# GUI layer: machines with a screen, on any OS, on top of the server layer:
-# the terminal (kitty) and its font, with an anonymous Zellij session per window.
+# GUI layer: machines with a screen, on any OS.
 {
   config,
   lib,
@@ -9,21 +8,17 @@
 
 {
   imports = [
-    ../. # the server layer
-    # The terminal's font size, set per machine (e.g. ubuntu/hubble.nix; the
-    # i3 bar's is in the Ubuntu layer).
+    ../.
     {
       options.desktop.fontSize = lib.mkOption {
         type = lib.types.number;
         default = 20;
-        description = "Font size of the terminal (kitty), and on Linux the launcher (rofi) and notifications (dunst).";
+        description = "Font size of the terminal";
       };
     }
   ];
 
-  # kitty's config. The app itself is installed outside Nix: on Ubuntu,
-  # because a Nix-built kitty can't use its graphics drivers; on the Mac,
-  # as a Homebrew cask (darwin/default.nix).
+  # kitty's config. The app itself is installed outside Nix
   programs.kitty = {
     enable = true;
     package = null;
@@ -35,8 +30,6 @@
     settings.confirm_os_window_close = 0;
     # A new terminal window is independent, even if launched from a Zellij pane.
     # Clear inherited session/pane identity here; direct calls may intentionally nest.
-    # After Zellij exits (s q, s d), the window stays as a plain shell, through
-    # the usual login-shell -> Fish hand-off for Nix's full environment.
     settings.shell =
       let
         unset = "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID";
