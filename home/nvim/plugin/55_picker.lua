@@ -142,10 +142,24 @@ map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
 
--- Buffers: a scratch buffer (snacks: a float, one per folder and git
--- branch, saved between sessions; q closes it), and delete without closing
--- the window
-map('<leader>bn', function() Snacks.scratch() end, 'Scratch buffer')
+-- Buffers: a scratch buffer, and delete without closing the window.
+-- The scratch buffer is snacks' scratch file (one per folder, git branch
+-- and filetype, kept between sessions) opened as an ordinary buffer rather
+-- than snacks' float; it's "Scratch" in the tabline (30_ui.lua) and saved
+-- whenever it's left.
+local scratch_dir = vim.fn.stdpath('data') .. '/scratch'
+map(
+  '<leader>bs',
+  function() vim.cmd.edit(vim.fn.fnameescape(Snacks.scratch.get().file)) end,
+  'Scratch buffer'
+)
+vim.api.nvim_create_autocmd('BufHidden', {
+  group = vim.api.nvim_create_augroup('config-scratch', {}),
+  pattern = scratch_dir .. '/*',
+  callback = function(ev)
+    vim.api.nvim_buf_call(ev.buf, function() vim.cmd('silent! write') end)
+  end,
+})
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
 map('<leader>bo', function() Snacks.bufdelete.other() end, 'Delete other buffers')
 map('<leader>ba', function() Snacks.bufdelete.all() end, 'Delete all buffers')

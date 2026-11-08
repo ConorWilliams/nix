@@ -89,8 +89,11 @@ hipatterns.setup({
 -- between them); tab pages, when there's more than one, show at the right.
 require('mini.tabline').setup({
   tabpage_section = 'right',
-  -- name* when the file has unsaved changes
+  -- name* when the file has unsaved changes; the scratch buffer (<leader>bs,
+  -- 55_picker.lua) as "Scratch" rather than its file's hash name
   format = function(buf, label)
+    local scratch = vim.fn.stdpath('data') .. '/scratch/'
+    if vim.startswith(vim.api.nvim_buf_get_name(buf), scratch) then label = 'Scratch' end
     return MiniTabline.default_format(buf, label .. (vim.bo[buf].modified and '*' or ''))
   end,
 })
