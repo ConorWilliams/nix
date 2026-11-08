@@ -58,13 +58,10 @@ in
     "/usr/share/pixmaps"
   ];
 
-  # Skip GNOME's first-login wizard for a new account: the first login
-  # (GNOME, before picking i3) is cut short, leaving it as a failed unit
-  # that every switch then reports.
+  # Skip GNOME's first-login wizard for a new account
   xdg.configFile."gnome-initial-setup-done".text = "yes";
 
-  # Desktop notifications (notify-send, Slack...): nothing shows them under
-  # i3, so dunst from Nix, started by the first notification.
+  # Desktop notifications
   services.dunst =
     let
       # Rose Pine Dawn, following the official mako port.
