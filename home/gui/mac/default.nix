@@ -1,6 +1,3 @@
-# Mac layer: the macOS counterpart of ubuntu/, on top of the GUI layer.
-# Mac GUI apps are Homebrew casks in darwin/ (every Mac's, and each one's),
-# except AeroSpace (below).
 {
   config,
   lib,
@@ -12,19 +9,13 @@
   imports = [ ../. ]; # the GUI layer
 
   # The window manager, AeroSpace, from Nix. Home Manager starts it at login
-  # (a launchd agent, which also restarts it if it stops) and reloads its
-  # config on each switch. Anything not set is AeroSpace's default. The keys
-  # come from the list shared with i3 (../keys.nix), with Cmd as the leader.
-  # (Each new version is a new app to macOS, which may ask again for its
-  # Accessibility permission: System Settings, Privacy & Security.)
   programs.aerospace = {
     enable = true;
     launchd.enable = true;
     settings =
       let
         wm = import ../keys.nix;
-        # A key as AeroSpace spells it, with Cmd as the leader: cmd-shift-left,
-        # cmd-enter...
+        # A key as AeroSpace spells it, with Cmd as the leader
         key = k: "cmd-" + lib.toLower (builtins.replaceStrings [ "+" "Return" ] [ "-" "enter" ] k);
         k = wm.keys;
 
@@ -86,29 +77,18 @@
   programs.kitty.settings = {
     # Quit when the last window closes, as on Linux.
     macos_quit_when_last_window_closed = true;
-    # Left Option is Alt, as on Linux: zellij's Alt-g, fzf's Alt-C, nvim's
-    # Alt keys. Not the right one: on the British layout it types # and
-    # other characters.
+    # Not the right one: on the British layout it types #, etc
     macos_option_as_alt = "left";
-    # No title bar and square corners, as tiled windows on i3 (where i3
-    # draws no title bars; this setting does nothing on X11).
+    # No title bar and square corners.
     hide_window_decorations = "titlebar-and-corners";
   };
 
-  # AeroSpace's menu bar icon shows the workspaces as i3's bar does: those
-  # with windows or on a screen, in order, the focused one filled and one on
-  # another screen dimmed. (Its "i3 style ordered", one of the Experimental
-  # UI Settings in its menu.)
+  # AeroSpace's menu bar icon shows the workspaces as i3's bar does
   targets.darwin.defaults."bobko.aerospace".displayStyle = "i3Ordered";
 
-  # Homebrew's command-line helpers (the casks'), after Nix's tools on PATH
-  # so a Homebrew formula never shadows them. (In fish, which every shell
-  # here hands over to; home.sessionPath would put them first.)
+  # Homebrew's command-line helpers (the casks')
   programs.fish.shellInit = "fish_add_path --append --path /opt/homebrew/bin /opt/homebrew/sbin";
 
-  # Everything on the Mac: system settings (darwin/<hostname>.nix), then home.
-  # `hms` stays home only, like everywhere else. nh picks
-  # darwinConfigurations.<hostname> and asks for sudo itself; the flake
-  # comes from NH_FLAKE.
+  # Everything on the Mac: system settings, then home.
   home.shellAliases.dms = "nh darwin switch && nh home switch";
 }
