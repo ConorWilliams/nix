@@ -27,7 +27,20 @@ echo "Neovim starts cleanly."
 
 # lua_ls's settings as the editor resolves them (after/lsp/lua_ls.lua merged
 # over nvim-lspconfig's), runtime files included.
-"${nvim}" --headless -i NONE \
-  -c "lua io.open('${tmp}/luarc.json', 'w'):write(vim.json.encode(vim.lsp.config.lua_ls.settings.Lua))" +qa
-lua-language-server --check=home/nvim --configpath="${tmp}/luarc.json" --checklevel=Hint \
-  --check_format=pretty --logpath="${tmp}/lua_ls"
+"${nvim}" --headless -i NONE -c "lua
+  local settings = vim.lsp.config.lua_ls.settings.Lua
+  local f = assert(io.open('${tmp}/luarc.json', 'w'))
+  f:write(vim.json.encode(settings))
+  f:close()
+  io.stdout:write(#settings.workspace.library .. ' library folders\n')" +qa
+if ! grep -q '"library":\["' "${tmp}/luarc.json"; then
+  echo "lua_ls's settings have no library:"
+  cat "${tmp}/luarc.json"
+  exit 1
+fi
+if ! lua-language-server --check="${PWD}/home/nvim" --configpath="${tmp}/luarc.json" \
+  --checklevel=Hint --check_format=pretty --logpath="${tmp}/lua_ls"; then
+  echo "lua_ls's log:"
+  tail -n 40 "${tmp}"/lua_ls/*.log
+  exit 1
+fi
