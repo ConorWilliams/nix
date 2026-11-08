@@ -51,6 +51,13 @@ let
 
 in
 {
+  home.packages = [
+    (import ./zellij/anon.nix {
+      inherit pkgs;
+      zellij = config.programs.zellij.package;
+    })
+  ];
+
   programs.zellij = {
     enable = true;
     themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
