@@ -49,7 +49,7 @@ require('zk').setup({
 })
 -- Inside a notebook: <leader>n makes a note (in the current file's
 -- folder), and <leader><space> finds notes instead of files
--- (<leader>ff always finds files).
+-- (<leader>f always finds files).
 local zk_util = require('zk.util')
 local in_notebook = function() return zk_util.notebook_root(zk_util.resolve_notebook_path(0)) end
 vim.keymap.set('n', '<leader>n', function()

@@ -86,5 +86,5 @@ local lazygit = function(cwd)
     },
   })
 end
-map('<leader>gg', function() lazygit(Snacks.git.get_root()) end, 'Lazygit')
-map('<leader>gb', Snacks.picker.git_log_line, 'Blame line (log)')
+map('<leader>g', function() lazygit(Snacks.git.get_root()) end, 'Lazygit')
+map('<leader>B', Snacks.picker.git_log_line, 'Blame line (log)')
