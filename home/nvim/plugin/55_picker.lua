@@ -127,8 +127,6 @@ end
 
 -- Top level
 -- (<leader><space>, find files, is in 70_markdown.lua: notes in a notebook)
-map('<leader>/', pick.grep, 'Grep')
-map('<leader>,', pick.buffers, 'Buffers')
 map('<leader>:', pick.command_history, 'Command history')
 
 -- Find
