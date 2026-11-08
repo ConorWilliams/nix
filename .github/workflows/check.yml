@@ -72,3 +72,41 @@ jobs:
       - run: .github/check.sh nvim
         env:
           CHECK_GC_ROOTS: ${{ runner.temp }}/gcroots
+
+  # A fresh install: bootstrap.sh run as the server user (conix) on a clean
+  # machine, with no terminal, so it declines every prompt (logins included).
+  bootstrap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write # to purge superseded Nix store caches
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      # Its own Nix store cache; the user's Home Manager profile roots what
+      # the bootstrap built, so the garbage collection keeps it.
+      - uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-bootstrap-${{ runner.os }}-${{ hashFiles('flake.lock', '**/*.nix', 'home/zellij/**', 'bootstrap.sh') }}
+          restore-prefixes-first-match: nix-bootstrap-${{ runner.os }}-
+          gc-max-store-size-linux: 6G
+          purge: true
+          purge-prefixes: nix-bootstrap-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
+      # The user, with this checkout where the bootstrap keeps the repo.
+      - run: |
+          sudo useradd --create-home --shell /bin/bash conix
+          sudo cp -a . /home/conix/nix
+          sudo chown -R conix: /home/conix/nix
+      - run: >-
+          sudo -u conix -H env PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+          bash /home/conix/nix/bootstrap.sh </dev/null
+      # Home Manager switched: its profile, fish, and the dotfiles linked.
+      - run: |
+          sudo -u conix -H bash -euc '
+            test -L ~/.local/state/nix/profiles/home-manager
+            ~/.nix-profile/bin/fish --version
+            readlink ~/.config/fish/config.fish | grep -q "^/nix/store/"
+            readlink ~/.config/nvim
+          '
