@@ -1,1 +1,4 @@
 result*
+
+# direnv's cache of the dev shell
+.direnv/

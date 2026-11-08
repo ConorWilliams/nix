@@ -1,5 +1,2 @@
 # Cargo builds (rust-analyzer runs cargo check here)
 target/
-
-# direnv's cache of the dev shell
-.direnv/

@@ -52,8 +52,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
-      - run: nix develop ../../..#zellij-plugins -c cargo clippy --all-targets -- -W clippy::pedantic -D warnings
-      - run: nix develop ../../..#zellij-plugins -c cargo test
+      - run: nix develop ../../.. -c cargo clippy --all-targets -- -W clippy::pedantic -D warnings
+      - run: nix develop ../../.. -c cargo test
 
   # Neovim starts without errors and lua_ls finds no problems; building the
   # home files also builds the Zellij plugins for WASI.

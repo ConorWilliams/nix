@@ -163,14 +163,14 @@
           )
         ) hosts;
 
-      # The Zellij plugins' host toolchain
+      # The repo's dev shell (.envrc): the Zellij plugins' host toolchain
       devShells = lib.genAttrs systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          zellij-plugins = pkgs.mkShell {
+          default = pkgs.mkShell {
             packages = with pkgs; [
               cargo
               clippy
