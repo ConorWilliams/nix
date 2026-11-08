@@ -125,48 +125,26 @@ local root = function(source)
   return function() pick[source]({ cwd = Snacks.git.get_root() }) end
 end
 
--- Top level
--- (<leader><space>, find files, is in 70_markdown.lua: notes in a notebook)
-map('<leader>:', pick.command_history, 'Command history')
-
--- Find
+-- Find (<leader><space>, find files, is in 70_markdown.lua: notes in a notebook)
 map('<leader>ff', pick.files, 'Files')
-map('<leader>fF', root('files'), 'Files (git root)')
-map('<leader>fg', pick.git_files, 'Git files')
-map('<leader>fr', pick.recent, 'Recent')
-map('<leader>fR', function() pick.recent({ filter = { cwd = true } }) end, 'Recent (cwd)')
 map('<leader>fb', pick.buffers, 'Buffers')
-map('<leader>fc', function() pick.files({ cwd = vim.fn.stdpath('config') }) end, 'Config files')
 
 -- Search
 map('<leader>sg', pick.grep, 'Grep')
 map('<leader>sG', root('grep'), 'Grep (git root)')
 map('<leader>sw', pick.grep_word, 'Word or selection', { 'n', 'x' })
-map('<leader>sW', root('grep_word'), 'Word or selection (git root)', { 'n', 'x' })
 map('<leader>sb', pick.lines, 'Buffer lines')
-map('<leader>sd', pick.diagnostics, 'Diagnostics')
-map('<leader>sD', pick.diagnostics_buffer, 'Buffer diagnostics')
 map('<leader>ss', pick.lsp_symbols, 'Symbols')
 map('<leader>sS', pick.lsp_workspace_symbols, 'Workspace symbols')
-map('<leader>sh', pick.help, 'Help pages')
 map('<leader>sk', pick.keymaps, 'Keymaps')
 map('<leader>sC', pick.commands, 'Commands')
-map('<leader>sj', pick.jumps, 'Jumps')
-map('<leader>sm', pick.marks, 'Marks')
 map('<leader>sq', pick.qflist, 'Quickfix list')
 map('<leader>su', pick.undo, 'Undo history')
 map('<leader>sR', pick.resume, 'Resume last picker')
 map('<leader>sy', function() pick.yanky() end, 'Yank history', { 'n', 'x' })
 
-Snacks.toggle.scroll():map('<leader>uS')
-
 -- Explorer
 map('<leader>e', function() Snacks.explorer() end, 'Explorer')
-map(
-  '<leader>E',
-  function() Snacks.explorer({ cwd = Snacks.git.get_root() }) end,
-  'Explorer (git root)'
-)
 
 -- Buffers: delete without closing the window
 map('<leader>bd', function() Snacks.bufdelete() end, 'Delete buffer')
