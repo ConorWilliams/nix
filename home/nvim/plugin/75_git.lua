@@ -96,12 +96,12 @@ end
 local file_repo = function() return not vim.b.scratch and Snacks.git.get_root() or nil end
 -- Or else the folder's (help etc. aren't in a repo: with no repo to
 -- compare, quitting would always look like a worktree switch)
-map('<leader>g', function()
-  lazygit(file_repo() or Snacks.git.get_root(vim.fn.getcwd()))
-end, 'Lazygit')
+map(
+  '<leader>g',
+  function() lazygit(file_repo() or Snacks.git.get_root(vim.fn.getcwd())) end,
+  'Lazygit'
+)
 map('<leader>B', function()
-  if not file_repo() then
-    return vim.notify('Not in a git repo', vim.log.levels.WARN)
-  end
+  if not file_repo() then return vim.notify('Not in a git repo', vim.log.levels.WARN) end
   Snacks.picker.git_log_line()
 end, 'Blame line (log)')
