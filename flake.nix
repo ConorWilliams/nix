@@ -163,6 +163,27 @@
           )
         ) hosts;
 
+      # The Zellij plugins' host toolchain
+      devShells = lib.genAttrs systems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          zellij-plugins = pkgs.mkShell {
+            packages = with pkgs; [
+              cargo
+              clippy
+              rustc
+              rustfmt
+              pkg-config
+              openssl
+              curl
+            ];
+          };
+        }
+      );
+
       # Formatting this repo
       formatter = lib.genAttrs systems (
         system:
