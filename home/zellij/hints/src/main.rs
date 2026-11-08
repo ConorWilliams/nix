@@ -207,11 +207,13 @@ fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
             continue;
         };
         // Keep shared navigation and mode-exit shortcuts out of the menu.
-        match action {
+        if matches!(
+            action,
             Action::SwitchToMode {
                 input_mode: InputMode::Locked,
-            } => continue,
-            _ => {}
+            }
+        ) {
+            continue;
         }
         let description = describe(action);
         if let Some((keys, _)) = groups.iter_mut().find(|(_, label)| *label == description) {
