@@ -9,13 +9,14 @@
 }:
 
 let
+  # An anonymous Zellij session, that cleans itself up (unless renamed)
   zellijTerminal = pkgs.writeShellApplication {
     name = "zellij-terminal";
     runtimeInputs = [
       config.programs.zellij.package
       pkgs.rust-petname
     ];
-    text = ''
+    text = /* bash */ ''
       unset ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
       existing=$(zellij list-sessions -sn 2>/dev/null || true)
       while :; do
