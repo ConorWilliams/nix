@@ -177,6 +177,7 @@
               clippy
               rustc
               rustfmt
+              rust-analyzer
               pkg-config
               openssl
               curl
@@ -189,6 +190,8 @@
               actionlint
               lua-language-server
             ];
+            # std's source, for rust-analyzer (nixpkgs' rustc doesn't ship it)
+            env.RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
           };
         }
       );
