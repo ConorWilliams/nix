@@ -8,12 +8,43 @@
 
 let
   plugin = import ./zellij/plugin.nix { inherit pkgs; };
-  anon = plugin ./zellij/anon;
-  hints = plugin ./zellij/hints;
+  wasm = name: "${plugin ./zellij/${name}}/bin/zellij-${name}.wasm";
+  anon = wasm "anon";
+  hints = wasm "hints";
   finder = scope: {
-    _props.location = "file:${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    _props.location = "file:${wasm "finder"}";
     inherit scope;
   };
+  # The permissions each plugin asks for, granted ahead of time (below).
+  grants = [
+    {
+      path = anon;
+      permissions = [
+        "ReadApplicationState"
+        "ChangeApplicationState"
+      ];
+    }
+    {
+      path = hints;
+      permissions = [
+        "ReadApplicationState"
+        "ChangeApplicationState"
+        "MessageAndLaunchOtherPlugins"
+      ];
+    }
+    {
+      path = wasm "finder";
+      permissions = [
+        "ReadApplicationState"
+        "ChangeApplicationState"
+      ];
+    }
+  ];
+  permissionsFile =
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij/permissions.kdl"
+    else
+      "${config.xdg.cacheHome}/zellij/permissions.kdl";
   zellij = lib.getExe config.programs.zellij.package;
   # Shells keep the ZELLIJ_SESSION_NAME they started with, so a rename
   # leaves a forwarding note: old name -> new name.
@@ -139,12 +170,12 @@ in
         session_serialization = false;
         plugins = {
           compact-bar._props.location = "zellij:compact-bar";
-          hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
+          hints._props.location = "file:${hints}";
           hints-controller = {
-            _props.location = "file:${hints}/bin/zellij-hints.wasm";
+            _props.location = "file:${hints}";
             controller = true;
           };
-          anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
+          anon._props.location = "file:${anon}";
           new-session = manager {
             multi_screen = false;
           };
@@ -240,6 +271,40 @@ in
       };
     };
   };
+
+  # zellij checks a plugin's saved permissions by reading permissions.kdl,
+  # and saves each grant by emptying and rewriting it; plugins starting
+  # together (hints runs one per tab) can read it empty and prompt again,
+  # sometimes in a hidden pane that can't be answered. So these plugins'
+  # grants are added here (keeping the file's other entries), and the file
+  # is left read-only: zellij then logs that it couldn't save a grant, but
+  # still grants it. (To let another plugin's grant be saved: chmod u+w.)
+  home.activation.zellijPermissions = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    ''
+      run mkdir -p ${lib.escapeShellArg (dirOf permissionsFile)}
+      run touch ${lib.escapeShellArg permissionsFile}
+      run chmod u+w ${lib.escapeShellArg permissionsFile}
+    ''
+    + lib.concatStrings (
+      map (
+        { path, permissions }:
+        let
+          entry = pkgs.writeText "zellij-permission.kdl" ''
+            "${path}" {
+            ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
+          '';
+        in
+        ''
+          if ! grep -qF ${lib.escapeShellArg ''"${path}"''} ${lib.escapeShellArg permissionsFile}; then
+            run tee -a ${lib.escapeShellArg permissionsFile} <${entry} >/dev/null
+          fi
+        ''
+      ) grants
+    )
+    + ''
+      run chmod a-w ${lib.escapeShellArg permissionsFile}
+    ''
+  );
 
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
   # for the session name.
