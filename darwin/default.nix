@@ -18,6 +18,9 @@
     "flakes"
   ];
 
+  # Hard-link identical files in the store, on a schedule.
+  nix.optimise.automatic = true;
+
   # GUI apps via Homebrew casks
   homebrew = {
     enable = true;
