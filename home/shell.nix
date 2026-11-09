@@ -73,27 +73,17 @@ in
         ''
         (lib.mkAfter /* fish */ ''
           bind -M insert space __space
-          bind -M default space __space
         '')
       ];
 
       functions = {
-        # Fish space binding:
-        #   - In Normal mode, space -> Zellij to normal mode
-        #   - Insert mode, Empty prompt, space -> Zelij to normal mode
-        #   - Insert mode, "g", space -> zoxide's zi (fzf)
+        # Space in insert mode: "g" then space -> zoxide's zi (fzf), instantly
         __space = /* fish */ ''
-          if set -q ZELLIJ; and not commandline --paging-mode; and begin; test "$fish_bind_mode" = default; or test -z "$(commandline)"; end; and __zellij_session
-            ${lib.getExe config.programs.zellij.package} action switch-mode normal
-          else if test "$fish_bind_mode" = default
-            commandline -f forward-char
-          else
-            commandline --insert ' '
-            commandline -f expand-abbr
-            if test "$(commandline)" = "g "
-              commandline ""
-              __zoxide_zi
-            end
+          commandline --insert ' '
+          commandline -f expand-abbr
+          if test "$(commandline)" = "g "
+            commandline ""
+            __zoxide_zi
           end
           commandline -f repaint
         '';
