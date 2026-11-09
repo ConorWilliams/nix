@@ -1,13 +1,10 @@
 -- ruff: Python linting, fixes and formatting (conform falls back to it, as
--- there is no Python entry in formatters_by_ft, so the .venv ruff formats).
+-- there is no Python entry in formatters_by_ft, so the project's ruff formats).
 local organize_imports = function()
   vim.lsp.buf.code_action({ apply = true, context = { only = { 'source.organizeImports' } } })
 end
 
 return {
-  cmd = require('config.venv')('ruff', { 'server' }),
-  -- As in ty.lua: a uv workspace's top first, so its .venv's ruff is used.
-  root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   on_attach = function(client, buf)
     -- Leave hover to ty, which knows the types
     client.server_capabilities.hoverProvider = false

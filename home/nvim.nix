@@ -37,9 +37,6 @@ in
       bash-language-server
       shellcheck
       shfmt
-      # Python: fallbacks; a project's .venv/bin versions are preferred
-      ruff
-      ty
       # Markdown (zk's server comes with zk, in default.nix)
       marksman
       rumdl
