@@ -10,6 +10,10 @@ let
   plugin = import ./zellij/plugin.nix { inherit pkgs; };
   anon = plugin ./zellij/anon;
   hints = plugin ./zellij/hints;
+  finder = scope: {
+    _props.location = "file:${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    inherit scope;
+  };
   zellij = lib.getExe config.programs.zellij.package;
   # Shells keep the ZELLIJ_SESSION_NAME they started with, so a rename
   # leaves a forwarding note: old name -> new name.
@@ -119,8 +123,11 @@ in
           new-session = manager {
             multi_screen = false;
           };
-          find-tabs = manager { multi_screen = true; };
-          find-sessions = manager { multi_screen = false; };
+          # Fuzzy finders (zellij/finder): each word of the query matches
+          # somewhere, so `nix edit` finds the tab edit in the session nix.
+          find = finder "all"; # every session's tabs
+          find-sessions = finder "sessions";
+          find-tabs = finder "tabs"; # this session's
         };
         load_plugins = {
           hints-controller = { };
@@ -134,7 +141,7 @@ in
             (bind "s" (mode "session"))
             (bind "t" (mode "tab"))
             (bind "p" (mode "pane"))
-            (once "Space" (launch "find-tabs"))
+            (once "Space" (launch "find"))
           ];
           session._children = [
             (once "n" (launch "new-session"))
@@ -171,6 +178,7 @@ in
               (mode "renametab")
             ])
             (once "d" { CloseTab = { }; })
+            (once "f" (launch "find-tabs"))
           ];
           renametab._children = [
             (bind "Enter" (mode "locked"))
