@@ -1,5 +1,6 @@
 -- Git: gitsigns for changes in the gutter and hunk jumps, lazygit in a
--- float, and snacks' log picker for blame. Keys as in LazyVim.
+-- float, and snacks' log pickers (line blame, file history, log). Keys as
+-- in LazyVim.
 
 local gs = require('gitsigns')
 local bar = { text = '▎' }
@@ -99,11 +100,18 @@ local file_repo = function() return not vim.b.scratch and Snacks.git.get_root() 
 -- Or else the folder's (help etc. aren't in a repo: with no repo to
 -- compare, quitting would always look like a worktree switch)
 map(
-  '<leader>g',
+  '<leader>gg',
   function() lazygit(file_repo() or Snacks.git.get_root(vim.fn.getcwd())) end,
   'Lazygit'
 )
-map('<leader>B', function()
-  if not file_repo() then return vim.notify('Not in a git repo', vim.log.levels.WARN) end
-  Snacks.picker.git_log_line()
-end, 'Blame line (log)')
+
+-- Log pickers, for the current file's repo (outside one, says so)
+local in_repo = function(picker)
+  return function()
+    if not file_repo() then return vim.notify('Not in a git repo', vim.log.levels.WARN) end
+    picker()
+  end
+end
+map('<leader>gb', in_repo(Snacks.picker.git_log_line), 'Blame line (log)')
+map('<leader>gf', in_repo(Snacks.picker.git_log_file), 'File history')
+map('<leader>gl', in_repo(Snacks.picker.git_log), 'Log')

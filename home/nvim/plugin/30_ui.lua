@@ -112,6 +112,7 @@ require('which-key').setup({
     -- Names for the leader groups, so the popup shows "+buffer" etc.
     { '<leader>b', group = 'buffer' },
     { '<leader>c', group = 'code' },
+    { '<leader>g', group = 'git' },
     { '<leader>s', group = 'search' },
     { '<leader>u', group = 'ui' },
     { '<leader>p', group = 'pane' },
