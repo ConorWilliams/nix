@@ -103,6 +103,12 @@ require('snacks').setup({
     layout = { preset = 'tall' }, -- the explorer picks by shape (below)
     matcher = { frecency = true }, -- rank often/recently opened files higher
     win = { input = { keys = { ['<Esc>'] = { 'close', mode = { 'n', 'i' } } } } },
+    -- Diffs (the git log pickers' commits, 75_git.lua) through git's pager,
+    -- delta, as in lazygit; not paged, as the preview scrolls itself.
+    previewers = {
+      diff = { style = 'terminal' },
+      git = { args = { '-c', 'pager.show=delta --paging=never' } },
+    },
     sources = {
       files = { hidden = true, transform = hide_dot_folders },
       grep = { hidden = true, transform = hide_dot_folders },
