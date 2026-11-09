@@ -113,10 +113,20 @@ fn filter(entries: &[Entry], query: &str) -> Vec<(usize, Vec<usize>)> {
     found.into_iter().map(|(_, i, idx)| (i, idx)).collect()
 }
 
+/// Esc or Ctrl c: close the finder.
+fn closes(key: &KeyWithModifier) -> bool {
+    match key.bare_key {
+        BareKey::Esc => true,
+        BareKey::Char('c') => key.has_modifiers(&[KeyModifier::Ctrl]),
+        _ => false,
+    }
+}
+
 #[derive(Default)]
 struct Finder {
     scope: Scope,
     ready: bool,
+    denied: bool,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -125,31 +135,51 @@ struct Finder {
 register_plugin!(Finder);
 
 impl Finder {
+    fn selected_entry(&self) -> Option<&Entry> {
+        self.shown
+            .get(self.selected)
+            .map(|(i, _)| &self.entries[*i])
+    }
+
+    /// New entries, keeping the same session or tab selected (if it's still
+    /// shown), so Enter never lands on whatever moved under the cursor.
     fn update_sessions(&mut self, sessions: &[SessionInfo]) {
+        let kept = self.selected_entry().map(|e| (e.session.clone(), e.tab));
         self.entries = entries(sessions, self.scope);
-        self.refilter();
-    }
-
-    /// `SessionUpdate` alone can leave out other sessions, so ask directly,
-    /// as the built-in session manager does: now and every second.
-    fn poll_sessions(&mut self) {
-        if let Ok(snapshot) = get_session_list() {
-            self.update_sessions(&snapshot.live_sessions);
-        }
-        set_timeout(1.0);
-    }
-
-    fn refilter(&mut self) {
         self.shown = filter(&self.entries, &self.query);
+        if let Some(position) = kept.and_then(|(session, tab)| {
+            self.shown.iter().position(|(i, _)| {
+                let e = &self.entries[*i];
+                e.session == session && e.tab == tab
+            })
+        }) {
+            self.selected = position;
+        }
         self.selected = self.selected.min(self.shown.len().saturating_sub(1));
     }
 
+    /// `SessionUpdate` alone can leave out other sessions, so its list is
+    /// never used: ask directly instead, as the built-in session manager does.
+    fn refresh_sessions(&mut self) {
+        if let Ok(snapshot) = get_session_list() {
+            self.update_sessions(&snapshot.live_sessions);
+        }
+    }
+
+    /// Refresh now and every second.
+    fn poll_sessions(&mut self) {
+        self.refresh_sessions();
+        set_timeout(1.0);
+    }
+
+    /// The query changed: the best match is selected.
+    fn refilter(&mut self) {
+        self.shown = filter(&self.entries, &self.query);
+        self.selected = 0;
+    }
+
     fn activate(&self) {
-        if let Some(entry) = self
-            .shown
-            .get(self.selected)
-            .map(|(i, _)| &self.entries[*i])
-        {
+        if let Some(entry) = self.selected_entry() {
             match (entry.in_current_session, entry.tab) {
                 (true, Some(position)) => go_to_tab(u32::try_from(position).unwrap_or(0)),
                 (true, None) => {}
@@ -162,8 +192,7 @@ impl Finder {
     fn key(&mut self, key: &KeyWithModifier) -> bool {
         let ctrl = key.has_modifiers(&[KeyModifier::Ctrl]);
         match key.bare_key {
-            BareKey::Esc => close_self(),
-            BareKey::Char('c') if ctrl => close_self(),
+            _ if closes(key) => close_self(),
             BareKey::Enter => self.activate(),
             BareKey::Up => self.selected = self.selected.saturating_sub(1),
             BareKey::Char('p' | 'k') if ctrl => self.selected = self.selected.saturating_sub(1),
@@ -171,20 +200,14 @@ impl Finder {
             BareKey::Char('n' | 'j') if ctrl => self.move_down(),
             BareKey::Char('u') if ctrl => {
                 self.query.clear();
-                self.selected = 0;
                 self.refilter();
             }
             BareKey::Backspace => {
                 self.query.pop();
-                self.selected = 0;
                 self.refilter();
             }
-            BareKey::Char(c)
-                if !key.has_modifiers(&[KeyModifier::Ctrl])
-                    && !key.has_modifiers(&[KeyModifier::Alt]) =>
-            {
+            BareKey::Char(c) if !ctrl && !key.has_modifiers(&[KeyModifier::Alt]) => {
                 self.query.push(c);
-                self.selected = 0;
                 self.refilter();
             }
             _ => return false,
@@ -226,20 +249,35 @@ impl ZellijPlugin for Finder {
                 self.poll_sessions();
                 true
             }
-            Event::SessionUpdate(sessions, _) => {
-                self.update_sessions(&sessions);
+            Event::PermissionRequestResult(PermissionStatus::Denied) => {
+                self.denied = true;
+                true
+            }
+            Event::SessionUpdate(..) if self.ready => {
+                self.refresh_sessions();
                 true
             }
             Event::Key(key) if self.ready => self.key(&key),
+            // Not ready: the pane can still be closed.
+            Event::Key(key) if closes(&key) => {
+                close_self();
+                false
+            }
             _ => false,
         }
     }
 
     fn render(&mut self, rows: usize, cols: usize) {
+        let width = Some(cols.saturating_sub(2));
         if !self.ready {
+            let message = if self.denied {
+                "Permission denied. Esc to close."
+            } else {
+                "Waiting for permission. Esc to close."
+            };
+            print_text_with_coordinates(Text::new(message), 1, 0, width, None);
             return;
         }
-        let width = Some(cols.saturating_sub(2));
         let count = format!("{}/{}", self.shown.len(), self.entries.len());
         let prompt = format!("> {}", self.query);
         let gap = cols.saturating_sub(prompt.chars().count() + count.chars().count() + 3);
@@ -360,6 +398,21 @@ mod tests {
     #[test]
     fn sessions_scope_ignores_tab_names() {
         assert_eq!(found(Scope::Sessions, "edit"), Vec::<String>::new());
+    }
+
+    #[test]
+    fn updates_keep_the_selected_entry() {
+        let mut finder = Finder::default();
+        finder.update_sessions(&sessions());
+        finder.selected = 2; // caiman › train
+        let mut more = sessions();
+        more.push(session("api", false, &[("serve", true)]));
+        finder.update_sessions(&more);
+        assert_eq!(finder.selected_entry().unwrap().label, "caiman › train");
+        // Gone: the same row, within the shorter list.
+        finder.selected = 5; // work › logs
+        finder.update_sessions(&sessions()[1..2]);
+        assert_eq!(finder.selected, 1);
     }
 
     #[test]
