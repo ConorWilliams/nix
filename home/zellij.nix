@@ -15,9 +15,6 @@ let
     inherit scope;
   };
   zellij = lib.getExe config.programs.zellij.package;
-  # Shells keep the ZELLIJ_SESSION_NAME they started with, so a rename
-  # leaves a forwarding note: old name -> new name.
-  renamed = "${config.xdg.stateHome}/zellij/renamed";
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
@@ -30,9 +27,6 @@ let
         continue
       end
       ${zellij} action rename-session "$name"; or continue
-      mkdir -p ${renamed}
-      echo $name >${renamed}/$ZELLIJ_SESSION_NAME
-      rm -f ${renamed}/$name # no forwarding loops
       break
     end
   '';
@@ -99,16 +93,6 @@ in
         ${zellij} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
       '';
     };
-
-    # `zellij action` hangs on a missing session, so check first and follow
-    # renames. Fails if this shell's session is gone.
-    fish.functions.__zellij_session = /* fish */ ''
-      set -l sessions (${zellij} list-sessions -sn 2>/dev/null)
-      while not contains -- "$ZELLIJ_SESSION_NAME" $sessions
-        test -r ${renamed}/$ZELLIJ_SESSION_NAME; or return 1
-        set -gx ZELLIJ_SESSION_NAME (cat ${renamed}/$ZELLIJ_SESSION_NAME)
-      end
-    '';
 
     zellij = {
       enable = true;
