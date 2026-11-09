@@ -161,7 +161,15 @@ in
         };
         keybinds = {
           _props.clear-defaults = true;
-          locked._children = [ (bind "Alt g" (mode "normal")) ];
+          # Locked (where you type) is the default; Alt g leads to the rest.
+          # Direct keys for the frequent moves, as in nvim: arrows move in
+          # space (Ctrl, below), h/l step through a list (tabs here; Shift-H/L
+          # through buffers in nvim). Not in hints' menus, which show other modes.
+          locked._children = [
+            (bind "Alt g" (mode "normal"))
+            (bind "Alt h" { GoToPreviousTab = { }; })
+            (bind "Alt l" { GoToNextTab = { }; })
+          ];
           normal._children = [
             (bind "s" (mode "session"))
             (bind "t" (mode "tab"))
