@@ -1,7 +1,6 @@
 # Neovim: plain Lua config in ./nvim; plugins, language servers and tools
 {
   config,
-  lib,
   pkgs,
   inputs,
   ...
@@ -16,15 +15,6 @@ let
       version = input.shortRev;
       src = input;
     };
-
-  # rust-analyzer, with std's source when the fallback rustc below is the
-  # one in use (a project's own toolchain, earlier on PATH, brings its own).
-  rust-analyzer = pkgs.writeShellScriptBin "rust-analyzer" ''
-    if [ "$(command -v rustc)" = ${lib.getExe' pkgs.rustc "rustc"} ]; then
-      export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
-    fi
-    exec ${lib.getExe pkgs.rust-analyzer} "$@"
-  '';
 in
 
 {
@@ -36,7 +26,9 @@ in
     # the wrapper instead so ~/.config/nvim can be this repo's nvim/.
     sideloadInitLua = true;
 
-    # Language servers and formatters, on nvim's PATH only.
+    # Language servers and formatters for editing config and prose anywhere,
+    # on nvim's PATH only (after the shell's). Project toolchains, and their
+    # servers (rust-analyzer...), come from the project's direnv/devshell.
     extraPackages = with pkgs; [
       lua-language-server
       stylua
@@ -48,11 +40,6 @@ in
       # Python: fallbacks; a project's .venv/bin versions are preferred
       ruff
       ty
-      # Rust: fallbacks; a project's toolchain (devshell, rustup) is preferred
-      rust-analyzer
-      cargo
-      rustc
-      rustfmt # rust-analyzer formats with it
       # Markdown (zk's server comes with zk, in default.nix)
       marksman
       rumdl
