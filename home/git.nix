@@ -96,8 +96,8 @@ in
           text = /* bash */ ''
             # Rose Pine Dawn: the official port's theme, then the config
             # (settings below, which adjust the theme).
-            LG_CONFIG_FILE=${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml
-            LG_CONFIG_FILE+=,${configDir}/lazygit/config.yml
+            LG_CONFIG_FILE="${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml"
+            LG_CONFIG_FILE+=",${configDir}/lazygit/config.yml"
 
             # Portrait windows (rotated monitors): the panels above the diff.
             if size=$(${pkgs.coreutils}/bin/stty size 2>/dev/null); then
