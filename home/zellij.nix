@@ -36,6 +36,31 @@ let
       break
     end
   '';
+  # Quitting ends the session for every client: named sessions ask first,
+  # anonymous ones (anon-*, which go away on detach anyway) don't.
+  quitSession = pkgs.writeText "zellij-quit-session.fish" /* fish */ ''
+    if not string match --quiet 'anon-*' -- $ZELLIJ_SESSION_NAME
+      read --local --nchars 1 --prompt-str "Quit session $ZELLIJ_SESSION_NAME? [y/N] " answer
+      or exit
+      contains -- "$answer" y Y; or exit
+    end
+    ${zellij} kill-session $ZELLIJ_SESSION_NAME
+  '';
+  # A fish script in a small floating pane, for a prompt.
+  prompt = name: script: {
+    Run = {
+      _args = [
+        (lib.getExe config.programs.fish.package)
+        "--no-config"
+        (toString script)
+      ];
+      floating = true;
+      inherit name;
+      width = "60%";
+      height = "5";
+      close_on_exit = true;
+    };
+  };
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -145,27 +170,14 @@ in
           ];
           session._children = [
             (once "n" (launch "new-session"))
-            (once "q" { Quit = { }; })
+            (once "q" (prompt "Quit session" quitSession))
             (once "d" { Detach = { }; })
             # Vim-style: [ back towards the root session, ] forward into the nested one.
             (once "[" { FocusHostSession = { }; })
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
             (once "f" (launch "find-sessions"))
-            (once "r" {
-              Run = {
-                _args = [
-                  (lib.getExe config.programs.fish.package)
-                  "--no-config"
-                  (toString renameSession)
-                ];
-                floating = true;
-                name = "Rename session";
-                width = "60%";
-                height = "5";
-                close_on_exit = true;
-              };
-            })
+            (once "r" (prompt "Rename session" renameSession))
           ];
           tab._children = [
             (bind "r" [
