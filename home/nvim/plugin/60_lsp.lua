@@ -4,7 +4,7 @@
 -- filetypes, root markers) as lsp/<name>.lua files; per-server tweaks
 -- live in after/lsp/<name>.lua and are merged on top.
 
-vim.lsp.enable({
+local servers = {
   'lua_ls', -- lua-language-server
   'nixd',
   'bashls', -- bash-language-server (sh and bash)
@@ -14,6 +14,29 @@ vim.lsp.enable({
   'marksman', -- Markdown links, headings, references
   'rumdl', -- Markdown lint and format
   'copilot', -- inline suggestions (80_ai.lua)
+}
+vim.lsp.enable(servers)
+
+-- Rather than silently no LSP, warn (once per server) when a file's server
+-- isn't installed, e.g. missing from the project's devshell.
+local warned = {}
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('config-lsp-missing', {}),
+  callback = function(ev)
+    for _, name in ipairs(servers) do
+      local config = vim.lsp.config[name]
+      local exe = config and type(config.cmd) == 'table' and config.cmd[1]
+      if
+        exe
+        and not warned[name]
+        and vim.tbl_contains(config.filetypes or {}, ev.match)
+        and vim.fn.executable(exe) == 0
+      then
+        warned[name] = true
+        vim.notify(('%s: `%s` not found'):format(name, exe), vim.log.levels.WARN)
+      end
+    end
+  end,
 })
 
 -- Keys for buffers with a server attached, as in LazyVim. Built in already:
