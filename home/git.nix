@@ -78,9 +78,8 @@ in
     # Git TUI, showing diffs through delta.
     lazygit = {
       enable = true;
-      # Rose Pine Dawn: lazygit merges every file in LG_CONFIG_FILE (later ones
-      # win), so the command is wrapped to read the official port's theme and
-      # then its config (settings below, which adjust the theme).
+      # Wrapped to pick its config files: lazygit merges every file in
+      # LG_CONFIG_FILE, later ones winning.
       package =
         let
           configDir =
@@ -88,14 +87,31 @@ in
               "${config.home.homeDirectory}/Library/Application Support"
             else
               config.xdg.configHome;
+          portrait = (pkgs.formats.yaml { }).generate "portrait.yml" {
+            gui.portraitMode = "always";
+          };
         in
-        pkgs.symlinkJoin {
+        pkgs.writeShellApplication {
           name = "lazygit";
-          paths = [ pkgs.lazygit ];
-          nativeBuildInputs = [ pkgs.makeWrapper ];
-          postBuild = /* bash */ ''
-            wrapProgram $out/bin/lazygit --set LG_CONFIG_FILE \
-              "${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml,${configDir}/lazygit/config.yml"
+          text = /* bash */ ''
+            # Rose Pine Dawn: the official port's theme, then the config
+            # (settings below, which adjust the theme).
+            LG_CONFIG_FILE=${inputs.rose-pine-lazygit}/themes/rose-pine-dawn.yml
+            LG_CONFIG_FILE+=,${configDir}/lazygit/config.yml
+
+            # Portrait windows (rotated monitors): the panels above the diff.
+            # lazygit's own "auto" only does that under 85 columns. Cells are
+            # about twice as tall as wide, so fewer than 2 x rows columns
+            # means the window is taller than wide. (Checked at startup only.)
+            if size=$(${pkgs.coreutils}/bin/stty size 2>/dev/null); then
+              read -r rows cols <<<"$size"
+              if ((cols < 2 * rows)); then
+                LG_CONFIG_FILE+=,${portrait}
+              fi
+            fi
+
+            export LG_CONFIG_FILE
+            exec ${pkgs.lazygit}/bin/lazygit "$@"
           '';
         };
       settings = {
