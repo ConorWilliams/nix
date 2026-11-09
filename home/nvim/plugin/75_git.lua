@@ -94,24 +94,20 @@ local lazygit = function(cwd)
     },
   })
 end
+
 -- The current file's repo. Not the scratch buffer's: its file sits under
 -- ~/.local/share, so that would be the home folder's repo, if any.
 local file_repo = function() return not vim.b.scratch and Snacks.git.get_root() or nil end
--- Or else the folder's (help etc. aren't in a repo: with no repo to
--- compare, quitting would always look like a worktree switch)
-map(
-  '<leader>gg',
-  function() lazygit(file_repo() or Snacks.git.get_root(vim.fn.getcwd())) end,
-  'Lazygit'
-)
 
--- Log pickers, for the current file's repo (outside one, says so)
-local in_repo = function(picker)
+-- The <leader>g keys work on it (outside one, they say so)
+local in_repo = function(action)
   return function()
     if not file_repo() then return vim.notify('Not in a git repo', vim.log.levels.WARN) end
-    picker()
+    action()
   end
 end
+
+map('<leader>gg', in_repo(function() lazygit(file_repo()) end), 'Lazygit')
 map('<leader>gb', in_repo(Snacks.picker.git_log_line), 'Blame line (log)')
 map('<leader>gf', in_repo(Snacks.picker.git_log_file), 'File history')
 map('<leader>gl', in_repo(Snacks.picker.git_log), 'Log')
