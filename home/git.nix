@@ -45,6 +45,8 @@ in
         merge.conflictStyle = "zdiff3";
 
         pull.rebase = true; # `git pull` replays local commits, no merge commits
+        rebase.updateRefs = true; # a rebase moves the branches stacked on it too
+        rerere.enabled = true; # a conflict resolved once is resolved again by itself
         push.autoSetupRemote = true; # first push of a new branch needs no -u
         fetch.prune = true; # drop refs to branches deleted on the remote
 
