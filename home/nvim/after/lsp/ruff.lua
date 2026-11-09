@@ -5,6 +5,9 @@ local organize_imports = function()
 end
 
 return {
+  -- As in ty.lua: a uv workspace's top first, so one ruff serves every member
+  -- (the defaults would root at each member's pyproject.toml).
+  root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   on_attach = function(client, buf)
     -- Leave hover to ty, which knows the types
     client.server_capabilities.hoverProvider = false
