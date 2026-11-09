@@ -95,9 +95,12 @@ local lazygit = function(cwd)
   })
 end
 
--- The current file's repo. Not the scratch buffer's: its file sits under
--- ~/.local/share, so that would be the home folder's repo, if any.
-local file_repo = function() return not vim.b.scratch and Snacks.git.get_root() or nil end
+-- The current file's repo, or else (help, scratch etc.) the folder's. Not
+-- the scratch buffer's: its file sits under ~/.local/share, so that would
+-- be the home folder's repo, if any.
+local file_repo = function()
+  return not vim.b.scratch and Snacks.git.get_root() or Snacks.git.get_root(vim.fn.getcwd())
+end
 
 -- The <leader>g keys work on it (outside one, they say so)
 local in_repo = function(action)
