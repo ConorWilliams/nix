@@ -100,9 +100,6 @@ in
             LG_CONFIG_FILE+=,${configDir}/lazygit/config.yml
 
             # Portrait windows (rotated monitors): the panels above the diff.
-            # lazygit's own "auto" only does that under 85 columns. Cells are
-            # about twice as tall as wide, so fewer than 2 x rows columns
-            # means the window is taller than wide. (Checked at startup only.)
             if size=$(${pkgs.coreutils}/bin/stty size 2>/dev/null); then
               read -r rows cols <<<"$size"
               if ((cols < 2 * rows)); then
