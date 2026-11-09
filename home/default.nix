@@ -205,6 +205,8 @@
 
   # nix commands use our pinned nixpkgs
   nix.registry.nixpkgs.flake = inputs.nixpkgs;
+  # ...and so do `nix-shell -p` and <nixpkgs>, through that registry entry.
+  nix.nixPath = [ "nixpkgs=flake:nixpkgs" ];
 
   # No "unread news" reminder on each switch.
   news.display = "silent";
