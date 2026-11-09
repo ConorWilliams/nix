@@ -169,6 +169,7 @@ in
             (bind "Alt g" (mode "normal"))
             (bind "Alt h" { GoToPreviousTab = { }; })
             (bind "Alt l" { GoToNextTab = { }; })
+            (bind "Alt f" (launch "find"))
           ];
           normal._children = [
             (bind "s" (mode "session"))
