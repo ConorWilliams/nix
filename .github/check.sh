@@ -55,7 +55,7 @@ lint() {
 # The Zellij plugins: clippy (pedantic, warnings fail) and tests.
 rust() {
   local crate
-  for crate in anon hints; do
+  for crate in anon finder hints; do
     step "clippy ${crate}" cargo clippy --manifest-path "home/zellij/${crate}/Cargo.toml" \
       --all-targets -- -W clippy::pedantic -D warnings
     step "test ${crate}" cargo test --manifest-path "home/zellij/${crate}/Cargo.toml"
