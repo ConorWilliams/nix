@@ -1,8 +1,9 @@
 -- Language servers. The servers themselves come from Nix (extraPackages in
 -- home/nvim.nix), or for project toolchains (rust-analyzer, ruff, ty) from
--- the project's direnv/devshell, on the PATH nvim starts with. nvim-lspconfig only supplies default configs (command,
--- filetypes, root markers) as lsp/<name>.lua files; per-server tweaks
--- live in after/lsp/<name>.lua and are merged on top.
+-- the project's direnv/devshell, on the PATH nvim starts with.
+-- nvim-lspconfig only supplies default configs (command, filetypes, root
+-- markers) as lsp/<name>.lua files; per-server tweaks live in
+-- after/lsp/<name>.lua and are merged on top.
 
 local servers = {
   'lua_ls', -- lua-language-server
