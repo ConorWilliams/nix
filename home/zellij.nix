@@ -7,7 +7,10 @@
 }:
 
 let
-  plugins = import ./zellij/plugin.nix { inherit pkgs; };
+  plugins = import ./zellij/plugin.nix {
+    inherit lib pkgs;
+    zellij = config.programs.zellij.package;
+  };
   # The plugins are at fixed paths, linking to the current builds
   # (xdg.dataFile, below): Zellij keys permissions, and saved sessions name
   # plugins, by path. A store path would need a new grant after each
