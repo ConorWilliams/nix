@@ -1,7 +1,7 @@
 # The window manager's keys, the same on Linux  and the Mac
 {
   keys = {
-    terminal = "Return"; # kitty, in its own zellij session
+    terminal = "Return"; # kitty
     launcher = "space"; # rofi; on the Mac, Spotlight's own Cmd+Space
     close = "Shift+q";
     fullscreen = "Shift+f";
