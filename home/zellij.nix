@@ -16,28 +16,34 @@ let
   zellij = lib.getExe config.programs.zellij.package;
   fish = lib.getExe config.programs.fish.package;
   # A resurrected pane's command: Neovim with this folder's persistence
-  # session, or an agent with its conversation, then a plain shell. Run in
-  # the folder's direnv environment, as from the shell (where the project's
-  # toolchain comes from), unless its .envrc is blocked.
+  # session, or an agent with its conversation. In the folder's direnv
+  # environment, as from the shell (where the project's toolchain comes
+  # from), unless its .envrc is blocked. It replaces itself with the
+  # program, so what Zellij sees running is the program itself
+  # (vim-zellij-navigator forwards Ctrl+arrows only to a pane running nvim).
   restore = pkgs.writeShellScript "zellij-restore" /* bash */ ''
-    direnv=${lib.getExe config.programs.direnv.package}
-    run() {
-      if "$direnv" exec . true 2>/dev/null; then
-        "$direnv" exec . "$@"
-      else
-        "$@"
-      fi
-    }
     case $1 in
-      nvim) run nvim -c 'lua require("persistence").load()' ;;
+      nvim) command=(nvim -c "lua require('persistence').load()") ;;
       # restore claude [ID]: that conversation, else the folder's latest
       claude)
-        if [[ -n ''${2:-} ]]; then run claude --resume "$2"; else run claude --continue; fi
+        if [[ -n ''${2:-} ]]; then
+          command=(claude --resume "$2")
+        else
+          command=(claude --continue)
+        fi
         ;;
-      codex) run codex resume --last ;;
+      codex) command=(codex resume --last) ;;
     esac
-    exec ${fish}
+    direnv=${lib.getExe config.programs.direnv.package}
+    if "$direnv" exec . true 2>/dev/null; then
+      exec "$direnv" exec . "''${command[@]}"
+    fi
+    exec "''${command[@]}"
   '';
+  # restore, under the tool's own name: Zellij reports what a pane runs in
+  # the foreground through the discovery hook (below), so this is the name
+  # vim-zellij-navigator sees, and it forwards Ctrl+arrows only to nvim.
+  restoreAs = tool: "${pkgs.writeShellScriptBin tool ''exec ${restore} ${tool} "$@"''}/bin/${tool}";
   # post_command_discovery_hook: given what a pane is running (its arguments
   # joined by spaces), prints what to resurrect there (split on spaces).
   # Only Neovim and the agents come back; any other pane is the default shell.
@@ -53,8 +59,9 @@ let
       case ''${words[i]} in --session-id | --resume | -r) id=''${words[i + 1]:-} ;; esac
     done
     case $name in
-      nvim | codex) echo "${restore} $name" ;;
-      claude) echo "${restore} claude $id" ;;
+      nvim) echo ${restoreAs "nvim"} ;;
+      codex) echo ${restoreAs "codex"} ;;
+      claude) echo "${restoreAs "claude"} $id" ;;
       *) echo ${fish} ;;
     esac
   '';
