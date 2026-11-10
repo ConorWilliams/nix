@@ -8,9 +8,18 @@
 
 let
   plugin = import ./zellij/plugin.nix { inherit pkgs; };
-  hints = plugin ./zellij/hints;
+  # The plugins, at fixed paths that link to the current builds: Zellij keys
+  # permissions, and saved sessions name plugins, by path. A store path
+  # would need a new grant after each rebuild, and pin old builds (soon
+  # garbage collected) in saved sessions.
+  wasm = {
+    zellij-hints = "${plugin ./zellij/hints}/bin/zellij-hints.wasm";
+    zellij-finder = "${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    vim-zellij-navigator = "${pkgs.zellijPlugins.vim-zellij-navigator}";
+  };
+  pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
   finder = scope: {
-    _props.location = "file:${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    _props.location = "file:${pluginPath "zellij-finder"}";
     inherit scope;
   };
   zellij = lib.getExe config.programs.zellij.package;
@@ -171,9 +180,9 @@ in
         post_command_discovery_hook = toString discoverCommand;
         plugins = {
           compact-bar._props.location = "zellij:compact-bar";
-          hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
+          hints._props.location = "file:${pluginPath "zellij-hints"}";
           hints-controller = {
-            _props.location = "file:${hints}/bin/zellij-hints.wasm";
+            _props.location = "file:${pluginPath "zellij-hints"}";
             controller = true;
           };
           # New sessions, and exited ones to resurrect (the finder has only live ones).
@@ -252,7 +261,7 @@ in
                 dir:
                 bind "Ctrl ${lib.toSentenceCase dir}" {
                   MessagePlugin = {
-                    _args = [ "file:${pkgs.zellijPlugins.vim-zellij-navigator}" ];
+                    _args = [ "file:${pluginPath "vim-zellij-navigator"}" ];
                     name = "move_focus";
                     payload = dir;
                     use_arrow_keys = "true";
@@ -276,6 +285,10 @@ in
       };
     };
   };
+
+  xdg.dataFile = lib.mapAttrs' (
+    name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
+  ) wasm;
 
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
   # for the session name.
