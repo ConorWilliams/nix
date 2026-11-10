@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use zellij_tile::prelude::{actions::Action, *};
 
@@ -11,8 +11,15 @@ struct Hints {
     rows: Vec<(String, String)>,
     size: (usize, usize),
     controller: bool,
-    views: BTreeSet<u32>,
+    /// Controller: each tab's view, with the floating pane focused there.
+    views: BTreeMap<u32, Option<Focus>>,
+    /// View: the floating pane to keep focused when showing (showing a
+    /// pane focuses it while floating panes are visible).
+    refocus: Option<Focus>,
 }
+
+/// A pane, as (id, is plugin): what the controller sends a view.
+type Focus = (u32, bool);
 register_plugin!(Hints);
 
 impl ZellijPlugin for Hints {
@@ -62,14 +69,20 @@ impl ZellijPlugin for Hints {
                 }
             }
             Event::PaneUpdate(manifest) if self.controller && self.ready => {
-                let mut views = BTreeSet::new();
+                let mut views = BTreeMap::new();
                 for panes in manifest.panes.values() {
                     let is_view_pane = |p: &&PaneInfo| {
                         p.is_plugin && p.id != self.id && is_view(p.plugin_url.as_deref())
                     };
+                    let focus = panes
+                        .iter()
+                        .find(|p| {
+                            p.is_focused && p.is_floating && !p.is_suppressed && !is_view_pane(p)
+                        })
+                        .map(|p| (p.id, p.is_plugin));
                     let mut hints = panes.iter().filter(is_view_pane);
                     if let Some(pane) = hints.next() {
-                        views.insert(pane.id);
+                        views.insert(pane.id, focus);
                     }
                     // Closing a tab transfers suppressed panes to another tab.
                     // Keep just one hints pane there, including after hidden closes.
@@ -90,10 +103,12 @@ impl ZellijPlugin for Hints {
     fn pipe(&mut self, message: PipeMessage) -> bool {
         if !self.controller
             && message.name == "hints-mode"
-            && let Some((mode, rows)) = message.payload.and_then(|p| serde_json::from_str(&p).ok())
+            && let Some((mode, rows, refocus)) =
+                message.payload.and_then(|p| serde_json::from_str(&p).ok())
         {
             self.mode = mode;
             self.rows = rows;
+            self.refocus = refocus;
             self.refresh();
         }
         self.ready && self.visible
@@ -135,12 +150,12 @@ impl Hints {
             return;
         }
         if self.controller {
-            let payload = serde_json::to_string(&(self.mode, &self.rows)).unwrap();
-            for id in &self.views {
+            for (id, focus) in &self.views {
+                let payload = serde_json::to_string(&(self.mode, &self.rows, focus)).unwrap();
                 pipe_message_to_plugin(MessageToPlugin {
                     destination_plugin_id: Some(*id),
                     message_name: "hints-mode".into(),
-                    message_payload: Some(payload.clone()),
+                    message_payload: Some(payload),
                     ..Default::default()
                 });
             }
@@ -165,7 +180,16 @@ impl Hints {
         let pane = PaneId::Plugin(self.id);
         if !self.visible {
             self.visible = true;
-            show_pane_with_id(pane, true, false); // leave input focused on the terminal
+            show_pane_with_id(pane, true, false);
+            // Which focuses it if floating panes are visible: give it back.
+            if let Some((id, is_plugin)) = self.refocus {
+                let pane = if is_plugin {
+                    PaneId::Plugin(id)
+                } else {
+                    PaneId::Terminal(id)
+                };
+                focus_pane_with_id(pane, false, false);
+            }
         }
         let key_width = self.key_width();
         let description_width = self
