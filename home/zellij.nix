@@ -14,6 +14,48 @@ let
     inherit scope;
   };
   zellij = lib.getExe config.programs.zellij.package;
+  fish = lib.getExe config.programs.fish.package;
+  # What a resurrected pane runs, a script named after the tool: the tool
+  # (with `defaults` if given no arguments) in the folder's direnv
+  # environment, as from the shell, unless its .envrc is blocked; then a
+  # plain shell. The name is what Zellij reports for the pane (through the
+  # discovery hook, below), and vim-zellij-navigator forwards Ctrl+arrows
+  # only to nvim.
+  resume =
+    tool: defaults:
+    pkgs.writeShellScriptBin tool /* bash */ ''
+      [[ $# -gt 0 ]] || set -- ${defaults}
+      direnv=${lib.getExe config.programs.direnv.package}
+      # Its own job, the terminal's foreground one, as if typed in the
+      # shell: Zellij reports and saves a pane's foreground job through
+      # the discovery hook, but not the pane's own process.
+      set -m
+      if "$direnv" exec . true 2>/dev/null; then
+        "$direnv" exec . ${tool} "$@"
+      else
+        ${tool} "$@"
+      fi
+      exec ${fish}
+    '';
+  # Resume scripts are at fixed paths too (xdg.dataFile, below), which saved
+  # sessions name: a store path would soon be garbage collected.
+  resumePath = tool: "${config.xdg.dataHome}/zellij/bin/${tool}";
+  # post_command_discovery_hook: given what a pane is running (its arguments
+  # joined by spaces), prints what to resurrect there (split on spaces).
+  # Only Neovim (with the folder's persistence session) and the agents (with
+  # their conversation, else the folder's latest) come back; any other pane
+  # is the default shell.
+  discoverCommand = pkgs.writeShellScript "zellij-discover-command" /* bash */ ''
+    read -r command _ <<<"$RESURRECT_COMMAND"
+    name=''${command##*/}
+    name=''${name#.}
+    name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
+    case $name in
+      nvim) echo ${resumePath "nvim"} ;;
+      codex) echo ${resumePath "codex"} ;;
+      *) echo ${fish} ;;
+    esac
+  '';
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
@@ -107,7 +149,13 @@ in
         show_startup_tips = false;
         show_release_notes = false;
         on_force_close = "detach";
-        session_serialization = false;
+        # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
+        # just the shell is then saved as one, not as a command to re-run.
+        default_shell = fish;
+        # Exited sessions can be resurrected (s n), each pane in its folder;
+        # what ran there waits for Enter (discoverCommand above).
+        session_serialization = true;
+        post_command_discovery_hook = toString discoverCommand;
         plugins = {
           compact-bar._props.location = "zellij:compact-bar";
           hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
@@ -115,6 +163,7 @@ in
             _props.location = "file:${hints}/bin/zellij-hints.wasm";
             controller = true;
           };
+          # New sessions, and exited ones to resurrect (the finder has only live ones).
           new-session = manager {
             multi_screen = false;
           };
@@ -213,6 +262,12 @@ in
         };
       };
     };
+  };
+
+  xdg.dataFile = {
+    # Resume scripts, where saved sessions find them (resumePath)
+    "zellij/bin/nvim".source = lib.getExe (resume "nvim" ''-c "lua require('persistence').load()"'');
+    "zellij/bin/codex".source = lib.getExe (resume "codex" "resume --last");
   };
 
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
