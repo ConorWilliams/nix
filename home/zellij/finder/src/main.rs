@@ -276,8 +276,12 @@ impl ZellijPlugin for Finder {
                 self.permission = Permission::Denied;
                 true
             }
+            // The first one shows reading is allowed (see `readable`). Then
+            // stop listening: get_session_list sends a SessionUpdate itself,
+            // so refreshing on each would loop. The timer refreshes the list.
             Event::SessionUpdate(..) => {
                 self.readable = true;
+                unsubscribe(&[EventType::SessionUpdate]);
                 self.refresh_sessions();
                 self.ready()
             }
