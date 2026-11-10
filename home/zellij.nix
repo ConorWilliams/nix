@@ -290,6 +290,55 @@ in
     name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
   ) wasm;
 
+  # Grant the plugins what they ask for, once: their paths are fixed, so
+  # these entries are too. Added to Zellij's permissions.kdl if missing; the
+  # file stays Zellij's (writable) for anything else it grants.
+  home.activation.zellijPermissions =
+    let
+      file =
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij/permissions.kdl"
+        else
+          "${config.xdg.cacheHome}/zellij/permissions.kdl";
+      grants = {
+        zellij-hints = [
+          "ReadApplicationState"
+          "ChangeApplicationState"
+          "MessageAndLaunchOtherPlugins"
+        ];
+        zellij-finder = [
+          "ReadApplicationState"
+          "ChangeApplicationState"
+        ];
+        vim-zellij-navigator = [
+          "ReadApplicationState"
+          "ChangeApplicationState"
+          "WriteToStdin"
+        ];
+      };
+      add =
+        name: permissions:
+        let
+          entry = pkgs.writeText "zellij-permission-${name}.kdl" ''
+            "${pluginPath name}" {
+            ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
+          '';
+        in
+        ''
+          if ! grep -qF ${lib.escapeShellArg ''"${pluginPath name}"''} ${lib.escapeShellArg file}; then
+            run tee -a ${lib.escapeShellArg file} <${entry} >/dev/null
+          fi
+        '';
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ] (
+      ''
+        run mkdir -p ${lib.escapeShellArg (dirOf file)}
+        run touch ${lib.escapeShellArg file}
+        run chmod u+w ${lib.escapeShellArg file}
+      ''
+      + lib.concatStrings (lib.mapAttrsToList add grants)
+    );
+
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
   # for the session name.
   home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
