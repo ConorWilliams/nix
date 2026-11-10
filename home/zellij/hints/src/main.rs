@@ -64,9 +64,9 @@ impl ZellijPlugin for Hints {
             Event::PaneUpdate(manifest) if self.controller && self.ready => {
                 let mut views = BTreeSet::new();
                 for panes in manifest.panes.values() {
-                    let mut hints = panes
-                        .iter()
-                        .filter(|p| p.is_plugin && p.plugin_url.as_deref() == Some("hints"));
+                    let mut hints = panes.iter().filter(|p| {
+                        p.is_plugin && p.id != self.id && is_view(p.plugin_url.as_deref())
+                    });
                     if let Some(pane) = hints.next() {
                         views.insert(pane.id);
                     }
@@ -188,6 +188,12 @@ impl Hints {
     }
 }
 
+/// A hints view pane: by its alias in the layout, or (in a resurrected
+/// session, whose saved layout has the resolved location) by its file.
+fn is_view(url: Option<&str>) -> bool {
+    url.is_some_and(|url| url == "hints" || url.ends_with("/zellij-hints.wasm"))
+}
+
 fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
     let mut groups: Vec<(String, String)> = Vec::new();
     // The keymap comes unordered; sort so the menu is stable: plain keys
@@ -283,5 +289,21 @@ fn describe(action: &Action) -> String {
             .unwrap_or("Action")
             .trim()
             .to_owned(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_view;
+
+    #[test]
+    fn views_by_alias_or_file() {
+        assert!(is_view(Some("hints")));
+        assert!(is_view(Some(
+            "file:/nix/store/abc-zellij-hints-static-wasm32-unknown-wasip1-0.1.0/bin/zellij-hints.wasm"
+        )));
+        assert!(!is_view(Some("hints-controller")));
+        assert!(!is_view(Some("zellij:compact-bar")));
+        assert!(!is_view(None));
     }
 }
