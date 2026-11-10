@@ -15,35 +15,10 @@ let
   };
   zellij = lib.getExe config.programs.zellij.package;
   fish = lib.getExe config.programs.fish.package;
-  # Claude and Codex in a pane run through zellij-agent, which tags each
-  # launch with a token; their SessionStart hook (also on /clear, /resume)
-  # records the conversation under it, so a resurrected pane resumes exactly
-  # that conversation.
-  agents = "${config.xdg.stateHome}/zellij/agents";
-  # zellij-agent TOKEN TOOL ARGS...: stays the pane's foreground command
-  # (no exec), so zellij saves the token with it.
-  agent = pkgs.writeShellScript "zellij-agent" /* bash */ ''
-    export ZELLIJ_AGENT=$1
-    shift
-    "$@"
-  '';
-  # The SessionStart hook: records the conversation (hook input on stdin)
-  # under the launch's token. Prints nothing: Claude would add it to the
-  # conversation.
-  recordAgent = pkgs.writeShellScript "zellij-agent-record" /* bash */ ''
-    [[ ''${ZELLIJ_AGENT:-} =~ ^[A-Za-z0-9-]+$ ]] || exit 0
-    id=$(${lib.getExe pkgs.jq} -r '.session_id // empty')
-    [[ -n $id ]] || exit 0
-    mkdir -p ${agents}
-    printf '%s\n' "$id" >${agents}/"$ZELLIJ_AGENT"
-    # Tokens of panes long gone
-    find ${agents} -type f -mtime +90 -delete
-  '';
   # A resurrected pane's command: Neovim with this folder's persistence
-  # session, or an agent with its conversation (its token's, else the
-  # folder's latest), then a plain shell. Run in the folder's direnv
-  # environment, as from the shell (where the project's toolchain comes
-  # from), unless its .envrc is blocked.
+  # session, or an agent with its conversation, then a plain shell. Run in
+  # the folder's direnv environment, as from the shell (where the project's
+  # toolchain comes from), unless its .envrc is blocked.
   restore = pkgs.writeShellScript "zellij-restore" /* bash */ ''
     direnv=${lib.getExe config.programs.direnv.package}
     run() {
@@ -53,47 +28,33 @@ let
         "$@"
       fi
     }
-    # restore claude|codex [TOKEN]: without a token (layouts saved before
-    # zellij-agent), a fresh one, so the conversation is tracked from now on.
-    tool=$1
-    token=''${2:-$(date +%s)-$RANDOM$RANDOM}
-    id=$(cat ${agents}/"$token" 2>/dev/null)
-    case $tool in
+    case $1 in
       nvim) run nvim -c 'lua require("persistence").load()' ;;
+      # restore claude [ID]: that conversation, else the folder's latest
       claude)
-        if [[ -n $id ]]; then
-          run ${agent} "$token" claude --resume "$id"
-        else
-          run ${agent} "$token" claude --continue
-        fi
+        if [[ -n ''${2:-} ]]; then run claude --resume "$2"; else run claude --continue; fi
         ;;
-      codex)
-        if [[ -n $id ]]; then
-          run ${agent} "$token" codex resume "$id"
-        else
-          run ${agent} "$token" codex resume --last
-        fi
-        ;;
+      codex) run codex resume --last ;;
     esac
     exec ${fish}
   '';
   # post_command_discovery_hook: given what a pane is running (its arguments
   # joined by spaces), prints what to resurrect there (split on spaces).
   # Only Neovim and the agents come back; any other pane is the default shell.
+  # A Claude conversation's id comes from its command line (see the claude
+  # function below): --session-id ID or --resume ID.
   discoverCommand = pkgs.writeShellScript "zellij-discover-command" /* bash */ ''
     read -r -a words <<<"$RESURRECT_COMMAND"
-    # An agent launched through zellij-agent: … zellij-agent TOKEN TOOL …
-    for i in "''${!words[@]}"; do
-      if [[ ''${words[i]} == ${agent} ]]; then
-        echo "${restore} ''${words[i + 2]} ''${words[i + 1]}"
-        exit
-      fi
-    done
     name=''${words[0]##*/}
     name=''${name#.}
     name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
+    id=
+    for i in "''${!words[@]}"; do
+      case ''${words[i]} in --session-id | --resume | -r) id=''${words[i + 1]:-} ;; esac
+    done
     case $name in
-      nvim | claude | codex) echo "${restore} $name" ;;
+      nvim | codex) echo "${restore} $name" ;;
+      claude) echo "${restore} claude $id" ;;
       *) echo ${fish} ;;
     esac
   '';
@@ -164,28 +125,18 @@ let
 in
 {
   programs = {
-    # In Zellij, claude and codex start through zellij-agent (above).
-    fish.functions = lib.genAttrs [ "claude" "codex" ] (tool: {
-      description = "${tool}; in Zellij, tagged so a resurrected pane resumes its conversation";
-      wraps = tool;
+    # In Zellij, a new Claude conversation gets its id on its command line,
+    # where Zellij saves it, so a resurrected pane resumes that one.
+    fish.functions.claude = {
+      wraps = "claude";
       body = /* fish */ ''
-        if set -q ZELLIJ
-          ${agent} (date +%s)-(random)(random) ${tool} $argv
+        if set -q ZELLIJ; and test (count $argv) -eq 0
+          command claude --session-id (${lib.getExe' pkgs.util-linux "uuidgen"})
         else
-          command ${tool} $argv
+          command claude $argv
         end
       '';
-    });
-    claude-code.settings.hooks.SessionStart = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = toString recordAgent;
-          }
-        ];
-      }
-    ];
+    };
 
     zellij = {
       enable = true;
@@ -326,20 +277,6 @@ in
         };
       };
     };
-  };
-
-  # Codex's hooks, as Claude's above (Codex asks once to trust a new hook).
-  home.file.".codex/hooks.json".text = builtins.toJSON {
-    hooks.SessionStart = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = toString recordAgent;
-          }
-        ];
-      }
-    ];
   };
 
   # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
