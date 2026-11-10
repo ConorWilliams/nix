@@ -29,7 +29,10 @@ impl ZellijPlugin for Hints {
         self.size = (24, 80);
         // The controller follows the mode (full ModeUpdate events supply the
         // live keymap; no config parser or cache) and the views; views only
-        // need their tab's size.
+        // need their tab's size. Views can't follow the mode themselves:
+        // Zellij sends ModeUpdate only to the active tab's plugins (and to
+        // background ones, as the controller), so a view in a tab just left
+        // (t n) would never hear the mode change, and stay open.
         if self.controller {
             subscribe(&[
                 EventType::ModeUpdate,
