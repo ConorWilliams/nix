@@ -27,13 +27,18 @@ impl ZellijPlugin for Hints {
         self.id = get_plugin_ids().plugin_id;
         self.controller = configuration.get("controller").is_some_and(|v| v == "true");
         self.size = (24, 80);
-        // Full ModeUpdate events supply the live keymap; no config parser or cache.
-        subscribe(&[
-            EventType::ModeUpdate,
-            EventType::TabUpdate,
-            EventType::PaneUpdate,
-            EventType::PermissionRequestResult,
-        ]);
+        // The controller follows the mode (full ModeUpdate events supply the
+        // live keymap; no config parser or cache) and the views; views only
+        // need their tab's size.
+        if self.controller {
+            subscribe(&[
+                EventType::ModeUpdate,
+                EventType::PaneUpdate,
+                EventType::PermissionRequestResult,
+            ]);
+        } else {
+            subscribe(&[EventType::TabUpdate, EventType::PermissionRequestResult]);
+        }
         request_permission(&[
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
@@ -45,8 +50,10 @@ impl ZellijPlugin for Hints {
         match event {
             Event::PermissionRequestResult(PermissionStatus::Granted) => {
                 self.ready = true;
-                set_selectable(false);
-                hide_self();
+                if !self.controller {
+                    set_selectable(false);
+                    hide_self();
+                }
                 self.refresh();
             }
             // Views get the mode piped from the controller, which also covers new views.
