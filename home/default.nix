@@ -210,7 +210,8 @@
   nix = {
     # Nix itself, from nixpkgs: what a switch runs and (in home.packages,
     # above) the `nix` on PATH, the same on every machine and bumped with the
-    # lock. The daemon stays the installed one.
+    # lock. On Linux the daemon stays the installed one; on the Mac it is
+    # nix-darwin's.
     package = pkgs.nix;
     # Flakes, in ~/.config/nix/nix.conf
     settings.experimental-features = [
