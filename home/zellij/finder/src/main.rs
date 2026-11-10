@@ -127,6 +127,10 @@ struct Finder {
     scope: Scope,
     ready: bool,
     denied: bool,
+    /// A `SessionUpdate` arrived, so reading Zellij's state is really
+    /// allowed: until then `get_session_list` could panic (if zellij reports
+    /// a grant it didn't apply, as for a pane restored with a session).
+    readable: bool,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -161,6 +165,9 @@ impl Finder {
     /// `SessionUpdate` alone can leave out other sessions, so its list is
     /// never used: ask directly instead, as the built-in session manager does.
     fn refresh_sessions(&mut self) {
+        if !self.readable {
+            return;
+        }
         if let Ok(snapshot) = get_session_list() {
             self.update_sessions(&snapshot.live_sessions);
         }
@@ -234,6 +241,7 @@ impl ZellijPlugin for Finder {
             EventType::SessionUpdate,
             EventType::Key,
             EventType::Timer,
+            EventType::Visible,
         ]);
     }
 
@@ -253,9 +261,16 @@ impl ZellijPlugin for Finder {
                 self.denied = true;
                 true
             }
-            Event::SessionUpdate(..) if self.ready => {
+            Event::SessionUpdate(..) => {
+                self.readable = true;
                 self.refresh_sessions();
-                true
+                self.ready
+            }
+            // A picker off screen (another tab or session, or brought back
+            // with a resurrected session) has no reason to stay open.
+            Event::Visible(false) => {
+                close_self();
+                false
             }
             Event::Key(key) if self.ready => self.key(&key),
             // Not ready: the pane can still be closed.
