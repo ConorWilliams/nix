@@ -2469,6 +2469,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "zellij-quit"
+version = "0.1.0"
+dependencies = [
+ "zellij-tile",
+]
+
+[[package]]
 name = "zellij-tile"
 version = "0.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

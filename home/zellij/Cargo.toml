@@ -1,7 +1,7 @@
 # The Zellij plugins: one workspace, so one lock and one build of what they share.
 [workspace]
 resolver = "3"
-members = ["finder", "hints"]
+members = ["finder", "hints", "quit"]
 
 [workspace.package]
 version = "0.1.0"
