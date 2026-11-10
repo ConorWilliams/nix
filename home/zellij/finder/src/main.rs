@@ -156,8 +156,8 @@ impl Finder {
             .map(|(i, _)| &self.entries[*i])
     }
 
-    /// New entries, keeping the same session or tab selected (if it's still
-    /// shown), so Enter never lands on whatever moved under the cursor.
+    /// New entries, keeping the same session or tab selected while it's
+    /// still shown, so Enter doesn't land on whatever moved under the cursor.
     /// Whether they changed (else there's nothing to redraw).
     fn update_sessions(&mut self, sessions: &[SessionInfo]) -> bool {
         let entries = entries(sessions, self.scope);
@@ -188,7 +188,8 @@ impl Finder {
     }
 
     /// `SessionUpdate` alone can leave out other sessions, so its list is
-    /// never used: ask directly instead, as the built-in session manager does.
+    /// never used: ask directly instead (as the built-in session manager
+    /// also does, on a timer).
     fn refresh_sessions(&mut self) -> bool {
         if !self.readable {
             return false;
@@ -294,6 +295,7 @@ impl ZellijPlugin for Finder {
         match event {
             Event::PermissionRequestResult(PermissionStatus::Granted) => {
                 self.ready = true;
+                // (which also brings the first SessionUpdate)
                 rename_plugin_pane(get_plugin_ids().plugin_id, self.scope.title());
                 self.poll_sessions();
                 true
@@ -303,13 +305,13 @@ impl ZellijPlugin for Finder {
                 self.denied = true;
                 true
             }
-            // The first one shows reading is allowed (see `readable`). Then
-            // stop listening: get_session_list sends a SessionUpdate itself,
-            // so refreshing on each would loop. The timer refreshes the list.
             Event::TabUpdate(tabs) => {
                 self.tabs = Some(tabs);
                 self.rebuild() && self.ready
             }
+            // The first one shows reading is allowed (see `readable`). Then
+            // stop listening: get_session_list sends a SessionUpdate itself,
+            // so refreshing on each would loop. The timer refreshes the list.
             Event::SessionUpdate(..) => {
                 self.readable = true;
                 unsubscribe(&[EventType::SessionUpdate]);
