@@ -65,10 +65,15 @@ let
     name=''${name#.}
     name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
     # A Claude conversation's id, from its command line (see the claude
-    # function below)
+    # function below). Only a UUID counts, so a prompt's words can't.
+    uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     id=
-    if [[ $RESURRECT_COMMAND =~ (^| )(--session-id|--resume|-r)\ ([^ ]+) ]]; then
+    if [[ $RESURRECT_COMMAND =~ (^| )(--session-id|--resume|-r)[\ =]($uuid)( |$) ]]; then
       id="--resume ''${BASH_REMATCH[3]}"
+    fi
+    # Print mode isn't a conversation to come back to.
+    if [[ $name == claude && $RESURRECT_COMMAND =~ (^| )(-p|--print)( |$) ]]; then
+      name=
     fi
     case $name in
       nvim) echo ${resumePath "nvim"} ;;
