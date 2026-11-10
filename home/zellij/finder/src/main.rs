@@ -152,9 +152,14 @@ impl Finder {
 
     /// New entries, keeping the same session or tab selected (if it's still
     /// shown), so Enter never lands on whatever moved under the cursor.
-    fn update_sessions(&mut self, sessions: &[SessionInfo]) {
+    /// Whether they changed (else there's nothing to redraw).
+    fn update_sessions(&mut self, sessions: &[SessionInfo]) -> bool {
+        let entries = entries(sessions, self.scope);
+        if entries == self.entries {
+            return false;
+        }
         let kept = self.selected_entry().map(|e| (e.session.clone(), e.tab));
-        self.entries = entries(sessions, self.scope);
+        self.entries = entries;
         self.shown = filter(&self.entries, &self.query);
         if let Some(position) = kept.and_then(|(session, tab)| {
             self.shown.iter().position(|(i, _)| {
@@ -165,35 +170,39 @@ impl Finder {
             self.selected = position;
         }
         self.selected = self.selected.min(self.shown.len().saturating_sub(1));
+        true
     }
 
     /// `SessionUpdate` alone can leave out other sessions, so its list is
     /// never used: ask directly instead, as the built-in session manager does.
-    fn refresh_sessions(&mut self) {
+    fn refresh_sessions(&mut self) -> bool {
         if !self.readable {
-            return;
+            return false;
         }
-        if let Ok(snapshot) = get_session_list() {
-            self.sessions = snapshot.live_sessions;
-            self.rebuild();
+        match get_session_list() {
+            Ok(snapshot) => {
+                self.sessions = snapshot.live_sessions;
+                self.rebuild()
+            }
+            Err(_) => false,
         }
     }
 
     /// Entries from the last session list, with this session's latest tabs.
-    fn rebuild(&mut self) {
+    fn rebuild(&mut self) -> bool {
         let mut sessions = self.sessions.clone();
         if let Some(tabs) = &self.tabs {
             for session in sessions.iter_mut().filter(|s| s.is_current_session) {
                 session.tabs.clone_from(tabs);
             }
         }
-        self.update_sessions(&sessions);
+        self.update_sessions(&sessions)
     }
 
     /// Refresh now and every second.
-    fn poll_sessions(&mut self) {
-        self.refresh_sessions();
+    fn poll_sessions(&mut self) -> bool {
         set_timeout(1.0);
+        self.refresh_sessions()
     }
 
     /// The query changed: the best match is selected.
@@ -271,10 +280,7 @@ impl ZellijPlugin for Finder {
                 self.poll_sessions();
                 true
             }
-            Event::Timer(_) if self.ready => {
-                self.poll_sessions();
-                true
-            }
+            Event::Timer(_) if self.ready => self.poll_sessions(),
             Event::PermissionRequestResult(PermissionStatus::Denied) => {
                 self.denied = true;
                 true
@@ -284,14 +290,12 @@ impl ZellijPlugin for Finder {
             // so refreshing on each would loop. The timer refreshes the list.
             Event::TabUpdate(tabs) => {
                 self.tabs = Some(tabs);
-                self.rebuild();
-                self.ready
+                self.rebuild() && self.ready
             }
             Event::SessionUpdate(..) => {
                 self.readable = true;
                 unsubscribe(&[EventType::SessionUpdate]);
-                self.refresh_sessions();
-                self.ready
+                self.refresh_sessions() && self.ready
             }
             // A picker off screen (another tab or session, or brought back
             // with a resurrected session) has no reason to stay open.
