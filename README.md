@@ -80,6 +80,33 @@ nix flake check --all-systems --no-build   # check every config
 .github/check.sh [check|lint|rust|nvim]    # everything CI checks
 ```
 
+## Zellij
+
+A new terminal is a plain shell; Zellij starts when asked for:
+
+```sh
+zellij attach -c NAME                      # join or create a session
+zzh HOST [NAME]                            # the same on another host
+restart-zellij                             # save and end every session
+```
+
+Zellij starts locked, so keys go to the program in the pane. `Alt g` leads
+into its modes (a menu shows the keys), and these work from anywhere:
+
+| Keys           | Does                                  |
+| -------------- | ------------------------------------- |
+| `Alt f`        | find a session's tab (any words)      |
+| `Alt h`/`l`    | previous / next tab                   |
+| `Ctrl` arrows  | move between panes and Neovim splits  |
+
+They shadow fish's `Alt h`, `Alt l` and `Alt f`, and `Ctrl Right` (in fish,
+`Alt Right` still accepts a word of a suggestion).
+
+Ended sessions can be brought back (`s n`, or `zellij attach NAME`), each pane
+in its folder; Neovim, Claude and Codex wait for Enter, then resume. A switch
+that changes plugin aliases or Zellij's options only reaches sessions started
+after it: run `restart-zellij` (outside Zellij) to bring them all up to date.
+
 ## Credentials
 
 `git` authenticates to GitHub through `gh`, over HTTPS desks log `gh` in with
