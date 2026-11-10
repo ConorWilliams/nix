@@ -144,7 +144,7 @@ in
         # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
         # just the shell is then saved as one, not as a command to re-run.
         default_shell = fish;
-        # Exited sessions can be resurrected (s m), each pane in its folder;
+        # Exited sessions can be resurrected (s n), each pane in its folder;
         # what ran there waits for Enter (discoverCommand above).
         session_serialization = true;
         post_command_discovery_hook = toString discoverCommand;
@@ -155,11 +155,8 @@ in
             _props.location = "file:${hints}/bin/zellij-hints.wasm";
             controller = true;
           };
+          # New sessions, and exited ones to resurrect (the finder has only live ones).
           new-session = manager {
-            multi_screen = false;
-          };
-          # The same, for its list of exited sessions (the finder has only live ones).
-          resurrect = manager {
             multi_screen = false;
           };
           # Fuzzy finders (zellij/finder): each word of the query matches
@@ -195,7 +192,6 @@ in
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
             (once "f" (launch "find-sessions"))
-            (once "m" (launch "resurrect"))
             (once "r" (prompt "Rename session" renameSession))
           ];
           tab._children = [
