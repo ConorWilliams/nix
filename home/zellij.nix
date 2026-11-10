@@ -8,7 +8,6 @@
 
 let
   plugin = import ./zellij/plugin.nix { inherit pkgs; };
-  anon = plugin ./zellij/anon;
   hints = plugin ./zellij/hints;
   finder = scope: {
     _props.location = "file:${plugin ./zellij/finder}/bin/zellij-finder.wasm";
@@ -30,14 +29,11 @@ let
       break
     end
   '';
-  # Quitting ends the session for every client: named sessions ask first,
-  # anonymous ones (anon-*, which go away on detach anyway) don't.
+  # Quitting ends the session for every client, so it asks first.
   quitSession = pkgs.writeText "zellij-quit-session.fish" /* fish */ ''
-    if not string match --quiet 'anon-*' -- $ZELLIJ_SESSION_NAME
-      read --local --nchars 1 --prompt-str "Quit session $ZELLIJ_SESSION_NAME? [y/N] " answer
-      or exit
-      contains -- "$answer" y Y; or exit
-    end
+    read --local --nchars 1 --prompt-str "Quit session $ZELLIJ_SESSION_NAME? [y/N] " answer
+    or exit
+    contains -- "$answer" y Y; or exit
     ${zellij} kill-session $ZELLIJ_SESSION_NAME
   '';
   # A fish script in a small floating pane, for a prompt.
@@ -85,15 +81,6 @@ let
 in
 {
   programs = {
-    # Naming only: the background plugin owns cleanup when the last client leaves.
-    fish.functions.anon-zellij = {
-      description = "Start an anonymous Zellij session";
-      wraps = "zellij";
-      body = /* fish */ ''
-        ${zellij} --session "anon-$(${lib.getExe pkgs.rust-petname} --words 2)" $argv
-      '';
-    };
-
     zellij = {
       enable = true;
       themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
@@ -128,7 +115,6 @@ in
             _props.location = "file:${hints}/bin/zellij-hints.wasm";
             controller = true;
           };
-          anon._props.location = "file:${anon}/bin/zellij-anon.wasm";
           new-session = manager {
             multi_screen = false;
           };
@@ -140,8 +126,6 @@ in
         };
         load_plugins = {
           hints-controller = { };
-          # Runs in the server, including after the last client disconnects.
-          anon = { };
         };
         keybinds = {
           _props.clear-defaults = true;
