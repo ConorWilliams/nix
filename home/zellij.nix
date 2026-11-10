@@ -352,7 +352,6 @@ in
         name = "restart-zellij";
         runtimeInputs = [
           config.programs.zellij.package
-          pkgs.perl
         ];
         text = ''
           if [[ -n ''${ZELLIJ:-} ]]; then
@@ -376,11 +375,6 @@ in
           mkdir -p "$backup"
           for s in "''${live[@]}"; do
             zellij --session "$s" action dump-layout >"$backup/$s.kdl"
-            # Sessions from before default_shell save idle shells as a fish
-            # command to re-run: plain panes again. And plugins by store path
-            # (from before their fixed paths): the fixed paths.
-            perl -0pi -e 's/pane command="[^"]*\/bin\/fish"([^{\n]*)\{\s*start_suspended true\s*\}/pane$1/g' "$backup/$s.kdl"
-            perl -pi -e 's#file:/nix/store/[^"]*/zellij-hints\.wasm#file:${pluginPath "zellij-hints"}#g; s#file:/nix/store/[^"]*/zellij-finder\.wasm#file:${pluginPath "zellij-finder"}#g' "$backup/$s.kdl"
             echo "saved $s ($(grep -c '^    tab ' "$backup/$s.kdl") tabs)"
           done
 
