@@ -109,9 +109,9 @@ after it: run `restart-zellij` (outside Zellij) to bring them all up to date.
 
 ## Credentials
 
-`git` authenticates to GitHub through `gh`, over HTTPS desks log `gh` in with
+`git` authenticates to GitHub through `gh`, over HTTPS. Desks log `gh` in with
 the browser; each server gets its own [fine-grained token][pat], limited to
-the repos it needs, to renew one, run:
+the repos it needs. To renew one, run:
 
 ```sh
 gh auth login --with-token
