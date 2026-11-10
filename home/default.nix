@@ -40,6 +40,7 @@
     # or shell integration get a `programs.<name>` block below or in their own
     # file.
     packages = with pkgs; [
+      config.nix.package # (nix.package, below)
       fd
       dust
       duf
@@ -203,10 +204,21 @@
     };
   };
 
-  # nix commands use our pinned nixpkgs
-  nix.registry.nixpkgs.flake = inputs.nixpkgs;
-  # ...and so do `nix-shell -p` and <nixpkgs>, through that registry entry.
-  nix.nixPath = [ "nixpkgs=flake:nixpkgs" ];
+  nix = {
+    # Nix itself, from nixpkgs: what a switch runs and (in home.packages,
+    # above) the `nix` on PATH, the same on every machine and bumped with the
+    # lock. The daemon stays the installed one.
+    package = pkgs.nix;
+    # Flakes, in ~/.config/nix/nix.conf
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    # nix commands use our pinned nixpkgs
+    registry.nixpkgs.flake = inputs.nixpkgs;
+    # ...and so do `nix-shell -p` and <nixpkgs>, through that registry entry.
+    nixPath = [ "nixpkgs=flake:nixpkgs" ];
+  };
 
   # No "unread news" reminder on each switch.
   news.display = "silent";
