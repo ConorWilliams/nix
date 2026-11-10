@@ -2461,6 +2461,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "zellij-hints"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "zellij-tile",
+]
+
+[[package]]
 name = "zellij-tile"
 version = "0.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

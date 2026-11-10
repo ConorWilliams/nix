@@ -1,17 +1,16 @@
 { pkgs }:
 
-# A Zellij plugin crate (Cargo.toml + Cargo.lock) built for WASI.
-src:
+# The Zellij plugins (this folder's Cargo workspace) built for WASI:
+# bin/<crate>.wasm for each.
 let
   wasm = pkgs.pkgsCross.wasm32-wasip1;
-  manifest = fromTOML (builtins.readFile (src + "/Cargo.toml"));
 in
 wasm.rustPlatform.buildRustPackage {
-  pname = manifest.package.name;
-  version = manifest.package.version;
-  inherit src;
-  cargoLock.lockFile = src + "/Cargo.lock";
+  pname = "zellij-plugins";
+  version = (fromTOML (builtins.readFile ./Cargo.toml)).workspace.package.version;
+  src = ./.;
+  cargoLock.lockFile = ./Cargo.lock;
   nativeBuildInputs = [ wasm.lld ];
   env.RUSTFLAGS = "-C linker=wasm-ld";
-  doCheck = false; # WASI plugin; behavior is checked in a real Zellij session.
+  doCheck = false; # WASI plugins; behavior is checked in a real Zellij session.
 }
