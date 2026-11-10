@@ -296,9 +296,6 @@ fn describe(action: &Action) -> String {
         Action::Detach => "Detach session".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
         action if action.launches_plugin("new-session") => "New / resurrect session".into(),
-        action if action.launches_plugin("find") => "Find sessions and tabs".into(),
-        action if action.launches_plugin("find-tabs") => "Find tabs".into(),
-        action if action.launches_plugin("find-sessions") => "Find sessions".into(),
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])

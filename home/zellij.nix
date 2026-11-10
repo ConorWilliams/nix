@@ -16,10 +16,6 @@ let
   # plugins, by path. A store path would need a new grant after each
   # rebuild, and pin old builds (soon garbage collected) in saved sessions.
   pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
-  finder = scope: {
-    _props.location = "file:${pluginPath "zellij-finder"}";
-    inherit scope;
-  };
   zellij = lib.getExe config.programs.zellij.package;
   fish = lib.getExe config.programs.fish.package;
   # What a resurrected pane runs, a script named after the tool: the tool
@@ -193,11 +189,10 @@ in
           new-session = manager {
             multi_screen = false;
           };
-          # Fuzzy finders (zellij/finder): each word of the query matches
-          # somewhere, so `nix edit` finds the tab edit in the session nix.
-          find = finder "all"; # every session's tabs
-          find-sessions = finder "sessions";
-          find-tabs = finder "tabs"; # this session's
+          # Fuzzy finder (zellij/finder) for every session's tabs: each word
+          # of the query matches somewhere, so `nix edit` finds the tab edit
+          # in the session nix.
+          find._props.location = "file:${pluginPath "zellij-finder"}";
         };
         load_plugins = {
           hints-controller = { };
@@ -215,7 +210,6 @@ in
             (bind "s" (mode "session"))
             (bind "t" (mode "tab"))
             (bind "p" (mode "pane"))
-            (once "Space" (launch "find"))
           ];
           session._children = [
             (once "n" (launch "new-session"))
@@ -225,7 +219,6 @@ in
             (once "[" { FocusHostSession = { }; })
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
-            (once "f" (launch "find-sessions"))
             (once "r" (prompt "Rename session" renameSession))
           ];
           tab._children = [
@@ -239,7 +232,6 @@ in
               (mode "renametab")
             ])
             (once "d" { CloseTab = { }; })
-            (once "f" (launch "find-tabs"))
           ];
           renametab._children = [
             (bind "Enter" (mode "locked"))
