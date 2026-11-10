@@ -297,9 +297,69 @@ in
     "zellij/plugins/vim-zellij-navigator.wasm".source = pkgs.zellijPlugins.vim-zellij-navigator;
   };
 
-  # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
-  # for the session name.
-  home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
+  home = {
+    # Grant the plugins what they ask for: their paths are fixed, so these
+    # entries are too. Written into Zellij's permissions.kdl (replacing older
+    # versions of them); the file stays Zellij's, writable, for anything else
+    # it grants.
+    activation.zellijPermissions =
+      let
+        file =
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij/permissions.kdl"
+          else
+            "${config.xdg.cacheHome}/zellij/permissions.kdl";
+        grants = {
+          zellij-hints = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+            "MessageAndLaunchOtherPlugins"
+          ];
+          zellij-finder = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+          ];
+          vim-zellij-navigator = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+            "WriteToStdin"
+          ];
+        };
+        # Ours as below (replacing any older version), others' as they are.
+        keys = pkgs.writeText "zellij-permission-keys" (
+          lib.concatMapStrings (name: ''"${pluginPath name}" {'' + "\n") (lib.attrNames grants)
+        );
+        entries = pkgs.writeText "zellij-permissions.kdl" (
+          lib.concatStrings (
+            lib.mapAttrsToList (name: permissions: ''
+              "${pluginPath name}" {
+              ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
+            '') grants
+          )
+        );
+      in
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        file=${lib.escapeShellArg file}
+        new=$(mktemp)
+        if [[ -e $file ]]; then
+          ${lib.getExe pkgs.gawk} 'NR == FNR { ours[$0]; next }
+            $0 in ours { skip = 1; next }
+            skip { if ($0 == "}") skip = 0; next }
+            { print }' ${keys} "$file" >"$new"
+        fi
+        cat ${entries} >>"$new"
+        if ! cmp -s "$new" "$file"; then
+          run mkdir -p "$(dirname "$file")"
+          [[ -e $file ]] && run chmod u+w "$file"
+          run cp "$new" "$file"
+        fi
+        rm -f "$new"
+      '';
+
+    # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
+    # for the session name.
+    sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
+    };
   };
 }
