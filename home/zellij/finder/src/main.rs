@@ -131,6 +131,11 @@ struct Finder {
     /// allowed: until then `get_session_list` could panic (if zellij reports
     /// a grant it didn't apply, as for a pane restored with a session).
     readable: bool,
+    /// The last session list, and this session's tabs as of the last
+    /// `TabUpdate`: fresher than the list's, which Zellij updates on disk
+    /// once a second.
+    sessions: Vec<SessionInfo>,
+    tabs: Option<Vec<TabInfo>>,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -169,8 +174,20 @@ impl Finder {
             return;
         }
         if let Ok(snapshot) = get_session_list() {
-            self.update_sessions(&snapshot.live_sessions);
+            self.sessions = snapshot.live_sessions;
+            self.rebuild();
         }
+    }
+
+    /// Entries from the last session list, with this session's latest tabs.
+    fn rebuild(&mut self) {
+        let mut sessions = self.sessions.clone();
+        if let Some(tabs) = &self.tabs {
+            for session in sessions.iter_mut().filter(|s| s.is_current_session) {
+                session.tabs.clone_from(tabs);
+            }
+        }
+        self.update_sessions(&sessions);
     }
 
     /// Refresh now and every second.
@@ -242,6 +259,7 @@ impl ZellijPlugin for Finder {
             EventType::Key,
             EventType::Timer,
             EventType::Visible,
+            EventType::TabUpdate,
         ]);
     }
 
@@ -264,6 +282,11 @@ impl ZellijPlugin for Finder {
             // The first one shows reading is allowed (see `readable`). Then
             // stop listening: get_session_list sends a SessionUpdate itself,
             // so refreshing on each would loop. The timer refreshes the list.
+            Event::TabUpdate(tabs) => {
+                self.tabs = Some(tabs);
+                self.rebuild();
+                self.ready
+            }
             Event::SessionUpdate(..) => {
                 self.readable = true;
                 unsubscribe(&[EventType::SessionUpdate]);
