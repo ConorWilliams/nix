@@ -84,9 +84,11 @@ let
   '';
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
+      set name (string trim -- "$name")
       test -z "$name"; and break
-      if string match --quiet '*/*' -- "$name"
-        echo 'Session names cannot contain /.' >&2
+      # (Zellij's own checks, which renaming skips)
+      if string match --quiet '*/*' -- "$name"; or contains -- "$name" . ..
+        echo 'Not a session name: no /, and not . or ..' >&2
         continue
       end
       if contains -- "$name" (${zellij} list-sessions -sn)
