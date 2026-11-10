@@ -27,11 +27,11 @@ in
     wraps = "claude";
     body = /* fish */ ''
       # Not for what already picks a conversation, print mode, or a
-      # subcommand (as `claude --help` lists them).
-      set -l subcommands agents attach auth auto-mode doctor gateway import install logs \
-        mcp plugin plugins purge respawn rm setup-token stop kill ultrareview update upgrade
+      # subcommand: any single bare word, rather than a list of them to
+      # keep up with. (A one-word prompt then goes without an id, and its
+      # pane comes back with the folder's latest conversation.)
       if set -q ZELLIJ
-          and not contains -- "$argv[1]" $subcommands
+          and not string match -qr -- '^[a-z][a-z-]*$' "$argv[1]"
           and not string match -qr -- '^(-r|--resume|-c|--continue|--session-id|--fork-session|-p|--print)(=.*)?$' $argv
         command claude --session-id (${lib.getExe' pkgs.util-linux "uuidgen"}) $argv
       else
