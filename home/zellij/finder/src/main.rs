@@ -113,13 +113,13 @@ fn filter(entries: &[Entry], query: &str) -> Vec<(usize, Vec<usize>)> {
     found.into_iter().map(|(_, i, idx)| (i, idx)).collect()
 }
 
-/// Esc or Ctrl c: close the finder.
 /// The query without its last word (and the spaces after it), as Ctrl-w.
 fn delete_word(query: &str) -> &str {
     let query = query.trim_end();
     query.rfind(' ').map_or("", |i| &query[..=i])
 }
 
+/// Esc or Ctrl c: close the finder.
 fn closes(key: &KeyWithModifier) -> bool {
     match key.bare_key {
         BareKey::Esc => true,
