@@ -193,7 +193,10 @@
       git = true;
       package = pkgs.symlinkJoin {
         name = "eza";
-        paths = [ pkgs.eza ];
+        paths = [
+          pkgs.eza
+          pkgs.eza.man # (a separate output, which the join would leave out)
+        ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
         # Wrapped so it ignores LS_COLORS above.
         postBuild = /* bash */ ''
