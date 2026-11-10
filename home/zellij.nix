@@ -344,7 +344,7 @@ in
         file=${lib.escapeShellArg file}
         new=$(mktemp)
         if [[ -e $file ]]; then
-          awk 'NR == FNR { ours[$0]; next }
+          ${lib.getExe pkgs.gawk} 'NR == FNR { ours[$0]; next }
             $0 in ours { skip = 1; next }
             skip { if ($0 == "}") skip = 0; next }
             { print }' ${keys} "$file" >"$new"
