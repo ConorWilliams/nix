@@ -268,6 +268,7 @@ impl ZellijPlugin for Finder {
             EventType::SessionUpdate,
             EventType::Key,
             EventType::Timer,
+            EventType::Visible,
             EventType::TabUpdate,
         ]);
     }
@@ -297,6 +298,12 @@ impl ZellijPlugin for Finder {
                 self.readable = true;
                 unsubscribe(&[EventType::SessionUpdate]);
                 self.refresh_sessions() && self.ready
+            }
+            // A picker off screen (another tab or session, or brought back
+            // with a resurrected session) has no reason to stay open.
+            Event::Visible(false) => {
+                close_self();
+                false
             }
             Event::Key(key) if self.ready => self.key(&key),
             // Not ready: the pane can still be closed.
