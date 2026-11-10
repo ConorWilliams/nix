@@ -394,7 +394,8 @@ in
             exit 1
           fi
 
-          mapfile -t live < <(zellij list-sessions --no-formatting 2>/dev/null | grep -v EXITED | cut -d' ' -f1)
+          # (names can have spaces: drop what follows them, not split on them)
+          mapfile -t live < <(zellij list-sessions --no-formatting 2>/dev/null | sed -n '/(EXITED/!s/ \[Created .*//p')
           if ((''${#live[@]} == 0)); then
             echo 'No live sessions.'
             exit 0
