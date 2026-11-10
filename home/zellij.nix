@@ -65,7 +65,7 @@ let
     name=''${name#.}
     name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
     # A Claude conversation's id, from its command line (see the claude
-    # function below). Only a UUID counts, so a prompt's words can't.
+    # function, in claude.nix). Only a UUID counts, so a prompt's words can't.
     uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     id=
     if [[ $RESURRECT_COMMAND =~ (^| )(--session-id|--resume|-r)[\ =]($uuid)( |$) ]]; then
@@ -151,25 +151,6 @@ let
 in
 {
   programs = {
-    # In Zellij, a new Claude conversation gets its id on its command line,
-    # where Zellij saves it, so a resurrected pane resumes that one.
-    fish.functions.claude = {
-      wraps = "claude";
-      body = /* fish */ ''
-        # Not for what already picks a conversation, print mode, or a
-        # subcommand (as `claude --help` lists them).
-        set -l subcommands agents attach auth auto-mode doctor gateway import install logs \
-          mcp plugin plugins purge respawn rm setup-token stop kill ultrareview update upgrade
-        if set -q ZELLIJ
-            and not contains -- "$argv[1]" $subcommands
-            and not string match -qr -- '^(-r|--resume|-c|--continue|--session-id|--fork-session|-p|--print)(=.*)?$' $argv
-          command claude --session-id (${lib.getExe' pkgs.util-linux "uuidgen"}) $argv
-        else
-          command claude $argv
-        end
-      '';
-    };
-
     zellij = {
       enable = true;
       themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
