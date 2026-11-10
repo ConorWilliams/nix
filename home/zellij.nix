@@ -340,7 +340,7 @@ in
         + lib.concatStrings (lib.mapAttrsToList add grants)
       );
 
-    # zellij-restart-sessions: restart every live session under the current
+    # restart-zellij: restart every live session under the current
     # config (after a switch that changes what a running session can't pick up:
     # plugin aliases, options). Each session's layout is saved, the session
     # ended, and the layout put where Zellij keeps exited sessions, to bring
@@ -349,7 +349,7 @@ in
     # ends every session, and whatever runs in them.
     packages = [
       (pkgs.writeShellApplication {
-        name = "zellij-restart-sessions";
+        name = "restart-zellij";
         runtimeInputs = [
           config.programs.zellij.package
           pkgs.perl
