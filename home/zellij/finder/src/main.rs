@@ -127,6 +127,15 @@ struct Finder {
     scope: Scope,
     ready: bool,
     denied: bool,
+    /// A `SessionUpdate` arrived, so reading Zellij's state is really
+    /// allowed: until then `get_session_list` could panic (if zellij reports
+    /// a grant it didn't apply, as for a pane restored with a session).
+    readable: bool,
+    /// The last session list, and this session's tabs as of the last
+    /// `TabUpdate`: fresher than the list's, which Zellij updates on disk
+    /// once a second.
+    sessions: Vec<SessionInfo>,
+    tabs: Option<Vec<TabInfo>>,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -141,11 +150,16 @@ impl Finder {
             .map(|(i, _)| &self.entries[*i])
     }
 
-    /// New entries, keeping the same session or tab selected (if it's still
-    /// shown), so Enter never lands on whatever moved under the cursor.
-    fn update_sessions(&mut self, sessions: &[SessionInfo]) {
+    /// New entries, keeping the same session or tab selected while it's
+    /// still shown, so Enter doesn't land on whatever moved under the cursor.
+    /// Whether they changed (else there's nothing to redraw).
+    fn update_sessions(&mut self, sessions: &[SessionInfo]) -> bool {
+        let entries = entries(sessions, self.scope);
+        if entries == self.entries {
+            return false;
+        }
         let kept = self.selected_entry().map(|e| (e.session.clone(), e.tab));
-        self.entries = entries(sessions, self.scope);
+        self.entries = entries;
         self.shown = filter(&self.entries, &self.query);
         if let Some(position) = kept.and_then(|(session, tab)| {
             self.shown.iter().position(|(i, _)| {
@@ -156,20 +170,40 @@ impl Finder {
             self.selected = position;
         }
         self.selected = self.selected.min(self.shown.len().saturating_sub(1));
+        true
     }
 
     /// `SessionUpdate` alone can leave out other sessions, so its list is
-    /// never used: ask directly instead, as the built-in session manager does.
-    fn refresh_sessions(&mut self) {
-        if let Ok(snapshot) = get_session_list() {
-            self.update_sessions(&snapshot.live_sessions);
+    /// never used: ask directly instead (as the built-in session manager
+    /// also does, on a timer).
+    fn refresh_sessions(&mut self) -> bool {
+        if !self.readable {
+            return false;
+        }
+        match get_session_list() {
+            Ok(snapshot) => {
+                self.sessions = snapshot.live_sessions;
+                self.rebuild()
+            }
+            Err(_) => false,
         }
     }
 
+    /// Entries from the last session list, with this session's latest tabs.
+    fn rebuild(&mut self) -> bool {
+        let mut sessions = self.sessions.clone();
+        if let Some(tabs) = &self.tabs {
+            for session in sessions.iter_mut().filter(|s| s.is_current_session) {
+                session.tabs.clone_from(tabs);
+            }
+        }
+        self.update_sessions(&sessions)
+    }
+
     /// Refresh now and every second.
-    fn poll_sessions(&mut self) {
-        self.refresh_sessions();
+    fn poll_sessions(&mut self) -> bool {
         set_timeout(1.0);
+        self.refresh_sessions()
     }
 
     /// The query changed: the best match is selected.
@@ -234,6 +268,7 @@ impl ZellijPlugin for Finder {
             EventType::SessionUpdate,
             EventType::Key,
             EventType::Timer,
+            EventType::TabUpdate,
         ]);
     }
 
@@ -241,21 +276,27 @@ impl ZellijPlugin for Finder {
         match event {
             Event::PermissionRequestResult(PermissionStatus::Granted) => {
                 self.ready = true;
+                // (which also brings the first SessionUpdate)
                 rename_plugin_pane(get_plugin_ids().plugin_id, self.scope.title());
                 self.poll_sessions();
                 true
             }
-            Event::Timer(_) if self.ready => {
-                self.poll_sessions();
-                true
-            }
+            Event::Timer(_) if self.ready => self.poll_sessions(),
             Event::PermissionRequestResult(PermissionStatus::Denied) => {
                 self.denied = true;
                 true
             }
-            Event::SessionUpdate(..) if self.ready => {
-                self.refresh_sessions();
-                true
+            Event::TabUpdate(tabs) => {
+                self.tabs = Some(tabs);
+                self.rebuild() && self.ready
+            }
+            // The first one shows reading is allowed (see `readable`). Then
+            // stop listening: get_session_list sends a SessionUpdate itself,
+            // so refreshing on each would loop. The timer refreshes the list.
+            Event::SessionUpdate(..) => {
+                self.readable = true;
+                unsubscribe(&[EventType::SessionUpdate]);
+                self.refresh_sessions() && self.ready
             }
             Event::Key(key) if self.ready => self.key(&key),
             // Not ready: the pane can still be closed.
