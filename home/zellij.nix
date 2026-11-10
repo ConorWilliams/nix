@@ -24,11 +24,11 @@ let
   };
   zellij = lib.getExe config.programs.zellij.package;
   fish = lib.getExe config.programs.fish.package;
-  # What a resurrected pane runs: the tool, with these arguments if given
-  # none, in the folder's direnv environment as from the shell (the
-  # project's toolchain), unless its .envrc is blocked. It's named after the
-  # tool and replaces itself with it: Zellij reports a pane's command through
-  # the discovery hook (below), and vim-zellij-navigator forwards Ctrl+arrows
+  # What a resurrected pane runs, a script named after the tool: the tool
+  # (with `defaults` if given no arguments) in the folder's direnv
+  # environment, as from the shell, unless its .envrc is blocked; then a
+  # plain shell. The name is what Zellij reports for the pane (through the
+  # discovery hook, below), and vim-zellij-navigator forwards Ctrl+arrows
   # only to nvim.
   resume =
     tool: defaults:
@@ -36,10 +36,16 @@ let
       pkgs.writeShellScriptBin tool /* bash */ ''
         [[ $# -gt 0 ]] || set -- ${defaults}
         direnv=${lib.getExe config.programs.direnv.package}
+        # Its own job, the terminal's foreground one, as if typed in the
+        # shell: Zellij reports and saves a pane's foreground job through
+        # the discovery hook, but not the pane's own process.
+        set -m
         if "$direnv" exec . true 2>/dev/null; then
-          exec "$direnv" exec . ${tool} "$@"
+          "$direnv" exec . ${tool} "$@"
+        else
+          ${tool} "$@"
         fi
-        exec ${tool} "$@"
+        exec ${fish}
       ''
     }/bin/${tool}";
   # post_command_discovery_hook: given what a pane is running (its arguments
