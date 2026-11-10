@@ -290,58 +290,135 @@ in
     name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
   ) wasm;
 
-  # Grant the plugins what they ask for, once: their paths are fixed, so
-  # these entries are too. Added to Zellij's permissions.kdl if missing; the
-  # file stays Zellij's (writable) for anything else it grants.
-  home.activation.zellijPermissions =
-    let
-      file =
-        if pkgs.stdenv.hostPlatform.isDarwin then
-          "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij/permissions.kdl"
-        else
-          "${config.xdg.cacheHome}/zellij/permissions.kdl";
-      grants = {
-        zellij-hints = [
-          "ReadApplicationState"
-          "ChangeApplicationState"
-          "MessageAndLaunchOtherPlugins"
-        ];
-        zellij-finder = [
-          "ReadApplicationState"
-          "ChangeApplicationState"
-        ];
-        vim-zellij-navigator = [
-          "ReadApplicationState"
-          "ChangeApplicationState"
-          "WriteToStdin"
-        ];
-      };
-      add =
-        name: permissions:
-        let
-          entry = pkgs.writeText "zellij-permission-${name}.kdl" ''
-            "${pluginPath name}" {
-            ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
+  home = {
+    # Grant the plugins what they ask for, once: their paths are fixed, so
+    # these entries are too. Added to Zellij's permissions.kdl if missing; the
+    # file stays Zellij's (writable) for anything else it grants.
+    activation.zellijPermissions =
+      let
+        file =
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij/permissions.kdl"
+          else
+            "${config.xdg.cacheHome}/zellij/permissions.kdl";
+        grants = {
+          zellij-hints = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+            "MessageAndLaunchOtherPlugins"
+          ];
+          zellij-finder = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+          ];
+          vim-zellij-navigator = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+            "WriteToStdin"
+          ];
+        };
+        add =
+          name: permissions:
+          let
+            entry = pkgs.writeText "zellij-permission-${name}.kdl" ''
+              "${pluginPath name}" {
+              ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
+            '';
+          in
+          ''
+            if ! grep -qF ${lib.escapeShellArg ''"${pluginPath name}"''} ${lib.escapeShellArg file}; then
+              run tee -a ${lib.escapeShellArg file} <${entry} >/dev/null
+            fi
           '';
-        in
+      in
+      lib.hm.dag.entryAfter [ "writeBoundary" ] (
         ''
-          if ! grep -qF ${lib.escapeShellArg ''"${pluginPath name}"''} ${lib.escapeShellArg file}; then
-            run tee -a ${lib.escapeShellArg file} <${entry} >/dev/null
-          fi
-        '';
-    in
-    lib.hm.dag.entryAfter [ "writeBoundary" ] (
-      ''
-        run mkdir -p ${lib.escapeShellArg (dirOf file)}
-        run touch ${lib.escapeShellArg file}
-        run chmod u+w ${lib.escapeShellArg file}
-      ''
-      + lib.concatStrings (lib.mapAttrsToList add grants)
-    );
+          run mkdir -p ${lib.escapeShellArg (dirOf file)}
+          run touch ${lib.escapeShellArg file}
+          run chmod u+w ${lib.escapeShellArg file}
+        ''
+        + lib.concatStrings (lib.mapAttrsToList add grants)
+      );
 
-  # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
-  # for the session name.
-  home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
+    # zellij-restart-sessions: restart every live session under the current
+    # config (after a switch that changes what a running session can't pick up:
+    # plugin aliases, options). Each session's layout is saved, the session
+    # ended, and the layout put where Zellij keeps exited sessions, to bring
+    # back with `zellij attach NAME` (or s n); what ran in a pane waits for
+    # Enter. Copies go to ~/zellij-layouts-<date>/. Run it outside Zellij: it
+    # ends every session, and whatever runs in them.
+    packages = [
+      (pkgs.writeShellApplication {
+        name = "zellij-restart-sessions";
+        runtimeInputs = [
+          config.programs.zellij.package
+          pkgs.perl
+        ];
+        text = ''
+          if [[ -n ''${ZELLIJ:-} ]]; then
+            echo 'Run this from a terminal outside Zellij: it ends every session.' >&2
+            exit 1
+          fi
+          sessions=${
+            if pkgs.stdenv.hostPlatform.isDarwin then
+              "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij"
+            else
+              "${config.xdg.cacheHome}/zellij"
+          }/contract_version_1/session_info
+
+          mapfile -t live < <(zellij list-sessions --no-formatting 2>/dev/null | grep -v EXITED | cut -d' ' -f1)
+          if ((''${#live[@]} == 0)); then
+            echo 'No live sessions.'
+            exit 0
+          fi
+
+          backup=$HOME/zellij-layouts-$(date +%F-%H%M%S)
+          mkdir -p "$backup"
+          for s in "''${live[@]}"; do
+            zellij --session "$s" action dump-layout >"$backup/$s.kdl"
+            # Sessions from before default_shell save idle shells as a fish
+            # command to re-run: plain panes again. And plugins by store path
+            # (from before their fixed paths): the fixed paths.
+            perl -0pi -e 's/pane command="[^"]*\/bin\/fish"([^{\n]*)\{\s*start_suspended true\s*\}/pane$1/g' "$backup/$s.kdl"
+            perl -pi -e 's#file:/nix/store/[^"]*/zellij-hints\.wasm#file:${pluginPath "zellij-hints"}#g; s#file:/nix/store/[^"]*/zellij-finder\.wasm#file:${pluginPath "zellij-finder"}#g' "$backup/$s.kdl"
+            echo "saved $s ($(grep -c '^    tab ' "$backup/$s.kdl") tabs)"
+          done
+
+          read -r -p "End these ''${#live[@]} sessions now? [y/N] " answer
+          if [[ $answer != [yY] ]]; then
+            echo "Nothing ended; layouts are in $backup"
+            exit 0
+          fi
+
+          for s in "''${live[@]}"; do
+            zellij kill-session "$s"
+          done
+          # Ending a session clears or rewrites its folder in the cache, so
+          # wait for it to end first (it may stay listed, as EXITED, if it
+          # saved itself).
+          for s in "''${live[@]}"; do
+            for _ in $(seq 50); do
+              zellij list-sessions --no-formatting 2>/dev/null | grep "^$s " | grep -qv EXITED || break
+              sleep 0.2
+            done
+            sleep 0.5
+            mkdir -p "$sessions/$s"
+            cp "$backup/$s.kdl" "$sessions/$s/session-layout.kdl"
+          done
+
+          echo
+          zellij list-sessions --no-formatting
+          echo
+          echo "Bring one back with: zellij attach NAME (or s n in Zellij)."
+          echo "Layouts are also in $backup"
+        '';
+      })
+    ];
+
+    # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
+    # for the session name.
+    sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      ZELLIJ_SOCKET_DIR = "${config.xdg.cacheHome}/zellij-sockets";
+    };
   };
 }
