@@ -50,7 +50,7 @@
       remapCapsLockToEscape = true;
     };
 
-    # Free keys that overlap with Zellij/AreoSpace.
+    # Free keys that overlap with Zellij/AeroSpace.
     activationScripts.postActivation.text =
       let
         disabledHotkeys = [
