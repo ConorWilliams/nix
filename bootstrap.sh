@@ -57,8 +57,7 @@ main() {
   # plain <user> (the server layer).
   user=$(id -un)
   host=$(hostname -s)
-  config=$(nix eval --raw "${dir}#homeConfigurations" --apply "c:
-    if c ? \"${user}@${host}\" then \"${user}@${host}\" else if c ? \"${user}\" then \"${user}\" else \"\"")
+  config=$(nix eval --raw "${dir}#lib.configFor" --apply "f: f \"${user}\" \"${host}\"")
   if [[ -z ${config} ]]; then
     echo "No config for user '${user}' (the users are listed in flake.nix)."
     exit 1

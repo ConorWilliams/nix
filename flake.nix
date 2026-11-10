@@ -163,6 +163,21 @@
           )
         ) hosts;
 
+      # Which config a user on a host gets: "<user>@<host>" if the host is
+      # listed, else "<user>" (the server layer), else "" (no such user).
+      # For bootstrap.sh and .github/check.sh.
+      lib.configFor =
+        user: host:
+        let
+          configs = self.homeConfigurations;
+        in
+        if configs ? "${user}@${host}" then
+          "${user}@${host}"
+        else if configs ? ${user} then
+          user
+        else
+          "";
+
       # The repo's dev shell
       devShells = lib.genAttrs systems (
         system:
