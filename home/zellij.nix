@@ -17,11 +17,21 @@ let
   fish = lib.getExe config.programs.fish.package;
   # A resurrected pane's command: Neovim with this folder's persistence
   # session, or an agent with its latest conversation, then a plain shell.
+  # Run in the folder's direnv environment, as from the shell (where the
+  # project's toolchain comes from), unless its .envrc is blocked.
   restore = pkgs.writeShellScript "zellij-restore" /* bash */ ''
+    direnv=${lib.getExe config.programs.direnv.package}
+    run() {
+      if "$direnv" exec . true 2>/dev/null; then
+        "$direnv" exec . "$@"
+      else
+        "$@"
+      fi
+    }
     case $1 in
-      nvim) nvim -c 'lua require("persistence").load()' ;;
-      claude) claude --continue ;;
-      codex) codex resume --last ;;
+      nvim) run nvim -c 'lua require("persistence").load()' ;;
+      claude) run claude --continue ;;
+      codex) run codex resume --last ;;
     esac
     exec ${fish}
   '';
