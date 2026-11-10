@@ -154,8 +154,14 @@ in
     fish.functions.claude = {
       wraps = "claude";
       body = /* fish */ ''
-        if set -q ZELLIJ; and test (count $argv) -eq 0
-          command claude --session-id (${lib.getExe' pkgs.util-linux "uuidgen"})
+        # Not for what already picks a conversation, print mode, or a
+        # subcommand (as `claude --help` lists them).
+        set -l subcommands agents attach auth auto-mode doctor gateway import install logs \
+          mcp plugin plugins purge respawn rm setup-token stop kill ultrareview update upgrade
+        if set -q ZELLIJ
+            and not contains -- "$argv[1]" $subcommands
+            and not string match -qr -- '^(-r|--resume|-c|--continue|--session-id|--fork-session|-p|--print)(=.*)?$' $argv
+          command claude --session-id (${lib.getExe' pkgs.util-linux "uuidgen"}) $argv
         else
           command claude $argv
         end
