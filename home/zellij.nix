@@ -14,6 +14,30 @@ let
     inherit scope;
   };
   zellij = lib.getExe config.programs.zellij.package;
+  fish = lib.getExe config.programs.fish.package;
+  # A resurrected pane's command: Neovim with this folder's persistence
+  # session, or an agent with its latest conversation, then a plain shell.
+  restore = pkgs.writeShellScript "zellij-restore" /* bash */ ''
+    case $1 in
+      nvim) nvim -c 'lua require("persistence").load()' ;;
+      claude) claude --continue ;;
+      codex) codex resume --last ;;
+    esac
+    exec ${fish}
+  '';
+  # post_command_discovery_hook: given what a pane is running (its arguments
+  # joined by spaces), prints what to resurrect there (split on spaces).
+  # Only Neovim and the agents come back; any other pane is the default shell.
+  discoverCommand = pkgs.writeShellScript "zellij-discover-command" /* bash */ ''
+    read -r command _ <<<"$RESURRECT_COMMAND"
+    name=''${command##*/}
+    name=''${name#.}
+    name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
+    case $name in
+      nvim | claude | codex) echo "${restore} $name" ;;
+      *) echo ${fish} ;;
+    esac
+  '';
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
       test -z "$name"; and break
@@ -107,7 +131,13 @@ in
         show_startup_tips = false;
         show_release_notes = false;
         on_force_close = "detach";
-        session_serialization = false;
+        # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
+        # just the shell is then saved as one, not as a command to re-run.
+        default_shell = fish;
+        # Exited sessions can be resurrected (s m), each pane in its folder;
+        # what ran there waits for Enter (discoverCommand above).
+        session_serialization = true;
+        post_command_discovery_hook = toString discoverCommand;
         plugins = {
           compact-bar._props.location = "zellij:compact-bar";
           hints._props.location = "file:${hints}/bin/zellij-hints.wasm";
@@ -116,6 +146,10 @@ in
             controller = true;
           };
           new-session = manager {
+            multi_screen = false;
+          };
+          # The same, for its list of exited sessions (the finder has only live ones).
+          resurrect = manager {
             multi_screen = false;
           };
           # Fuzzy finders (zellij/finder): each word of the query matches
@@ -151,6 +185,7 @@ in
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
             (once "f" (launch "find-sessions"))
+            (once "m" (launch "resurrect"))
             (once "r" (prompt "Rename session" renameSession))
           ];
           tab._children = [

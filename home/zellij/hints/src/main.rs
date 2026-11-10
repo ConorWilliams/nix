@@ -270,6 +270,7 @@ fn describe(action: &Action) -> String {
             format!("Plugin: {}", name.as_deref().unwrap_or("message"))
         }
         action if action.launches_plugin("new-session") => "New session".into(),
+        action if action.launches_plugin("resurrect") => "Resurrect session".into(),
         action if action.launches_plugin("find") => "Find sessions and tabs".into(),
         action if action.launches_plugin("find-tabs") => "Find tabs".into(),
         action if action.launches_plugin("find-sessions") => "Find sessions".into(),
