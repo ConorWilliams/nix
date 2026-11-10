@@ -114,6 +114,12 @@ fn filter(entries: &[Entry], query: &str) -> Vec<(usize, Vec<usize>)> {
 }
 
 /// Esc or Ctrl c: close the finder.
+/// The query without its last word (and the spaces after it), as Ctrl-w.
+fn delete_word(query: &str) -> &str {
+    let query = query.trim_end();
+    query.rfind(' ').map_or("", |i| &query[..=i])
+}
+
 fn closes(key: &KeyWithModifier) -> bool {
     match key.bare_key {
         BareKey::Esc => true,
@@ -241,6 +247,10 @@ impl Finder {
             BareKey::Char('n' | 'j') if ctrl => self.move_down(),
             BareKey::Char('u') if ctrl => {
                 self.query.clear();
+                self.refilter();
+            }
+            BareKey::Char('w') if ctrl => {
+                self.query = delete_word(&self.query).to_owned();
                 self.refilter();
             }
             BareKey::Backspace => {
@@ -483,6 +493,14 @@ mod tests {
         };
         finder.update_sessions(&sessions()); // nix (current), caiman, work
         assert_eq!(finder.selected_entry().unwrap().label, "caiman");
+    }
+
+    #[test]
+    fn ctrl_w_deletes_a_word() {
+        assert_eq!(delete_word("nix edit"), "nix ");
+        assert_eq!(delete_word("nix edit  "), "nix ");
+        assert_eq!(delete_word("nix"), "");
+        assert_eq!(delete_word(""), "");
     }
 
     #[test]
