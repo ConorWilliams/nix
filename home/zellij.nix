@@ -35,6 +35,12 @@ let
       else
         ${tool} "$@"
       fi
+      # Suspended (Ctrl-Z)? There is no shell here to suspend to, and going
+      # on would leave the tool behind, stopped: resume it. (Recursion, not
+      # a loop: bash breaks out of a loop whose job is suspended. fg's
+      # stderr stays the terminal: bash hands that to the job.)
+      unsuspend() { if [[ -n $(jobs -ps) ]]; then fg >/dev/null; unsuspend; fi; }
+      unsuspend
       exec ${fish}
     '';
   # Resume scripts are at fixed paths too (xdg.dataFile, below), which saved
