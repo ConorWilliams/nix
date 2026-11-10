@@ -318,9 +318,10 @@ in
     ) resumers;
 
   home = {
-    # Grant the plugins what they ask for, once: their paths are fixed, so
-    # these entries are too. Added to Zellij's permissions.kdl if missing; the
-    # file stays Zellij's (writable) for anything else it grants.
+    # Grant the plugins what they ask for: their paths are fixed, so these
+    # entries are too. Written into Zellij's permissions.kdl (replacing older
+    # versions of them); the file stays Zellij's, writable, for anything else
+    # it grants.
     activation.zellijPermissions =
       let
         file =
@@ -344,28 +345,36 @@ in
             "WriteToStdin"
           ];
         };
-        add =
-          name: permissions:
-          let
-            entry = pkgs.writeText "zellij-permission-${name}.kdl" ''
+        # Ours as below (replacing any older version), others' as they are.
+        keys = pkgs.writeText "zellij-permission-keys" (
+          lib.concatMapStrings (name: ''"${pluginPath name}" {'' + "\n") (lib.attrNames grants)
+        );
+        entries = pkgs.writeText "zellij-permissions.kdl" (
+          lib.concatStrings (
+            lib.mapAttrsToList (name: permissions: ''
               "${pluginPath name}" {
               ${lib.concatMapStrings (p: "    ${p}\n") permissions}}
-            '';
-          in
-          ''
-            if ! grep -qF ${lib.escapeShellArg ''"${pluginPath name}"''} ${lib.escapeShellArg file}; then
-              run tee -a ${lib.escapeShellArg file} <${entry} >/dev/null
-            fi
-          '';
+            '') grants
+          )
+        );
       in
-      lib.hm.dag.entryAfter [ "writeBoundary" ] (
-        ''
-          run mkdir -p ${lib.escapeShellArg (dirOf file)}
-          run touch ${lib.escapeShellArg file}
-          run chmod u+w ${lib.escapeShellArg file}
-        ''
-        + lib.concatStrings (lib.mapAttrsToList add grants)
-      );
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        file=${lib.escapeShellArg file}
+        new=$(mktemp)
+        if [[ -e $file ]]; then
+          awk 'NR == FNR { ours[$0]; next }
+            $0 in ours { skip = 1; next }
+            skip { if ($0 == "}") skip = 0; next }
+            { print }' ${keys} "$file" >"$new"
+        fi
+        cat ${entries} >>"$new"
+        if ! cmp -s "$new" "$file"; then
+          run mkdir -p "$(dirname "$file")"
+          [[ -e $file ]] && run chmod u+w "$file"
+          run cp "$new" "$file"
+        fi
+        rm -f "$new"
+      '';
 
     # restart-zellij: restart every live session under the current
     # config (after a switch that changes what a running session can't pick up:
