@@ -38,12 +38,11 @@ jobs:
   rust:
     runs-on: ubuntu-latest
     env:
-      CARGO_TARGET_DIR: ${{ github.workspace }}/target # the crates share their dependencies
       CARGO_INCREMENTAL: 0 # no use from scratch; it would only grow the cache
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
-      # Compiled dependencies, rebuilt when the toolchain (flake.lock) or a
+      # Compiled dependencies, rebuilt when the toolchain (flake.lock) or the
       # Cargo.lock changes; otherwise only the crates themselves compile.
       - uses: actions/cache@v6
         with:
@@ -51,8 +50,8 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-            target
-          key: cargo-${{ runner.os }}-${{ hashFiles('flake.lock', 'home/zellij/*/Cargo.lock') }}
+            home/zellij/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('flake.lock', 'home/zellij/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
       - run: .github/check.sh rust
 

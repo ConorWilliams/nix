@@ -54,12 +54,9 @@ lint() {
 
 # The Zellij plugins: clippy (pedantic, warnings fail) and tests.
 rust() {
-  local crate
-  for crate in finder hints; do
-    step "clippy ${crate}" cargo clippy --manifest-path "home/zellij/${crate}/Cargo.toml" \
-      --all-targets -- -W clippy::pedantic -D warnings
-    step "test ${crate}" cargo test --manifest-path "home/zellij/${crate}/Cargo.toml"
-  done
+  step "clippy" cargo clippy --manifest-path home/zellij/Cargo.toml --workspace \
+    --all-targets -- -W clippy::pedantic -D warnings
+  step "test" cargo test --manifest-path home/zellij/Cargo.toml --workspace
 }
 
 # Neovim with this checkout's home/nvim and a Home Manager config's plugins

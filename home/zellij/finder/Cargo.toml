@@ -1,9 +1,9 @@
 [package]
 name = "zellij-finder"
-version = "0.1.0"
-edition = "2024"
-publish = false
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
 
 [dependencies]
 fuzzy-matcher = "0.3"
-zellij-tile = "=0.45.1"
+zellij-tile.workspace = true
