@@ -376,13 +376,12 @@ in
         rm -f "$new"
       '';
 
-    # restart-zellij: restart every live session under the current
-    # config (after a switch that changes what a running session can't pick up:
-    # plugin aliases, options). Each session's layout is saved, the session
-    # ended, and the layout put where Zellij keeps exited sessions, to bring
-    # back with `zellij attach NAME` (or s n); what ran in a pane waits for
-    # Enter. Copies go to ~/zellij-layouts-<date>/. Run it outside Zellij: it
-    # ends every session, and whatever runs in them.
+    # restart-zellij: restart every live session under the current config
+    # (after a switch that changes what a running session can't pick up:
+    # plugin aliases, options). Each session is saved as Zellij saves it on
+    # its own, then ended, to bring back with `zellij attach NAME` (or s n);
+    # what ran in a pane waits for Enter. Run it outside Zellij: it ends
+    # every session, and whatever runs in them.
     packages = [
       (pkgs.writeShellApplication {
         name = "restart-zellij";
@@ -394,12 +393,6 @@ in
             echo 'Run this from a terminal outside Zellij: it ends every session.' >&2
             exit 1
           fi
-          sessions=${
-            if pkgs.stdenv.hostPlatform.isDarwin then
-              "${config.home.homeDirectory}/Library/Caches/org.Zellij-Contributors.Zellij"
-            else
-              "${config.xdg.cacheHome}/zellij"
-          }/contract_version_1/session_info
 
           mapfile -t live < <(zellij list-sessions --no-formatting 2>/dev/null | grep -v EXITED | cut -d' ' -f1)
           if ((''${#live[@]} == 0)); then
@@ -407,40 +400,19 @@ in
             exit 0
           fi
 
-          backup=$HOME/zellij-layouts-$(date +%F-%H%M%S)
-          mkdir -p "$backup"
-          for s in "''${live[@]}"; do
-            zellij --session "$s" action dump-layout >"$backup/$s.kdl"
-            echo "saved $s ($(grep -c '^    tab ' "$backup/$s.kdl") tabs)"
-          done
-
-          read -r -p "End these ''${#live[@]} sessions now? [y/N] " answer
-          if [[ $answer != [yY] ]]; then
-            echo "Nothing ended; layouts are in $backup"
-            exit 0
-          fi
+          printf '%s\n' "''${live[@]}"
+          read -r -p "Save and end these ''${#live[@]} sessions? [y/N] " answer
+          [[ $answer == [yY] ]] || exit 0
 
           for s in "''${live[@]}"; do
+            zellij --session "$s" action save-session
             zellij kill-session "$s"
-          done
-          # Ending a session clears or rewrites its folder in the cache, so
-          # wait for it to end first (it may stay listed, as EXITED, if it
-          # saved itself).
-          for s in "''${live[@]}"; do
-            for _ in $(seq 50); do
-              zellij list-sessions --no-formatting 2>/dev/null | grep "^$s " | grep -qv EXITED || break
-              sleep 0.2
-            done
-            sleep 0.5
-            mkdir -p "$sessions/$s"
-            cp "$backup/$s.kdl" "$sessions/$s/session-layout.kdl"
           done
 
           echo
           zellij list-sessions --no-formatting
           echo
           echo "Bring one back with: zellij attach NAME (or s n in Zellij)."
-          echo "Layouts are also in $backup"
         '';
       })
     ];
