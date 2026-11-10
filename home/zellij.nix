@@ -8,15 +8,10 @@
 
 let
   plugin = import ./zellij/plugin.nix { inherit pkgs; };
-  # The plugins, at fixed paths that link to the current builds: Zellij keys
-  # permissions, and saved sessions name plugins, by path. A store path
-  # would need a new grant after each rebuild, and pin old builds (soon
-  # garbage collected) in saved sessions.
-  wasm = {
-    zellij-hints = "${plugin ./zellij/hints}/bin/zellij-hints.wasm";
-    zellij-finder = "${plugin ./zellij/finder}/bin/zellij-finder.wasm";
-    vim-zellij-navigator = pkgs.zellijPlugins.vim-zellij-navigator;
-  };
+  # The plugins are at fixed paths, linking to the current builds
+  # (xdg.dataFile, below): Zellij keys permissions, and saved sessions name
+  # plugins, by path. A store path would need a new grant after each
+  # rebuild, and pin old builds (soon garbage collected) in saved sessions.
   pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
   finder = scope: {
     _props.location = "file:${pluginPath "zellij-finder"}";
@@ -46,13 +41,8 @@ let
       fi
       exec ${fish}
     '';
-  # Each at a fixed path linking to the current build (below), which saved
+  # Resume scripts are at fixed paths too (xdg.dataFile, below), which saved
   # sessions name: a store path would soon be garbage collected.
-  resumers = {
-    nvim = resume "nvim" ''-c "lua require('persistence').load()"'';
-    claude = resume "claude" "--continue";
-    codex = resume "codex" "resume --last";
-  };
   resumePath = tool: "${config.xdg.dataHome}/zellij/bin/${tool}";
   # post_command_discovery_hook: given what a pane is running (its arguments
   # joined by spaces), prints what to resurrect there (split on spaces).
@@ -291,13 +281,16 @@ in
     };
   };
 
-  xdg.dataFile =
-    lib.mapAttrs' (
-      name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
-    ) wasm
-    // lib.mapAttrs' (
-      tool: script: lib.nameValuePair "zellij/bin/${tool}" { source = lib.getExe script; }
-    ) resumers;
+  xdg.dataFile = {
+    # Resume scripts, where saved sessions find them (resumePath)
+    "zellij/bin/nvim".source = lib.getExe (resume "nvim" ''-c "lua require('persistence').load()"'');
+    "zellij/bin/claude".source = lib.getExe (resume "claude" "--continue");
+    "zellij/bin/codex".source = lib.getExe (resume "codex" "resume --last");
+    # Plugins, where the config and permissions find them (pluginPath)
+    "zellij/plugins/zellij-hints.wasm".source = "${plugin ./zellij/hints}/bin/zellij-hints.wasm";
+    "zellij/plugins/zellij-finder.wasm".source = "${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    "zellij/plugins/vim-zellij-navigator.wasm".source = pkgs.zellijPlugins.vim-zellij-navigator;
+  };
 
   home = {
     # Grant the plugins what they ask for: their paths are fixed, so these
