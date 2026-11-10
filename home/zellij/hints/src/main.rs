@@ -168,7 +168,6 @@ impl Hints {
                 | InputMode::Tab
                 | InputMode::Session
                 | InputMode::Resize
-                | InputMode::Scroll
         );
         if !active || self.rows.is_empty() {
             if self.visible {
@@ -260,12 +259,9 @@ fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
 fn describe(action: &Action) -> String {
     match action {
         Action::SwitchToMode { input_mode } => match input_mode {
-            InputMode::Locked => "Cancel / return to typing".into(),
-            InputMode::Normal => "Leader".into(),
             InputMode::Tab => "Tabs".into(),
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
-            InputMode::RenameTab => "Rename tab".into(),
             mode => format!("{mode:?}"),
         },
         Action::NewPane {
@@ -282,31 +278,17 @@ fn describe(action: &Action) -> String {
             ..
         } => name.clone(),
         Action::TabNameInput { .. } => "Rename tab".into(),
-        Action::GoToTab { .. } => "Go to tab".into(),
-        Action::GoToPreviousTab => "Previous tab".into(),
-        Action::GoToNextTab => "Next tab".into(),
-        Action::ToggleTab => "Last tab".into(),
-        Action::FocusLastPane => "Last pane".into(),
         Action::CloseTab => "Close tab".into(),
         Action::CloseFocus => "Close pane".into(),
-        Action::ToggleFocusFullscreen => "Maximize / restore pane".into(),
-        Action::ToggleFloatingPanes => "Show / hide floating panes".into(),
         Action::FocusGuestSession => "Control nested session".into(),
         Action::FocusHostSession => "Control parent session".into(),
         Action::ToggleHostFullscreen => "Maximize / restore nested session".into(),
         Action::Detach => "Detach session".into(),
-        Action::Quit => "Quit session".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
-        Action::KeybindPipe { name, .. } => {
-            format!("Plugin: {}", name.as_deref().unwrap_or("message"))
-        }
         action if action.launches_plugin("new-session") => "New / resurrect session".into(),
         action if action.launches_plugin("find") => "Find sessions and tabs".into(),
         action if action.launches_plugin("find-tabs") => "Find tabs".into(),
         action if action.launches_plugin("find-sessions") => "Find sessions".into(),
-        action if action.launches_plugin("session-manager") => {
-            "Find tabs / panes / sessions".into()
-        }
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])
@@ -325,7 +307,7 @@ mod tests {
     fn views_by_alias_or_file() {
         assert!(is_view(Some("hints")));
         assert!(is_view(Some(
-            "file:/nix/store/abc-zellij-hints-static-wasm32-unknown-wasip1-0.1.0/bin/zellij-hints.wasm"
+            "file:/home/me/.local/share/zellij/plugins/zellij-hints.wasm"
         )));
         assert!(!is_view(Some("hints-controller")));
         assert!(!is_view(Some("zellij:compact-bar")));
