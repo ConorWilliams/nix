@@ -15,7 +15,7 @@ let
   wasm = {
     zellij-hints = "${plugin ./zellij/hints}/bin/zellij-hints.wasm";
     zellij-finder = "${plugin ./zellij/finder}/bin/zellij-finder.wasm";
-    vim-zellij-navigator = "${pkgs.zellijPlugins.vim-zellij-navigator}";
+    vim-zellij-navigator = pkgs.zellijPlugins.vim-zellij-navigator;
   };
   pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
   finder = scope: {
@@ -110,7 +110,7 @@ let
   prompt = name: script: {
     Run = {
       _args = [
-        (lib.getExe config.programs.fish.package)
+        fish
         "--no-config"
         (toString script)
       ];
@@ -176,7 +176,6 @@ in
         theme = "rose-pine-dawn";
         show_startup_tips = false;
         show_release_notes = false;
-        on_force_close = "detach";
         # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
         # just the shell is then saved as one, not as a command to re-run.
         default_shell = fish;
