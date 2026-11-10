@@ -159,6 +159,7 @@ impl Finder {
             return false;
         }
         let kept = self.selected_entry().map(|e| (e.session.clone(), e.tab));
+        let first = kept.is_none() && self.query.is_empty();
         self.entries = entries;
         self.shown = filter(&self.entries, &self.query);
         if let Some(position) = kept.and_then(|(session, tab)| {
@@ -168,6 +169,13 @@ impl Finder {
             })
         }) {
             self.selected = position;
+        } else if first {
+            // Start somewhere other than where you are.
+            self.selected = self
+                .shown
+                .iter()
+                .position(|(i, _)| !self.entries[*i].here)
+                .unwrap_or(0);
         }
         self.selected = self.selected.min(self.shown.len().saturating_sub(1));
         true
@@ -459,6 +467,22 @@ mod tests {
         finder.selected = 5; // work › logs
         finder.update_sessions(&sessions()[1..2]);
         assert_eq!(finder.selected, 1);
+    }
+
+    #[test]
+    fn starts_away_from_where_you_are() {
+        let mut finder = Finder {
+            scope: Scope::Tabs,
+            ..Finder::default()
+        };
+        finder.update_sessions(&sessions()); // tabs edit, shell (current)
+        assert_eq!(finder.selected_entry().unwrap().label, "edit");
+        let mut finder = Finder {
+            scope: Scope::Sessions,
+            ..Finder::default()
+        };
+        finder.update_sessions(&sessions()); // nix (current), caiman, work
+        assert_eq!(finder.selected_entry().unwrap().label, "caiman");
     }
 
     #[test]
