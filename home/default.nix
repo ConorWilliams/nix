@@ -220,6 +220,12 @@
     nixPath = [ "nixpkgs=flake:nixpkgs" ];
   };
 
+  # nh's weekly clean (programs.nh.clean) runs nix, which systemd's user
+  # manager doesn't have on its PATH: without this it fails, unnoticed.
+  systemd.user.services.nh-clean.Service.Environment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [
+    "PATH=${config.nix.package}/bin"
+  ];
+
   # No "unread news" reminder on each switch.
   news.display = "silent";
 
