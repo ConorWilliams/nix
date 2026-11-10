@@ -32,22 +32,28 @@ let
   # only to nvim.
   resume =
     tool: defaults:
-    "${
-      pkgs.writeShellScriptBin tool /* bash */ ''
-        [[ $# -gt 0 ]] || set -- ${defaults}
-        direnv=${lib.getExe config.programs.direnv.package}
-        # Its own job, the terminal's foreground one, as if typed in the
-        # shell: Zellij reports and saves a pane's foreground job through
-        # the discovery hook, but not the pane's own process.
-        set -m
-        if "$direnv" exec . true 2>/dev/null; then
-          "$direnv" exec . ${tool} "$@"
-        else
-          ${tool} "$@"
-        fi
-        exec ${fish}
-      ''
-    }/bin/${tool}";
+    pkgs.writeShellScriptBin tool /* bash */ ''
+      [[ $# -gt 0 ]] || set -- ${defaults}
+      direnv=${lib.getExe config.programs.direnv.package}
+      # Its own job, the terminal's foreground one, as if typed in the
+      # shell: Zellij reports and saves a pane's foreground job through
+      # the discovery hook, but not the pane's own process.
+      set -m
+      if "$direnv" exec . true 2>/dev/null; then
+        "$direnv" exec . ${tool} "$@"
+      else
+        ${tool} "$@"
+      fi
+      exec ${fish}
+    '';
+  # Each at a fixed path linking to the current build (below), which saved
+  # sessions name: a store path would soon be garbage collected.
+  resumers = {
+    nvim = resume "nvim" ''-c "lua require('persistence').load()"'';
+    claude = resume "claude" "--continue";
+    codex = resume "codex" "resume --last";
+  };
+  resumePath = tool: "${config.xdg.dataHome}/zellij/bin/${tool}";
   # post_command_discovery_hook: given what a pane is running (its arguments
   # joined by spaces), prints what to resurrect there (split on spaces).
   # Only Neovim (with the folder's persistence session) and the agents (with
@@ -65,9 +71,9 @@ let
       id="--resume ''${BASH_REMATCH[3]}"
     fi
     case $name in
-      nvim) echo ${resume "nvim" ''-c "lua require('persistence').load()"''} ;;
-      claude) echo ${resume "claude" "--continue"} $id ;;
-      codex) echo ${resume "codex" "resume --last"} ;;
+      nvim) echo ${resumePath "nvim"} ;;
+      claude) echo ${resumePath "claude"} $id ;;
+      codex) echo ${resumePath "codex"} ;;
       *) echo ${fish} ;;
     esac
   '';
@@ -292,9 +298,13 @@ in
     };
   };
 
-  xdg.dataFile = lib.mapAttrs' (
-    name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
-  ) wasm;
+  xdg.dataFile =
+    lib.mapAttrs' (
+      name: source: lib.nameValuePair "zellij/plugins/${name}.wasm" { inherit source; }
+    ) wasm
+    // lib.mapAttrs' (
+      tool: script: lib.nameValuePair "zellij/bin/${tool}" { source = lib.getExe script; }
+    ) resumers;
 
   home = {
     # Grant the plugins what they ask for, once: their paths are fixed, so
