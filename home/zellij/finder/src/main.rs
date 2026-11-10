@@ -122,15 +122,24 @@ fn closes(key: &KeyWithModifier) -> bool {
     }
 }
 
+#[derive(Clone, Copy, Default, PartialEq)]
+enum Permission {
+    #[default]
+    Pending,
+    Granted,
+    Denied,
+}
+
 #[derive(Default)]
 struct Finder {
     scope: Scope,
-    ready: bool,
-    denied: bool,
+    permission: Permission,
     /// A `SessionUpdate` arrived, so reading Zellij's state is really
     /// allowed: until then `get_session_list` could panic (if zellij reports
     /// a grant it didn't apply, as for a pane restored with a session).
     readable: bool,
+    /// A key came since the last poll: skip polling while typing.
+    typing: bool,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -139,6 +148,10 @@ struct Finder {
 register_plugin!(Finder);
 
 impl Finder {
+    fn ready(&self) -> bool {
+        self.permission == Permission::Granted
+    }
+
     fn selected_entry(&self) -> Option<&Entry> {
         self.shown
             .get(self.selected)
@@ -175,7 +188,9 @@ impl Finder {
 
     /// Refresh now and every second.
     fn poll_sessions(&mut self) {
-        self.refresh_sessions();
+        if !std::mem::take(&mut self.typing) {
+            self.refresh_sessions();
+        }
         set_timeout(1.0);
     }
 
@@ -248,23 +263,23 @@ impl ZellijPlugin for Finder {
     fn update(&mut self, event: Event) -> bool {
         match event {
             Event::PermissionRequestResult(PermissionStatus::Granted) => {
-                self.ready = true;
+                self.permission = Permission::Granted;
                 rename_plugin_pane(get_plugin_ids().plugin_id, self.scope.title());
                 self.poll_sessions();
                 true
             }
-            Event::Timer(_) if self.ready => {
+            Event::Timer(_) if self.ready() => {
                 self.poll_sessions();
                 true
             }
             Event::PermissionRequestResult(PermissionStatus::Denied) => {
-                self.denied = true;
+                self.permission = Permission::Denied;
                 true
             }
             Event::SessionUpdate(..) => {
                 self.readable = true;
                 self.refresh_sessions();
-                self.ready
+                self.ready()
             }
             // A picker off screen (another tab or session, or brought back
             // with a resurrected session) has no reason to stay open.
@@ -272,7 +287,10 @@ impl ZellijPlugin for Finder {
                 close_self();
                 false
             }
-            Event::Key(key) if self.ready => self.key(&key),
+            Event::Key(key) if self.ready() => {
+                self.typing = true;
+                self.key(&key)
+            }
             // Not ready: the pane can still be closed.
             Event::Key(key) if closes(&key) => {
                 close_self();
@@ -284,8 +302,8 @@ impl ZellijPlugin for Finder {
 
     fn render(&mut self, rows: usize, cols: usize) {
         let width = Some(cols.saturating_sub(2));
-        if !self.ready {
-            let message = if self.denied {
+        if !self.ready() {
+            let message = if self.permission == Permission::Denied {
                 "Permission denied. Esc to close."
             } else {
                 "Waiting for permission. Esc to close."
