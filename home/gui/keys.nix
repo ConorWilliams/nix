@@ -1,4 +1,4 @@
-# The window manager's keys, the same on Linux  and the Mac
+# The window manager's keys, the same on Linux and the Mac
 {
   keys = {
     terminal = "Return"; # kitty
