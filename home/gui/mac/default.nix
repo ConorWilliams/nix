@@ -101,6 +101,7 @@
   # AeroSpace's menu bar icon shows the workspaces as i3's bar does
   targets.darwin.defaults."bobko.aerospace".displayStyle = "i3Ordered";
 
-  # Everything on the Mac: system settings, then home.
-  home.shellAliases.dms = "nh darwin switch && nh home switch";
+  # Everything on the Mac: system settings, then home, then the Homebrew
+  # apps (activation installs and removes casks, but doesn't upgrade them).
+  home.shellAliases.dms = "nh darwin switch && nh home switch && brew upgrade";
 }
