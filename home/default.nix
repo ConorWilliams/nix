@@ -59,6 +59,46 @@
           "cpz/progress"
         ];
       })
+      # bump-preview [INPUT [URL]]: which packages' versions bumping a flake
+      # input would change, from evaluation alone, so nothing is built (nh's
+      # report needs the build). INPUT defaults to nixpkgs, URL to the
+      # input's own unlocked source: its latest.
+      (writeShellApplication {
+        name = "bump-preview";
+        runtimeInputs = [
+          coreutils
+          gawk
+          hostname
+          jq
+        ];
+        text = ''
+          flake=''${NH_FLAKE:-${config.programs.nh.flake}}
+          input=''${1:-nixpkgs}
+          url=''${2:-$(nix flake metadata "$flake" --json | jq -r --arg i "$input" '
+            .locks.nodes[.locks.nodes.root.inputs[$i]].original
+            | if .type == "github" then "github:\(.owner)/\(.repo)\(if .ref then "/" + .ref else "" end)"
+              else .url end')}
+          configs=$(nix eval --json "$flake#homeConfigurations" --apply builtins.attrNames)
+          config="$USER@$(hostname -s)"
+          jq -e --arg c "$config" 'index($c)' <<<"$configs" >/dev/null || config=$USER
+
+          # Each package's name and version, as "name<TAB>version", sorted.
+          versions() {
+            nix eval --json "$flake#homeConfigurations.\"$config\".config.home.packages" "$@" \
+              --apply 'map (p: builtins.parseDrvName (p.name or ""))' |
+              jq -r '.[] | select(.name != "") | "\(.name)\t\(.version)"' | sort -u
+          }
+          tmp=$(mktemp -d)
+          trap 'rm -r "$tmp"' EXIT
+          versions >"$tmp/old"
+          versions --override-input "$input" "$url" --no-write-lock-file 2>/dev/null >"$tmp/new"
+
+          echo "$input -> $url"
+          join -t $'\t' -a1 -a2 -e - -o 0,1.2,2.2 "$tmp/old" "$tmp/new" |
+            awk -F'\t' '$2 != $3 { printf "  %-28s %s -> %s\n", $1, $2, $3; n++ }
+              END { if (!n) print "  no version changes" }'
+        '';
+      })
     ];
 
     # Rose Pine Dawn for Codex (programs.codex below picks it).
