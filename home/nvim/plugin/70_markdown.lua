@@ -47,9 +47,9 @@ Snacks.toggle({
 require('zk').setup({
   picker = 'snacks_picker',
 })
--- Inside a notebook: <leader>z makes a note (in the current file's
--- folder), and <leader><space> finds notes instead of files
--- (<leader>f always finds files).
+-- Inside a notebook: <leader>z makes a note (at its root: the notebook's
+-- config says where it goes), and <leader><space> finds notes instead of
+-- files (<leader>f always finds files).
 local zk_util = require('zk.util')
 local in_notebook = function()
   local path = zk_util.resolve_notebook_path(0)
@@ -59,8 +59,7 @@ vim.keymap.set('n', '<leader>z', function()
   if not in_notebook() then return vim.notify('Not in a zk notebook') end
   local title = vim.fn.input('Title: ')
   if title == '' then return end -- Esc (or no title) cancels
-  local dir = vim.fn.expand('%:p:h')
-  require('zk').new({ dir = dir ~= '' and dir or vim.fn.getcwd(), title = title })
+  require('zk').new({ dir = in_notebook(), title = title })
 end, { desc = 'New zk note' })
 vim.keymap.set('n', '<leader><space>', function()
   if in_notebook() then
