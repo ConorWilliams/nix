@@ -56,7 +56,7 @@ Activating configurations:
 
 ```sh
 hms                                        # apply home changes
-dms                                        # on Mac: system settings, then home
+dms                                        # on Mac: system settings, home, then brew upgrade
 ```
 
 Updating things (nh bumps the pinned inputs, builds, and lists each package
