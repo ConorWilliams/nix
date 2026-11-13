@@ -58,8 +58,8 @@ let
     name=''${command##*/}
     name=''${name#.}
     name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
-    # A Claude conversation's id, from its command line (see the claude
-    # function, in claude.nix). Only a UUID counts, so a prompt's words can't.
+    # A Claude conversation's id, from its command line (a resurrected
+    # pane's has one). Only a UUID counts, so a prompt's words can't.
     uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     id=
     if [[ $RESURRECT_COMMAND =~ (^| )(--session-id|--resume|-r)[\ =]($uuid)( |$) ]]; then
@@ -76,6 +76,32 @@ let
       *) echo ${fish} ;;
     esac
   '';
+  # Claude's SessionStart and SessionEnd hooks: a pane running Claude tells
+  # Zellij what to resurrect it with, the conversation it's in now (which
+  # /resume and /clear change, and the command line doesn't show). Cleared
+  # when Claude exits, so the pane is a shell again; the discovery hook
+  # still covers a pane this didn't reach (its Claude killed, say).
+  claudeResurrect = pkgs.writeShellApplication {
+    name = "zellij-claude-resurrect";
+    runtimeInputs = [
+      pkgs.jq
+      config.programs.zellij.package
+    ];
+    text = ''
+      [[ -n ''${ZELLIJ:-} && -n ''${ZELLIJ_PANE_ID:-} ]] || exit 0
+      IFS=$'\t' read -r event id reason < <(jq -r '[.hook_event_name, .session_id, .reason // "-"] | @tsv')
+      case $event in
+        SessionStart)
+          [[ -n $id ]] || exit 0
+          zellij action set-resurrect-command -- ${resumePath "claude"} --resume "$id"
+          ;;
+        # (not between conversations: the next one's start may come first)
+        SessionEnd)
+          [[ $reason == clear || $reason == resume ]] || zellij action set-resurrect-command --clear
+          ;;
+      esac
+    '';
+  };
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -106,6 +132,21 @@ let
 in
 {
   programs = {
+    claude-code.settings.hooks =
+      let
+        hook = [
+          {
+            hooks = lib.singleton {
+              type = "command";
+              command = lib.getExe claudeResurrect;
+            };
+          }
+        ];
+      in
+      {
+        SessionStart = hook;
+        SessionEnd = hook;
+      };
     zellij = {
       enable = true;
       themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
