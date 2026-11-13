@@ -76,32 +76,46 @@ let
       *) echo ${fish} ;;
     esac
   '';
-  # Claude's SessionStart and SessionEnd hooks: a pane running Claude tells
-  # Zellij what to resurrect it with, the conversation it's in now (which
-  # /resume and /clear change, and the command line doesn't show). Cleared
-  # when Claude exits, so the pane is a shell again; the discovery hook
-  # still covers a pane this didn't reach (its Claude killed, say).
-  claudeResurrect = pkgs.writeShellApplication {
-    name = "zellij-claude-resurrect";
-    runtimeInputs = [
-      pkgs.jq
-      config.programs.zellij.package
-    ];
-    text = ''
-      [[ -n ''${ZELLIJ:-} && -n ''${ZELLIJ_PANE_ID:-} ]] || exit 0
-      IFS=$'\t' read -r event id reason < <(jq -r '[.hook_event_name, .session_id, .reason // "-"] | @tsv')
-      case $event in
-        SessionStart)
-          [[ -n $id ]] || exit 0
-          zellij action set-resurrect-command -- ${resumePath "claude"} --resume "$id"
-          ;;
-        # (not between conversations: the next one's start may come first)
-        SessionEnd)
-          [[ $reason == clear || $reason == resume ]] || zellij action set-resurrect-command --clear
-          ;;
-      esac
-    '';
-  };
+  # The agents' SessionStart and SessionEnd hooks (Claude's and Codex's are
+  # alike): a pane running one tells Zellij what to resurrect it with, the
+  # conversation it's in now (which /resume and /clear change, and the
+  # command line doesn't show). Cleared when the agent exits, so the pane
+  # is a shell again; the discovery hook still covers a pane this didn't
+  # reach (its agent killed, say). `resume` is what the tool takes before
+  # a conversation's id.
+  resurrectHooks =
+    tool: resume:
+    let
+      script = pkgs.writeShellApplication {
+        name = "zellij-${tool}-resurrect";
+        runtimeInputs = [
+          pkgs.jq
+          config.programs.zellij.package
+        ];
+        text = ''
+          [[ -n ''${ZELLIJ:-} && -n ''${ZELLIJ_PANE_ID:-} ]] || exit 0
+          IFS=$'\t' read -r event id reason < <(jq -r '[.hook_event_name, .session_id, .reason // "-"] | @tsv')
+          case $event in
+            SessionStart)
+              [[ -n $id ]] || exit 0
+              zellij action set-resurrect-command -- ${resumePath tool} ${resume} "$id"
+              ;;
+            # (not between conversations: the next one's start may come first)
+            SessionEnd)
+              [[ $reason == clear || $reason == resume ]] || zellij action set-resurrect-command --clear
+              ;;
+          esac
+        '';
+      };
+    in
+    lib.genAttrs [ "SessionStart" "SessionEnd" ] (_: [
+      {
+        hooks = lib.singleton {
+          type = "command";
+          command = lib.getExe script;
+        };
+      }
+    ]);
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -132,21 +146,12 @@ let
 in
 {
   programs = {
-    claude-code.settings.hooks =
-      let
-        hook = [
-          {
-            hooks = lib.singleton {
-              type = "command";
-              command = lib.getExe claudeResurrect;
-            };
-          }
-        ];
-      in
-      {
-        SessionStart = hook;
-        SessionEnd = hook;
-      };
+
+    claude-code.settings.hooks = resurrectHooks "claude" "--resume";
+
+    # (Codex asks once, in /hooks, to trust these.)
+    codex.settings.hooks = resurrectHooks "codex" "resume";
+
     zellij = {
       enable = true;
       themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
