@@ -224,7 +224,7 @@ fn describe(action: &Action) -> String {
         Action::ToggleHostFullscreen => "Maximize / restore nested session".into(),
         Action::Detach => "Detach session".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
-        action if action.launches_plugin("new-session") => "New session".into(),
+        action if action.launches_plugin("new-session") => "New / resurrect session".into(),
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])
