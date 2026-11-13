@@ -1,84 +1,40 @@
-//! A fuzzy finder for sessions, the current session's tabs, or every
-//! session's tabs (`scope` = `sessions`, `tabs` or `all`). Each word of the
-//! query must match, in any order, so `nix edit` finds the tab `edit` in the
-//! session `nix`.
+//! A fuzzy finder for every session's tabs. Each word of the query must
+//! match, in any order, so `nix edit` finds the tab `edit` in the session
+//! `nix`.
 
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 use std::collections::BTreeMap;
 use zellij_tile::prelude::*;
 
-#[derive(Clone, Copy, Default, PartialEq, Debug)]
-enum Scope {
-    Sessions,
-    Tabs,
-    #[default]
-    All,
-}
-
-impl Scope {
-    fn parse(value: Option<&String>) -> Self {
-        match value.map(String::as_str) {
-            Some("sessions") => Self::Sessions,
-            Some("tabs") => Self::Tabs,
-            _ => Self::All,
-        }
-    }
-
-    fn title(self) -> &'static str {
-        match self {
-            Self::Sessions => "Sessions",
-            Self::Tabs => "Tabs",
-            Self::All => "Sessions and tabs",
-        }
-    }
-}
-
-/// Something to switch to: a session, or a tab (position, name) in one.
+/// Something to switch to: a tab (by position) in a session.
 #[derive(Clone, PartialEq, Debug)]
 struct Entry {
     session: String,
-    tab: Option<usize>,
+    tab: usize,
     in_current_session: bool,
-    /// Where you are now: the current session, or its active tab.
+    /// Where you are now: the current session's active tab.
     here: bool,
     label: String,
 }
 
-/// The entries for a scope: the current session's first, then the others
-/// by name; tabs in tab bar order.
-fn entries(sessions: &[SessionInfo], scope: Scope) -> Vec<Entry> {
+/// Every session's tabs: the current session's first, then the others by
+/// name; tabs in tab bar order.
+fn entries(sessions: &[SessionInfo]) -> Vec<Entry> {
     let mut sessions: Vec<&SessionInfo> = sessions.iter().collect();
     sessions.sort_by_key(|s| (!s.is_current_session, s.name.clone()));
     let mut entries = vec![];
     for session in sessions {
         let current = session.is_current_session;
-        if scope == Scope::Sessions {
-            entries.push(Entry {
-                session: session.name.clone(),
-                tab: None,
-                in_current_session: current,
-                here: current,
-                label: session.name.clone(),
-            });
-            continue;
-        }
-        if scope == Scope::Tabs && !current {
-            continue;
-        }
         let mut tabs: Vec<&TabInfo> = session.tabs.iter().collect();
         tabs.sort_by_key(|t| t.position);
         for tab in tabs {
-            let label = match scope {
-                Scope::All => format!("{} › {}", session.name, tab.name),
-                _ => tab.name.clone(),
-            };
             entries.push(Entry {
                 session: session.name.clone(),
-                tab: Some(tab.position),
+                tab: tab.position,
                 in_current_session: current,
                 here: current && tab.active,
-                label,
+                label: format!("{} › {}", session.name, tab.name),
             });
         }
     }
@@ -113,6 +69,12 @@ fn filter(entries: &[Entry], query: &str) -> Vec<(usize, Vec<usize>)> {
     found.into_iter().map(|(_, i, idx)| (i, idx)).collect()
 }
 
+/// The query without its last word (and the spaces after it), as Ctrl-w.
+fn delete_word(query: &str) -> &str {
+    let query = query.trim_end();
+    query.rfind(' ').map_or("", |i| &query[..=i])
+}
+
 /// Esc or Ctrl c: close the finder.
 fn closes(key: &KeyWithModifier) -> bool {
     match key.bare_key {
@@ -124,9 +86,17 @@ fn closes(key: &KeyWithModifier) -> bool {
 
 #[derive(Default)]
 struct Finder {
-    scope: Scope,
     ready: bool,
     denied: bool,
+    /// A `SessionUpdate` arrived, so reading Zellij's state is really
+    /// allowed: until then `get_session_list` could panic (if zellij reports
+    /// a grant it didn't apply, as for a pane restored with a session).
+    readable: bool,
+    /// The last session list, and this session's tabs as of the last
+    /// `TabUpdate`: fresher than the list's, which Zellij updates on disk
+    /// once a second.
+    sessions: Vec<SessionInfo>,
+    tabs: Option<Vec<TabInfo>>,
     entries: Vec<Entry>,
     query: String,
     shown: Vec<(usize, Vec<usize>)>,
@@ -141,11 +111,17 @@ impl Finder {
             .map(|(i, _)| &self.entries[*i])
     }
 
-    /// New entries, keeping the same session or tab selected (if it's still
-    /// shown), so Enter never lands on whatever moved under the cursor.
-    fn update_sessions(&mut self, sessions: &[SessionInfo]) {
+    /// New entries, keeping the same tab selected while it's
+    /// still shown, so Enter doesn't land on whatever moved under the cursor.
+    /// Whether they changed (else there's nothing to redraw).
+    fn update_sessions(&mut self, sessions: &[SessionInfo]) -> bool {
+        let entries = entries(sessions);
+        if entries == self.entries {
+            return false;
+        }
         let kept = self.selected_entry().map(|e| (e.session.clone(), e.tab));
-        self.entries = entries(sessions, self.scope);
+        let first = kept.is_none() && self.query.is_empty();
+        self.entries = entries;
         self.shown = filter(&self.entries, &self.query);
         if let Some(position) = kept.and_then(|(session, tab)| {
             self.shown.iter().position(|(i, _)| {
@@ -154,22 +130,49 @@ impl Finder {
             })
         }) {
             self.selected = position;
+        } else if first {
+            // Start somewhere other than where you are.
+            self.selected = self
+                .shown
+                .iter()
+                .position(|(i, _)| !self.entries[*i].here)
+                .unwrap_or(0);
         }
         self.selected = self.selected.min(self.shown.len().saturating_sub(1));
+        true
     }
 
     /// `SessionUpdate` alone can leave out other sessions, so its list is
-    /// never used: ask directly instead, as the built-in session manager does.
-    fn refresh_sessions(&mut self) {
-        if let Ok(snapshot) = get_session_list() {
-            self.update_sessions(&snapshot.live_sessions);
+    /// never used: ask directly instead (as the built-in session manager
+    /// also does, on a timer).
+    fn refresh_sessions(&mut self) -> bool {
+        if !self.readable {
+            return false;
+        }
+        match get_session_list() {
+            Ok(snapshot) => {
+                self.sessions = snapshot.live_sessions;
+                self.rebuild()
+            }
+            Err(_) => false,
         }
     }
 
+    /// Entries from the last session list, with this session's latest tabs.
+    fn rebuild(&mut self) -> bool {
+        let mut sessions = self.sessions.clone();
+        if let Some(tabs) = &self.tabs {
+            for session in sessions.iter_mut().filter(|s| s.is_current_session) {
+                session.tabs.clone_from(tabs);
+            }
+        }
+        self.update_sessions(&sessions)
+    }
+
     /// Refresh now and every second.
-    fn poll_sessions(&mut self) {
-        self.refresh_sessions();
+    fn poll_sessions(&mut self) -> bool {
         set_timeout(1.0);
+        self.refresh_sessions()
     }
 
     /// The query changed: the best match is selected.
@@ -180,10 +183,10 @@ impl Finder {
 
     fn activate(&self) {
         if let Some(entry) = self.selected_entry() {
-            match (entry.in_current_session, entry.tab) {
-                (true, Some(position)) => go_to_tab(u32::try_from(position).unwrap_or(0)),
-                (true, None) => {}
-                (false, tab) => switch_session_with_focus(&entry.session, tab, None),
+            if entry.in_current_session {
+                go_to_tab(u32::try_from(entry.tab).unwrap_or(0));
+            } else {
+                switch_session_with_focus(&entry.session, Some(entry.tab), None);
             }
         }
         close_self();
@@ -200,6 +203,10 @@ impl Finder {
             BareKey::Char('n' | 'j') if ctrl => self.move_down(),
             BareKey::Char('u') if ctrl => {
                 self.query.clear();
+                self.refilter();
+            }
+            BareKey::Char('w') if ctrl => {
+                self.query = delete_word(&self.query).to_owned();
                 self.refilter();
             }
             BareKey::Backspace => {
@@ -223,8 +230,7 @@ impl Finder {
 }
 
 impl ZellijPlugin for Finder {
-    fn load(&mut self, configuration: BTreeMap<String, String>) {
-        self.scope = Scope::parse(configuration.get("scope"));
+    fn load(&mut self, _configuration: BTreeMap<String, String>) {
         request_permission(&[
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
@@ -234,6 +240,8 @@ impl ZellijPlugin for Finder {
             EventType::SessionUpdate,
             EventType::Key,
             EventType::Timer,
+            EventType::Visible,
+            EventType::TabUpdate,
         ]);
     }
 
@@ -241,21 +249,33 @@ impl ZellijPlugin for Finder {
         match event {
             Event::PermissionRequestResult(PermissionStatus::Granted) => {
                 self.ready = true;
-                rename_plugin_pane(get_plugin_ids().plugin_id, self.scope.title());
+                // (which also brings the first SessionUpdate)
+                rename_plugin_pane(get_plugin_ids().plugin_id, "Sessions and tabs");
                 self.poll_sessions();
                 true
             }
-            Event::Timer(_) if self.ready => {
-                self.poll_sessions();
-                true
-            }
+            Event::Timer(_) if self.ready => self.poll_sessions(),
             Event::PermissionRequestResult(PermissionStatus::Denied) => {
                 self.denied = true;
                 true
             }
-            Event::SessionUpdate(..) if self.ready => {
-                self.refresh_sessions();
-                true
+            Event::TabUpdate(tabs) => {
+                self.tabs = Some(tabs);
+                self.rebuild() && self.ready
+            }
+            // The first one shows reading is allowed (see `readable`). Then
+            // stop listening: get_session_list sends a SessionUpdate itself,
+            // so refreshing on each would loop. The timer refreshes the list.
+            Event::SessionUpdate(..) => {
+                self.readable = true;
+                unsubscribe(&[EventType::SessionUpdate]);
+                self.refresh_sessions() && self.ready
+            }
+            // A picker off screen (another tab or session, or brought back
+            // with a resurrected session) has no reason to stay open.
+            Event::Visible(false) => {
+                close_self();
+                false
             }
             Event::Key(key) if self.ready => self.key(&key),
             // Not ready: the pane can still be closed.
@@ -355,8 +375,8 @@ mod tests {
         entries.iter().map(|e| e.label.as_str()).collect()
     }
 
-    fn found(scope: Scope, query: &str) -> Vec<String> {
-        let entries = entries(&sessions(), scope);
+    fn found(query: &str) -> Vec<String> {
+        let entries = entries(&sessions());
         filter(&entries, query)
             .iter()
             .map(|(i, _)| entries[*i].label.clone())
@@ -366,38 +386,35 @@ mod tests {
     #[test]
     fn current_session_first_then_by_name() {
         assert_eq!(
-            labels(&entries(&sessions(), Scope::Sessions)),
-            ["nix", "caiman", "work"]
+            labels(&entries(&sessions())),
+            [
+                "nix › edit",
+                "nix › shell",
+                "caiman › train",
+                "work › build",
+                "work › logs"
+            ]
         );
     }
 
     #[test]
-    fn tabs_are_the_current_sessions() {
-        let tabs = entries(&sessions(), Scope::Tabs);
-        assert_eq!(labels(&tabs), ["edit", "shell"]);
-        assert!(tabs[1].here && !tabs[0].here);
-    }
-
-    #[test]
-    fn all_is_session_and_tab() {
-        let all = entries(&sessions(), Scope::All);
-        assert_eq!(all[0].label, "nix › edit");
-        assert_eq!(all.len(), 5);
-        // Another session's active tab is not where you are.
-        assert!(!all.iter().any(|e| e.session == "work" && e.here));
+    fn here_is_the_current_sessions_active_tab() {
+        let all = entries(&sessions());
+        let here: Vec<&str> = all
+            .iter()
+            .filter(|e| e.here)
+            .map(|e| e.label.as_str())
+            .collect();
+        // (another session's active tab is not where you are)
+        assert_eq!(here, ["nix › shell"]);
     }
 
     #[test]
     fn words_match_in_any_order() {
-        assert_eq!(found(Scope::All, "nix edit"), ["nix › edit"]);
-        assert_eq!(found(Scope::All, "edit nix"), ["nix › edit"]);
-        assert_eq!(found(Scope::All, "wrk lgs"), ["work › logs"]);
-        assert_eq!(found(Scope::All, "nix train"), Vec::<String>::new());
-    }
-
-    #[test]
-    fn sessions_scope_ignores_tab_names() {
-        assert_eq!(found(Scope::Sessions, "edit"), Vec::<String>::new());
+        assert_eq!(found("nix edit"), ["nix › edit"]);
+        assert_eq!(found("edit nix"), ["nix › edit"]);
+        assert_eq!(found("wrk lgs"), ["work › logs"]);
+        assert_eq!(found("nix train"), Vec::<String>::new());
     }
 
     #[test]
@@ -416,7 +433,26 @@ mod tests {
     }
 
     #[test]
+    fn starts_away_from_where_you_are() {
+        let mut finder = Finder::default();
+        // The current session's active tab is the first entry.
+        let mut sessions = sessions();
+        sessions[1].tabs[0].active = true;
+        sessions[1].tabs[1].active = false;
+        finder.update_sessions(&sessions);
+        assert_eq!(finder.selected_entry().unwrap().label, "nix › shell");
+    }
+
+    #[test]
+    fn ctrl_w_deletes_a_word() {
+        assert_eq!(delete_word("nix edit"), "nix ");
+        assert_eq!(delete_word("nix edit  "), "nix ");
+        assert_eq!(delete_word("nix"), "");
+        assert_eq!(delete_word(""), "");
+    }
+
+    #[test]
     fn empty_query_keeps_the_order() {
-        assert_eq!(found(Scope::Tabs, ""), ["edit", "shell"]);
+        assert_eq!(found("")[..2], ["nix › edit", "nix › shell"]);
     }
 }
