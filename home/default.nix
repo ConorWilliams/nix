@@ -40,6 +40,7 @@
     # or shell integration get a `programs.<name>` block below or in their own
     # file.
     packages = with pkgs; [
+      config.nix.package # (nix.package, below)
       fd
       dust
       duf
@@ -192,7 +193,10 @@
       git = true;
       package = pkgs.symlinkJoin {
         name = "eza";
-        paths = [ pkgs.eza ];
+        paths = [
+          pkgs.eza
+          pkgs.eza.man # (a separate output, which the join would leave out)
+        ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
         # Wrapped so it ignores LS_COLORS above.
         postBuild = /* bash */ ''
@@ -203,10 +207,28 @@
     };
   };
 
-  # nix commands use our pinned nixpkgs
-  nix.registry.nixpkgs.flake = inputs.nixpkgs;
-  # ...and so do `nix-shell -p` and <nixpkgs>, through that registry entry.
-  nix.nixPath = [ "nixpkgs=flake:nixpkgs" ];
+  nix = {
+    # Nix itself, from nixpkgs: what a switch runs and (in home.packages,
+    # above) the `nix` on PATH, the same on every machine and bumped with the
+    # lock. On Linux the daemon stays the installed one; on the Mac it is
+    # nix-darwin's.
+    package = pkgs.nix;
+    # Flakes, in ~/.config/nix/nix.conf
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    # nix commands use our pinned nixpkgs
+    registry.nixpkgs.flake = inputs.nixpkgs;
+    # ...and so do `nix-shell -p` and <nixpkgs>, through that registry entry.
+    nixPath = [ "nixpkgs=flake:nixpkgs" ];
+  };
+
+  # nh's weekly clean (programs.nh.clean) runs nix, which systemd's user
+  # manager doesn't have on its PATH: without this it fails, unnoticed.
+  systemd.user.services.nh-clean.Service.Environment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [
+    "PATH=${config.nix.package}/bin"
+  ];
 
   # No "unread news" reminder on each switch.
   news.display = "silent";

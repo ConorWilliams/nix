@@ -31,13 +31,9 @@ main() {
   nix_version=$(command nix --version | grep -oE '[0-9]+\.[0-9]+' | head -1) || true
   echo "Nix ${nix_version}"
 
-  # Keep flakes enabled after the first run's command-line flags.
-  if ! command nix config show experimental-features 2>/dev/null | grep -qw flakes; then
-    local nix_config_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/nix"
-    mkdir -p "${nix_config_dir}"
-    printf '\nextra-experimental-features = nix-command flakes\n' >>"${nix_config_dir}/nix.conf"
-    echo "Turned on flakes in ${nix_config_dir}/nix.conf"
-  fi
+  # Flakes for this run's own nix commands, however it was started; from the
+  # switch on, Home Manager's nix.conf turns them on.
+  export NIX_CONFIG="extra-experimental-features = nix-command flakes${NIX_CONFIG:+$'\n'${NIX_CONFIG}}"
 
   # git from Nix if the system has none
   git() { if type -P git >/dev/null; then command git "$@"; else nix run nixpkgs#git -- "$@"; fi; }
@@ -57,8 +53,7 @@ main() {
   # plain <user> (the server layer).
   user=$(id -un)
   host=$(hostname -s)
-  config=$(nix eval --raw "${dir}#homeConfigurations" --apply "c:
-    if c ? \"${user}@${host}\" then \"${user}@${host}\" else if c ? \"${user}\" then \"${user}\" else \"\"")
+  config=$(nix eval --raw "${dir}#lib.configFor" --apply "f: f \"${user}\" \"${host}\"")
   if [[ -z ${config} ]]; then
     echo "No config for user '${user}' (the users are listed in flake.nix)."
     exit 1

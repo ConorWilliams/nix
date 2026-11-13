@@ -70,8 +70,8 @@ nvim() {
   local user host config
   user=$(id -un)
   host=$(hostname -s)
-  config=$(nix eval --raw ".#homeConfigurations" --apply \
-    "c: if c ? \"${user}@${host}\" then \"${user}@${host}\" else \"conix\"")
+  config=$(nix eval --raw ".#lib.configFor" --apply "f: f \"${user}\" \"${host}\"")
+  [[ -n ${config} ]] || config=conix # (CI's user has none)
   step "nvim startup (${config})" nvim_startup "${config}"
   step "lua_ls" lua_ls
 }
