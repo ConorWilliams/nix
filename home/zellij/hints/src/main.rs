@@ -1,232 +1,161 @@
+//! A menu of the current mode's keys, in a corner while a menu mode is on.
+//!
+//! One instance runs in the background (`controller true`), which is the
+//! only kind that hears every mode change; on entering a menu mode it
+//! opens another, with no configuration, as a popup. The popup follows the
+//! mode itself, and closes when the menu is left. Zellij keeps a popup
+//! unfocused, within the screen, and with its client across tabs.
+
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use zellij_tile::prelude::{actions::Action, *};
 
+/// The popup's alias in Zellij's config (`plugins`, in zellij.nix).
+const POPUP: &str = "hints";
+
 #[derive(Default)]
 struct Hints {
-    id: u32,
-    ready: bool,
-    visible: bool,
+    controller: bool,
+    /// Controller: a menu is on, so its popup is open.
+    menu: bool,
+    /// Popup: what it shows.
     mode: InputMode,
     rows: Vec<(String, String)>,
-    size: (usize, usize),
-    controller: bool,
-    /// Controller: each tab's view, with the floating pane focused there.
-    views: BTreeMap<u32, Option<Focus>>,
-    /// View: the floating pane to keep focused when showing (showing a
-    /// pane focuses it while floating panes are visible).
-    refocus: Option<Focus>,
 }
-
-/// A pane, as (id, is plugin): what the controller sends a view.
-type Focus = (u32, bool);
 register_plugin!(Hints);
 
 impl ZellijPlugin for Hints {
     fn load(&mut self, configuration: BTreeMap<String, String>) {
-        self.id = get_plugin_ids().plugin_id;
         self.controller = configuration.get("controller").is_some_and(|v| v == "true");
-        self.size = (24, 80);
-        // The controller follows the mode (full ModeUpdate events supply the
-        // live keymap; no config parser or cache) and the views; views only
-        // need their tab's size. Views can't follow the mode themselves:
-        // Zellij sends ModeUpdate only to the active tab's plugins (and to
-        // background ones, as the controller), so a view in a tab just left
-        // (t n) would never hear the mode change, and stay open.
-        if self.controller {
-            subscribe(&[
-                EventType::ModeUpdate,
-                EventType::PaneUpdate,
-                EventType::PermissionRequestResult,
-            ]);
-        } else {
-            subscribe(&[EventType::TabUpdate, EventType::PermissionRequestResult]);
-        }
+        // (ModeUpdate only comes once reading is allowed, so nothing here
+        // runs before the permissions are granted.)
+        subscribe(&[EventType::ModeUpdate]);
         request_permission(&[
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
-            PermissionType::MessageAndLaunchOtherPlugins,
         ]);
     }
 
     fn update(&mut self, event: Event) -> bool {
-        match event {
-            Event::PermissionRequestResult(PermissionStatus::Granted) => {
-                self.ready = true;
-                if !self.controller {
-                    set_selectable(false);
-                    hide_self();
-                }
-                self.refresh();
+        let Event::ModeUpdate(info) = event else {
+            return false;
+        };
+        let rows = bindings(&info);
+        let menu = is_menu(info.mode) && !rows.is_empty();
+        if self.controller {
+            if menu && !self.menu {
+                let (width, height) = size(info.mode, &rows);
+                open_plugin_popup_with_options(
+                    POPUP,
+                    BTreeMap::new(),
+                    0,
+                    0,
+                    width,
+                    height,
+                    PopupOptions::default()
+                        .focused(false)
+                        .corner(PopupCorner::BottomRight),
+                );
             }
-            // Views get the mode piped from the controller, which also covers new views.
-            Event::ModeUpdate(info) if self.controller => {
-                let rows = bindings(&info);
-                if self.mode != info.mode || self.rows != rows {
-                    self.mode = info.mode;
-                    self.rows = rows;
-                    self.refresh();
-                }
-            }
-            Event::TabUpdate(tabs) => {
-                if let Some(tab) = tabs.iter().find(|t| t.active) {
-                    let size = (tab.display_area_rows, tab.display_area_columns);
-                    let changed = self.size != size;
-                    self.size = size;
-                    if self.ready && self.visible && changed {
-                        self.refresh();
-                    }
-                }
-            }
-            Event::PaneUpdate(manifest) if self.controller && self.ready => {
-                let mut views = BTreeMap::new();
-                for panes in manifest.panes.values() {
-                    let is_view_pane = |p: &&PaneInfo| {
-                        p.is_plugin && p.id != self.id && is_view(p.plugin_url.as_deref())
-                    };
-                    let focus = panes
-                        .iter()
-                        .find(|p| {
-                            p.is_focused && p.is_floating && !p.is_suppressed && !is_view_pane(p)
-                        })
-                        .map(|p| (p.id, p.is_plugin));
-                    let mut hints = panes.iter().filter(is_view_pane);
-                    if let Some(pane) = hints.next() {
-                        views.insert(pane.id, focus);
-                    }
-                    // Closing a tab transfers suppressed panes to another tab.
-                    // Keep just one hints pane there, including after hidden closes.
-                    for duplicate in hints {
-                        close_plugin_pane(duplicate.id);
-                    }
-                }
-                if self.views != views {
-                    self.views = views;
-                    self.refresh();
-                }
-            }
-            _ => {}
+            self.menu = menu;
+            return false;
         }
-        self.ready && self.visible
-    }
-
-    fn pipe(&mut self, message: PipeMessage) -> bool {
-        if !self.controller
-            && message.name == "hints-mode"
-            && let Some((mode, rows, refocus)) =
-                message.payload.and_then(|p| serde_json::from_str(&p).ok())
-        {
-            self.mode = mode;
-            self.rows = rows;
-            self.refocus = refocus;
-            self.refresh();
+        // Also what ends a hints pane from a session saved before the
+        // popups: it closes at the first mode it hears of.
+        if !menu {
+            close_self();
+            return false;
         }
-        self.ready && self.visible
+        if (self.mode, &self.rows) == (info.mode, &rows) {
+            return false;
+        }
+        let (width, height) = size(info.mode, &rows);
+        set_popup_size(width, height);
+        self.mode = info.mode;
+        self.rows = rows;
+        true
     }
 
     fn render(&mut self, rows: usize, cols: usize) {
-        let key_width = self.key_width();
+        if self.rows.is_empty() || rows < 2 || cols < 2 {
+            return;
+        }
+        // A popup has no frame of its own.
+        let inner = cols - 2;
+        let title: String = title(self.mode).chars().take(inner).collect();
+        let fill = "─".repeat(inner - title.chars().count());
         print_text_with_coordinates(
-            Text::from(format!("{:?}", self.mode)).color_all(0),
-            1,
+            Text::from(format!("╭{title}{fill}╮")).color_range(0, 1..=title.chars().count()),
             0,
-            Some(cols.saturating_sub(2)),
+            0,
+            Some(cols),
             None,
         );
-        for (y, (key, description)) in self.rows.iter().take(rows.saturating_sub(1)).enumerate() {
-            let label = format!("{key:<key_width$}  {description}");
+        let key_width = key_width(&self.rows);
+        for y in 1..rows - 1 {
+            let line = self
+                .rows
+                .get(y - 1)
+                .map_or(String::new(), |(key, description)| {
+                    format!(" {key:<key_width$}  {description}")
+                });
+            let line: String = line.chars().take(inner).collect();
+            let keys = self
+                .rows
+                .get(y - 1)
+                .map_or(0, |(key, _)| key.chars().count());
             print_text_with_coordinates(
-                Text::from(label).color_range(3, 0..key.chars().count()),
-                1,
-                y + 1,
-                Some(cols.saturating_sub(2)),
+                Text::from(format!("│{line:<inner$}│")).color_range(3, 2..2 + keys),
+                0,
+                y,
+                Some(cols),
                 None,
             );
         }
-    }
-}
-
-impl Hints {
-    fn key_width(&self) -> usize {
-        self.rows
-            .iter()
-            .map(|(k, _)| k.chars().count())
-            .max()
-            .unwrap_or(0)
-    }
-
-    fn refresh(&mut self) {
-        if !self.ready {
-            return;
-        }
-        if self.controller {
-            for (id, focus) in &self.views {
-                let payload = serde_json::to_string(&(self.mode, &self.rows, focus)).unwrap();
-                pipe_message_to_plugin(MessageToPlugin {
-                    destination_plugin_id: Some(*id),
-                    message_name: "hints-mode".into(),
-                    message_payload: Some(payload),
-                    ..Default::default()
-                });
-            }
-            return;
-        }
-        let active = matches!(
-            self.mode,
-            InputMode::Normal
-                | InputMode::Pane
-                | InputMode::Tab
-                | InputMode::Session
-                | InputMode::Resize
-                | InputMode::Prompt
+        print_text_with_coordinates(
+            Text::from(format!("╰{}╯", "─".repeat(inner))),
+            0,
+            rows - 1,
+            Some(cols),
+            None,
         );
-        if !active || self.rows.is_empty() {
-            if self.visible {
-                self.visible = false;
-                hide_self();
-            }
-            return;
-        }
-        let pane = PaneId::Plugin(self.id);
-        if !self.visible {
-            self.visible = true;
-            show_pane_with_id(pane, true, false);
-            // Which focuses it if floating panes are visible: give it back.
-            if let Some((id, is_plugin)) = self.refocus {
-                let pane = if is_plugin {
-                    PaneId::Plugin(id)
-                } else {
-                    PaneId::Terminal(id)
-                };
-                focus_pane_with_id(pane, false, false);
-            }
-        }
-        let key_width = self.key_width();
-        let description_width = self
-            .rows
-            .iter()
-            .map(|(_, d)| d.chars().count())
-            .max()
-            .unwrap_or(0);
-        let width = (key_width + description_width + 6).min(self.size.1.saturating_sub(2));
-        let height = (self.rows.len() + 3).min(self.size.0.saturating_sub(2));
-        if let Some(coordinates) = FloatingPaneCoordinates::new(
-            Some(self.size.1.saturating_sub(width + 1).to_string()),
-            Some(self.size.0.saturating_sub(height + 1).to_string()),
-            Some(width.to_string()),
-            Some(height.to_string()),
-            Some(true),
-            Some(false),
-        ) {
-            change_floating_panes_coordinates(vec![(pane, coordinates)]);
-        }
     }
 }
 
-/// A hints view pane: by its alias in the layout, or (in a resurrected
-/// session, whose saved layout has the resolved location) by its file.
-fn is_view(url: Option<&str>) -> bool {
-    url.is_some_and(|url| url == "hints" || url.ends_with("/zellij-hints.wasm"))
+/// The modes with a menu: the ones reached through `Alt g`.
+fn is_menu(mode: InputMode) -> bool {
+    matches!(
+        mode,
+        InputMode::Normal
+            | InputMode::Pane
+            | InputMode::Tab
+            | InputMode::Session
+            | InputMode::Resize
+            | InputMode::Prompt
+    )
+}
+
+fn title(mode: InputMode) -> String {
+    format!(" {mode:?} ")
+}
+
+fn key_width(rows: &[(String, String)]) -> usize {
+    rows.iter()
+        .map(|(k, _)| k.chars().count())
+        .max()
+        .unwrap_or(0)
+}
+
+/// The popup's (width, height) for these rows: a frame, around each row as
+/// ` key  description `.
+fn size(mode: InputMode, rows: &[(String, String)]) -> (usize, usize) {
+    let descriptions = rows
+        .iter()
+        .map(|(_, d)| d.chars().count())
+        .max()
+        .unwrap_or(0);
+    let width = (key_width(rows) + descriptions + 4).max(title(mode).chars().count());
+    (width + 2, rows.len() + 2)
 }
 
 fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
@@ -309,16 +238,26 @@ fn describe(action: &Action) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::is_view;
+    use super::*;
 
     #[test]
-    fn views_by_alias_or_file() {
-        assert!(is_view(Some("hints")));
-        assert!(is_view(Some(
-            "file:/home/me/.local/share/zellij/plugins/zellij-hints.wasm"
-        )));
-        assert!(!is_view(Some("hints-controller")));
-        assert!(!is_view(Some("zellij:compact-bar")));
-        assert!(!is_view(None));
+    fn sized_to_the_longest_row_and_the_title() {
+        let rows = vec![
+            ("s".into(), "Sessions".into()),
+            ("Alt x".into(), "Go".into()),
+        ];
+        // │ Alt x  Sessions │: the widest key and the widest description.
+        assert_eq!(size(InputMode::Normal, &rows), (19, 4));
+        let rows = vec![("y".into(), "Go".into())];
+        assert_eq!(size(InputMode::Session, &rows), (" Session ".len() + 2, 3));
+    }
+
+    #[test]
+    fn menus_are_the_modes_behind_alt_g() {
+        assert!(is_menu(InputMode::Session));
+        assert!(is_menu(InputMode::Prompt));
+        assert!(!is_menu(InputMode::Locked));
+        assert!(!is_menu(InputMode::RenameTab));
+        assert!(!is_menu(InputMode::RenameSession));
     }
 }
