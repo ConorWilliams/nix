@@ -275,7 +275,7 @@ impl ZellijPlugin for Finder {
             } else {
                 "Waiting for permission. Esc to close."
             };
-            print_text_with_coordinates(Text::new(message), 1, 0, width, None);
+            print_text_with_coordinates(Text::from(message), 1, 0, width, None);
             return;
         }
         let count = format!("{}/{}", self.shown.len(), self.entries.len());
@@ -284,7 +284,7 @@ impl ZellijPlugin for Finder {
         let line = format!("{prompt}{}{count}", " ".repeat(gap.max(1)));
         let count_start = line.chars().count() - count.chars().count();
         print_text_with_coordinates(
-            Text::new(line)
+            Text::from(line)
                 .color_range(2, 0..1)
                 .color_range(1, count_start..),
             1,
@@ -309,7 +309,7 @@ impl ZellijPlugin for Finder {
             if entry.here {
                 label.push_str("  (current)");
             }
-            let mut text = Text::new(label).color_indices(3, indices.clone());
+            let mut text = Text::from(label).color_indices(3, indices.clone());
             if entry.here {
                 text = text.color_range(1, entry.label.chars().count()..);
             }
