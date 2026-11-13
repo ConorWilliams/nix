@@ -203,6 +203,7 @@ fn describe(action: &Action) -> String {
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
             InputMode::Prompt => "Quit session...".into(),
+            InputMode::RenameSession => "Rename session".into(),
             mode => format!("{mode:?}"),
         },
         Action::NewPane {
@@ -214,10 +215,6 @@ fn describe(action: &Action) -> String {
             ..
         } => "Split horizontally (|)".into(),
         Action::NewTab { .. } => "New tab".into(),
-        Action::NewFloatingPane {
-            pane_name: Some(name),
-            ..
-        } => name.clone(),
         Action::TabNameInput { .. } => "Rename tab".into(),
         Action::CloseTab => "Close tab".into(),
         Action::CloseFocus => "Close pane".into(),
@@ -228,7 +225,7 @@ fn describe(action: &Action) -> String {
         // (the only message bound in a menu; ModeInfo has no more of it)
         Action::KeybindPipe { .. } => "Quit session, for every client".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
-        action if action.launches_plugin("new-session") => "New / resurrect session".into(),
+        action if action.launches_plugin("sessions") => "Manage sessions".into(),
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])
