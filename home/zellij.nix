@@ -16,7 +16,6 @@ let
   # plugins, by path. A store path would need a new grant after each
   # rebuild, and pin old builds (soon garbage collected) in saved sessions.
   pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
-  zellij = lib.getExe config.programs.zellij.package;
   fish = lib.getExe config.programs.fish.package;
   # What a resurrected pane runs, a script named after the tool: the tool
   # (with `defaults` if given no arguments) in the folder's direnv
@@ -77,38 +76,6 @@ let
       *) echo ${fish} ;;
     esac
   '';
-  renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
-    while read --local --prompt-str 'Session name: ' name
-      set name (string trim -- "$name")
-      test -z "$name"; and break
-      # (Zellij's own checks, which renaming skips)
-      if string match --quiet '*/*' -- "$name"; or contains -- "$name" . ..
-        echo 'Not a session name: no /, and not . or ..' >&2
-        continue
-      end
-      if contains -- "$name" (${zellij} list-sessions -sn)
-        echo 'A session by this name already exists.' >&2
-        continue
-      end
-      ${zellij} action rename-session "$name"; or continue
-      break
-    end
-  '';
-  # A fish script in a small floating pane, for a prompt.
-  prompt = name: script: {
-    Run = {
-      _args = [
-        fish
-        "--no-config"
-        (toString script)
-      ];
-      floating = true;
-      inherit name;
-      width = "60%";
-      height = "5";
-      close_on_exit = true;
-    };
-  };
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -216,7 +183,11 @@ in
             (once "[" { FocusHostSession = { }; })
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
-            (once "r" (prompt "Rename session" renameSession))
+            # (the mode first: entering it starts the draft that the 0 clears)
+            (bind "r" [
+              (mode "renamesession")
+              { SessionNameInput = 0; }
+            ])
           ];
           tab._children = [
             (bind "r" [
@@ -243,6 +214,12 @@ in
           renametab._children = [
             (bind "Enter" (mode "locked"))
             (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
+          ];
+          # The name shows in the bar as it's typed, and is checked (no /, not
+          # another session's) on Enter.
+          renamesession._children = [
+            (bind "Enter" (mode "locked"))
+            (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameSession = { }; })
           ];
           pane._children = [
             (once "h" { NewPane = "Right"; })
@@ -281,6 +258,7 @@ in
             _args = [
               "locked"
               "renametab"
+              "renamesession"
             ];
             _children = [ (bind [ "Esc" "Ctrl c" "Alt g" ] (mode "locked")) ];
           };

@@ -274,6 +274,7 @@ fn describe(action: &Action) -> String {
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
             InputMode::Prompt => "Quit session...".into(),
+            InputMode::RenameSession => "Rename session".into(),
             mode => format!("{mode:?}"),
         },
         Action::NewPane {
@@ -285,10 +286,6 @@ fn describe(action: &Action) -> String {
             ..
         } => "Split horizontally (|)".into(),
         Action::NewTab { .. } => "New tab".into(),
-        Action::NewFloatingPane {
-            pane_name: Some(name),
-            ..
-        } => name.clone(),
         Action::TabNameInput { .. } => "Rename tab".into(),
         Action::CloseTab => "Close tab".into(),
         Action::CloseFocus => "Close pane".into(),
