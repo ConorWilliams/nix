@@ -175,7 +175,7 @@ in
         # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
         # just the shell is then saved as one, not as a command to re-run.
         default_shell = fish;
-        # Exited sessions can be resurrected (s n), each pane in its folder;
+        # Exited sessions can be resurrected (s m), each pane in its folder;
         # what ran there waits for Enter (discoverCommand above).
         session_serialization = true;
         post_command_discovery_hook = toString discoverCommand;
@@ -188,7 +188,7 @@ in
           };
           quit._props.location = "file:${pluginPath "zellij-quit"}";
           # New sessions, and exited ones to resurrect (the finder has only live ones).
-          new-session = manager {
+          sessions = manager {
             multi_screen = false;
           };
           # Fuzzy finder (zellij/finder) for every session's tabs: each word
@@ -215,7 +215,7 @@ in
             (bind "p" (mode "pane"))
           ];
           session._children = [
-            (once "n" (launch "new-session"))
+            (once "m" (launch "sessions"))
             # s q y: quitting ends the session for every client, so it takes
             # a y to confirm, in a mode of its own (which the hints show).
             (bind "q" (mode "prompt"))
@@ -386,7 +386,7 @@ in
     # restart-zellij: restart every live session under the current config
     # (after a switch that changes what a running session can't pick up:
     # plugin aliases, options). Each session is saved as Zellij saves it on
-    # its own, then ended, to bring back with `zellij attach NAME` (or s n);
+    # its own, then ended, to bring back with `zellij attach NAME` (or s m);
     # what ran in a pane waits for Enter. Run it outside Zellij: it ends
     # every session, and whatever runs in them.
     packages = [
@@ -420,7 +420,7 @@ in
           echo
           zellij list-sessions --no-formatting
           echo
-          echo "Bring one back with: zellij attach NAME (or s n in Zellij)."
+          echo "Bring one back with: zellij attach NAME (or s m in Zellij)."
         '';
       })
     ];

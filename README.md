@@ -104,7 +104,7 @@ into its modes (a menu shows the keys), and these work from anywhere:
 They shadow fish's `Alt h`, `Alt l` and `Alt f`, and `Ctrl Right` (in fish,
 `Alt Right` still accepts a word of a suggestion).
 
-Ended sessions can be brought back (`s n`, or `zellij attach NAME`), each pane
+Ended sessions can be brought back (`s m`, or `zellij attach NAME`), each pane
 in its folder; Neovim, Claude and Codex wait for Enter, then resume. A switch
 that changes plugin aliases or Zellij's options only reaches sessions started
 after it: run `restart-zellij` (outside Zellij) to bring them all up to date.

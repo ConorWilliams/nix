@@ -296,7 +296,7 @@ fn describe(action: &Action) -> String {
         // (the only message bound in a menu; ModeInfo has no more of it)
         Action::KeybindPipe { .. } => "Quit session, for every client".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
-        action if action.launches_plugin("new-session") => "New / resurrect session".into(),
+        action if action.launches_plugin("sessions") => "Manage sessions".into(),
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])
