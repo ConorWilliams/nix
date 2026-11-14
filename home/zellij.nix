@@ -113,37 +113,6 @@ let
         };
       }
     ]);
-  zellij = lib.getExe config.programs.zellij.package;
-  renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
-    while read --local --prompt-str 'Session name: ' name
-      test -z "$name"; and break
-      if string match --quiet '*/*' -- "$name"
-        echo 'Session names cannot contain /.' >&2
-        continue
-      end
-      if contains -- "$name" (${zellij} list-sessions -sn)
-        echo 'A session by this name already exists.' >&2
-        continue
-      end
-      ${zellij} action rename-session "$name"; or continue
-      break
-    end
-  '';
-  # A fish script in a small floating pane, for a prompt.
-  prompt = name: script: {
-    Run = {
-      _args = [
-        (lib.getExe config.programs.fish.package)
-        "--no-config"
-        (toString script)
-      ];
-      floating = true;
-      inherit name;
-      width = "60%";
-      height = "5";
-      close_on_exit = true;
-    };
-  };
   bind = keys: actions: {
     bind = {
       _args = lib.toList keys;
@@ -194,7 +163,7 @@ in
         # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
         # just the shell is then saved as one, not as a command to re-run.
         default_shell = fish;
-        # Exited sessions can be resurrected (s n), each pane in its folder;
+        # Exited sessions can be resurrected (s m), each pane in its folder;
         # what ran there waits for Enter (discoverCommand above).
         session_serialization = true;
         post_command_discovery_hook = toString discoverCommand;
@@ -209,7 +178,7 @@ in
           };
           quit._props.location = "file:${pluginPath "zellij-quit"}";
           # New sessions, and exited ones to resurrect (the finder has only live ones).
-          new-session = manager {
+          sessions = manager {
             multi_screen = false;
           };
           # Fuzzy finder (zellij/finder) for every session's tabs: each word
@@ -236,7 +205,7 @@ in
             (bind "p" (mode "pane"))
           ];
           session._children = [
-            (once "n" (launch "new-session"))
+            (once "m" (launch "sessions"))
             # s q y: quitting ends the session for every client, so it takes
             # a y to confirm, in a mode of its own (which the hints show).
             (bind "q" (mode "prompt"))
@@ -245,7 +214,11 @@ in
             (once "[" { FocusHostSession = { }; })
             (once "]" { FocusGuestSession = { }; })
             (once "z" { ToggleHostFullscreen = { }; })
-            (once "r" (prompt "Rename session" renameSession))
+            # (the mode first: entering it starts the draft that the 0 clears)
+            (bind "r" [
+              (mode "renamesession")
+              { SessionNameInput = 0; }
+            ])
           ];
           tab._children = [
             (bind "r" [
@@ -272,6 +245,12 @@ in
           renametab._children = [
             (bind "Enter" (mode "locked"))
             (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameTab = { }; })
+          ];
+          # The name shows in the bar as it's typed, and is checked (no /, not
+          # another session's) on Enter.
+          renamesession._children = [
+            (bind "Enter" (mode "locked"))
+            (once [ "Esc" "Ctrl c" "Alt g" ] { UndoRenameSession = { }; })
           ];
           pane._children = [
             (once "h" { NewPane = "Right"; })
@@ -310,6 +289,7 @@ in
             _args = [
               "locked"
               "renametab"
+              "renamesession"
             ];
             _children = [ (bind [ "Esc" "Ctrl c" "Alt g" ] (mode "locked")) ];
           };
