@@ -28,16 +28,6 @@
       package = pkgs.nerd-fonts.caskaydia-cove; # installs the font too
     };
     settings.confirm_os_window_close = 0;
-    # A new terminal window is independent, even if launched from a Zellij pane.
-    # Clear inherited session/pane identity here; direct calls may intentionally nest.
-    settings.shell =
-      let
-        unset = "env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID";
-        fish = lib.getExe config.programs.fish.package;
-        bash = lib.getExe config.programs.bash.package;
-        login = if pkgs.stdenv.hostPlatform.isDarwin then "/bin/zsh" else bash;
-      in
-      "${unset} ${fish} -c 'anon-zellij; exec ${login} --login'";
     themeFile = "rose-pine-dawn"; # kitty's official port of the theme
   };
 }
