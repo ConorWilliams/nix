@@ -101,7 +101,7 @@ impl ZellijPlugin for Hints {
     fn render(&mut self, rows: usize, cols: usize) {
         let key_width = self.key_width();
         print_text_with_coordinates(
-            Text::new(format!("{:?}", self.mode)).color_all(0),
+            Text::from(format!("{:?}", self.mode)).color_all(0),
             1,
             0,
             Some(cols.saturating_sub(2)),
@@ -110,7 +110,7 @@ impl ZellijPlugin for Hints {
         for (y, (key, description)) in self.rows.iter().take(rows.saturating_sub(1)).enumerate() {
             let label = format!("{key:<key_width$}  {description}");
             print_text_with_coordinates(
-                Text::new(label).color_range(3, 0..key.chars().count()),
+                Text::from(label).color_range(3, 0..key.chars().count()),
                 1,
                 y + 1,
                 Some(cols.saturating_sub(2)),
