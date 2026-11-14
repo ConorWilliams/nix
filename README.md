@@ -56,14 +56,16 @@ Activating configurations:
 
 ```sh
 hms                                        # apply home changes
-dms                                        # on Mac: system settings, then home
+dms                                        # on Mac: system, home, brew upgrade
 ```
 
-Updating things:
+Updating things (nh bumps the pinned inputs, builds, and lists each package
+whose version changed; `hms` then applies it):
 
 ```sh
-nix flake update                           # bump all pinned inputs
-nix flake update llm-agents                # bump only claude
+bump-preview [INPUT]                       # what a bump would change, unbuilt
+nh home build -u                           # bump all pinned inputs
+nh home build -U llm-agents                # bump only claude
 ```
 
 Manual garbage collection (runs on a schedule automatically):
