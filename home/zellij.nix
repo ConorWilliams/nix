@@ -7,7 +7,7 @@
 }:
 
 let
-  plugin = import ./zellij/plugin.nix { inherit pkgs; };
+  plugins = import ./zellij/plugin.nix { inherit pkgs; };
   # The plugins are at fixed paths, linking to the current builds
   # (xdg.dataFile, below): Zellij keys permissions, and saved sessions name
   # plugins, by path. A store path would need a new grant after each
@@ -221,8 +221,8 @@ in
 
   xdg.dataFile = {
     # Plugins, where the config and permissions find them (pluginPath)
-    "zellij/plugins/zellij-hints.wasm".source = "${plugin ./zellij/hints}/bin/zellij-hints.wasm";
-    "zellij/plugins/zellij-finder.wasm".source = "${plugin ./zellij/finder}/bin/zellij-finder.wasm";
+    "zellij/plugins/zellij-hints.wasm".source = "${plugins}/bin/zellij-hints.wasm";
+    "zellij/plugins/zellij-finder.wasm".source = "${plugins}/bin/zellij-finder.wasm";
     "zellij/plugins/vim-zellij-navigator.wasm".source = pkgs.zellijPlugins.vim-zellij-navigator;
   };
 
