@@ -2633,7 +2633,6 @@ dependencies = [
 name = "zellij-hints"
 version = "0.1.0"
 dependencies = [
- "serde_json",
  "zellij-tile",
 ]
 

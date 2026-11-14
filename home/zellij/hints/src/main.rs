@@ -1,191 +1,160 @@
-use std::collections::{BTreeMap, BTreeSet};
+//! A menu of the current mode's keys, in a corner while a menu mode is on.
+//!
+//! One instance runs in the background (`controller true`), which is the
+//! only kind that hears every mode change; on entering a menu mode it
+//! opens another, with no configuration, as a popup. The popup follows the
+//! mode itself, and closes when the menu is left. Zellij keeps a popup
+//! unfocused, within the screen, and with its client across tabs.
+
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use zellij_tile::prelude::{actions::Action, *};
 
+/// The popup's alias in Zellij's config (`plugins`, in zellij.nix).
+const POPUP: &str = "hints";
+
 #[derive(Default)]
 struct Hints {
-    id: u32,
-    ready: bool,
-    visible: bool,
+    controller: bool,
+    /// Controller: a menu is on, so its popup is open.
+    menu: bool,
+    /// Popup: what it shows.
     mode: InputMode,
     rows: Vec<(String, String)>,
-    size: (usize, usize),
-    controller: bool,
-    views: BTreeSet<u32>,
 }
 register_plugin!(Hints);
 
 impl ZellijPlugin for Hints {
     fn load(&mut self, configuration: BTreeMap<String, String>) {
-        self.id = get_plugin_ids().plugin_id;
         self.controller = configuration.get("controller").is_some_and(|v| v == "true");
-        self.size = (24, 80);
-        // Full ModeUpdate events supply the live keymap; no config parser or cache.
-        subscribe(&[
-            EventType::ModeUpdate,
-            EventType::TabUpdate,
-            EventType::PaneUpdate,
-            EventType::PermissionRequestResult,
-        ]);
+        // (ModeUpdate only comes once reading is allowed, so nothing here
+        // runs before the permissions are granted.)
+        subscribe(&[EventType::ModeUpdate]);
         request_permission(&[
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
-            PermissionType::MessageAndLaunchOtherPlugins,
         ]);
     }
 
     fn update(&mut self, event: Event) -> bool {
-        match event {
-            Event::PermissionRequestResult(PermissionStatus::Granted) => {
-                self.ready = true;
-                set_selectable(false);
-                hide_self();
-                self.refresh();
+        let Event::ModeUpdate(info) = event else {
+            return false;
+        };
+        let rows = bindings(&info);
+        let menu = is_menu(info.mode) && !rows.is_empty();
+        if self.controller {
+            if menu && !self.menu {
+                let (width, height) = size(info.mode, &rows);
+                open_plugin_popup_with_options(
+                    POPUP,
+                    BTreeMap::new(),
+                    0,
+                    0,
+                    width,
+                    height,
+                    PopupOptions::default()
+                        .focused(false)
+                        .corner(PopupCorner::BottomRight),
+                );
             }
-            // Views get the mode piped from the controller, which also covers new views.
-            Event::ModeUpdate(info) if self.controller => {
-                let rows = bindings(&info);
-                if self.mode != info.mode || self.rows != rows {
-                    self.mode = info.mode;
-                    self.rows = rows;
-                    self.refresh();
-                }
-            }
-            Event::TabUpdate(tabs) => {
-                if let Some(tab) = tabs.iter().find(|t| t.active) {
-                    let size = (tab.display_area_rows, tab.display_area_columns);
-                    let changed = self.size != size;
-                    self.size = size;
-                    if self.ready && self.visible && changed {
-                        self.refresh();
-                    }
-                }
-            }
-            Event::PaneUpdate(manifest) if self.controller && self.ready => {
-                let mut views = BTreeSet::new();
-                for panes in manifest.panes.values() {
-                    let mut hints = panes
-                        .iter()
-                        .filter(|p| p.is_plugin && p.plugin_url.as_deref() == Some("hints"));
-                    if let Some(pane) = hints.next() {
-                        views.insert(pane.id);
-                    }
-                    // Closing a tab transfers suppressed panes to another tab.
-                    // Keep just one hints pane there, including after hidden closes.
-                    for duplicate in hints {
-                        close_plugin_pane(duplicate.id);
-                    }
-                }
-                if self.views != views {
-                    self.views = views;
-                    self.refresh();
-                }
-            }
-            _ => {}
+            self.menu = menu;
+            return false;
         }
-        self.ready && self.visible
-    }
-
-    fn pipe(&mut self, message: PipeMessage) -> bool {
-        if !self.controller
-            && message.name == "hints-mode"
-            && let Some((mode, rows)) = message.payload.and_then(|p| serde_json::from_str(&p).ok())
-        {
-            self.mode = mode;
-            self.rows = rows;
-            self.refresh();
+        // Also what ends a hints pane from a session saved before the
+        // popups: it closes at the first mode it hears of.
+        if !menu {
+            close_self();
+            return false;
         }
-        self.ready && self.visible
+        if (self.mode, &self.rows) == (info.mode, &rows) {
+            return false;
+        }
+        let (width, height) = size(info.mode, &rows);
+        set_popup_size(width, height);
+        self.mode = info.mode;
+        self.rows = rows;
+        true
     }
 
     fn render(&mut self, rows: usize, cols: usize) {
-        let key_width = self.key_width();
+        if self.rows.is_empty() || rows < 2 || cols < 2 {
+            return;
+        }
+        // A popup has no frame of its own.
+        let inner = cols - 2;
+        let title: String = title(self.mode).chars().take(inner).collect();
+        let fill = "─".repeat(inner - title.chars().count());
         print_text_with_coordinates(
-            Text::from(format!("{:?}", self.mode)).color_all(0),
-            1,
+            Text::from(format!("╭{title}{fill}╮")).color_range(0, 1..=title.chars().count()),
             0,
-            Some(cols.saturating_sub(2)),
+            0,
+            Some(cols),
             None,
         );
-        for (y, (key, description)) in self.rows.iter().take(rows.saturating_sub(1)).enumerate() {
-            let label = format!("{key:<key_width$}  {description}");
+        let key_width = key_width(&self.rows);
+        for y in 1..rows - 1 {
+            let line = self
+                .rows
+                .get(y - 1)
+                .map_or(String::new(), |(key, description)| {
+                    format!(" {key:<key_width$}  {description}")
+                });
+            let line: String = line.chars().take(inner).collect();
+            let keys = self
+                .rows
+                .get(y - 1)
+                .map_or(0, |(key, _)| key.chars().count());
             print_text_with_coordinates(
-                Text::from(label).color_range(3, 0..key.chars().count()),
-                1,
-                y + 1,
-                Some(cols.saturating_sub(2)),
+                Text::from(format!("│{line:<inner$}│")).color_range(3, 2..2 + keys),
+                0,
+                y,
+                Some(cols),
                 None,
             );
         }
+        print_text_with_coordinates(
+            Text::from(format!("╰{}╯", "─".repeat(inner))),
+            0,
+            rows - 1,
+            Some(cols),
+            None,
+        );
     }
 }
 
-impl Hints {
-    fn key_width(&self) -> usize {
-        self.rows
-            .iter()
-            .map(|(k, _)| k.chars().count())
-            .max()
-            .unwrap_or(0)
-    }
+/// The modes with a menu: the ones reached through `Alt g`.
+fn is_menu(mode: InputMode) -> bool {
+    matches!(
+        mode,
+        InputMode::Normal
+            | InputMode::Pane
+            | InputMode::Tab
+            | InputMode::Session
+            | InputMode::Resize
+    )
+}
 
-    fn refresh(&mut self) {
-        if !self.ready {
-            return;
-        }
-        if self.controller {
-            let payload = serde_json::to_string(&(self.mode, &self.rows)).unwrap();
-            for id in &self.views {
-                pipe_message_to_plugin(MessageToPlugin {
-                    destination_plugin_id: Some(*id),
-                    message_name: "hints-mode".into(),
-                    message_payload: Some(payload.clone()),
-                    ..Default::default()
-                });
-            }
-            return;
-        }
-        let active = matches!(
-            self.mode,
-            InputMode::Normal
-                | InputMode::Pane
-                | InputMode::Tab
-                | InputMode::Session
-                | InputMode::Resize
-                | InputMode::Scroll
-        );
-        if !active || self.rows.is_empty() {
-            if self.visible {
-                self.visible = false;
-                hide_self();
-            }
-            return;
-        }
-        let pane = PaneId::Plugin(self.id);
-        if !self.visible {
-            self.visible = true;
-            show_pane_with_id(pane, true, false); // leave input focused on the terminal
-        }
-        let key_width = self.key_width();
-        let description_width = self
-            .rows
-            .iter()
-            .map(|(_, d)| d.chars().count())
-            .max()
-            .unwrap_or(0);
-        let width = (key_width + description_width + 6).min(self.size.1.saturating_sub(2));
-        let height = (self.rows.len() + 3).min(self.size.0.saturating_sub(2));
-        if let Some(coordinates) = FloatingPaneCoordinates::new(
-            Some(self.size.1.saturating_sub(width + 1).to_string()),
-            Some(self.size.0.saturating_sub(height + 1).to_string()),
-            Some(width.to_string()),
-            Some(height.to_string()),
-            Some(true),
-            Some(false),
-        ) {
-            change_floating_panes_coordinates(vec![(pane, coordinates)]);
-        }
-    }
+fn title(mode: InputMode) -> String {
+    format!(" {mode:?} ")
+}
+
+fn key_width(rows: &[(String, String)]) -> usize {
+    rows.iter()
+        .map(|(k, _)| k.chars().count())
+        .max()
+        .unwrap_or(0)
+}
+
+/// The popup's (width, height) for these rows: a frame, around each row as
+/// ` key  description `.
+fn size(mode: InputMode, rows: &[(String, String)]) -> (usize, usize) {
+    let descriptions = rows
+        .iter()
+        .map(|(_, d)| d.chars().count())
+        .max()
+        .unwrap_or(0);
+    let width = (key_width(rows) + descriptions + 4).max(title(mode).chars().count());
+    (width + 2, rows.len() + 2)
 }
 
 fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
@@ -229,12 +198,9 @@ fn bindings(info: &ModeInfo) -> Vec<(String, String)> {
 fn describe(action: &Action) -> String {
     match action {
         Action::SwitchToMode { input_mode } => match input_mode {
-            InputMode::Locked => "Cancel / return to typing".into(),
-            InputMode::Normal => "Leader".into(),
             InputMode::Tab => "Tabs".into(),
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
-            InputMode::RenameTab => "Rename tab".into(),
             mode => format!("{mode:?}"),
         },
         Action::NewPane {
@@ -251,31 +217,17 @@ fn describe(action: &Action) -> String {
             ..
         } => name.clone(),
         Action::TabNameInput { .. } => "Rename tab".into(),
-        Action::GoToTab { .. } => "Go to tab".into(),
-        Action::GoToPreviousTab => "Previous tab".into(),
-        Action::GoToNextTab => "Next tab".into(),
-        Action::ToggleTab => "Last tab".into(),
-        Action::FocusLastPane => "Last pane".into(),
         Action::CloseTab => "Close tab".into(),
         Action::CloseFocus => "Close pane".into(),
-        Action::ToggleFocusFullscreen => "Maximize / restore pane".into(),
-        Action::ToggleFloatingPanes => "Show / hide floating panes".into(),
         Action::FocusGuestSession => "Control nested session".into(),
         Action::FocusHostSession => "Control parent session".into(),
         Action::ToggleHostFullscreen => "Maximize / restore nested session".into(),
         Action::Detach => "Detach session".into(),
-        Action::Quit => "Quit session".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
-        Action::KeybindPipe { name, .. } => {
-            format!("Plugin: {}", name.as_deref().unwrap_or("message"))
-        }
         action if action.launches_plugin("new-session") => "New session".into(),
         action if action.launches_plugin("find") => "Find sessions and tabs".into(),
         action if action.launches_plugin("find-tabs") => "Find tabs".into(),
         action if action.launches_plugin("find-sessions") => "Find sessions".into(),
-        action if action.launches_plugin("session-manager") => {
-            "Find tabs / panes / sessions".into()
-        }
         // New actions still appear without adding another menu entry here.
         action => format!("{action:?}")
             .split(['{', '('])
@@ -283,5 +235,30 @@ fn describe(action: &Action) -> String {
             .unwrap_or("Action")
             .trim()
             .to_owned(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sized_to_the_longest_row_and_the_title() {
+        let rows = vec![
+            ("s".into(), "Sessions".into()),
+            ("Alt x".into(), "Go".into()),
+        ];
+        // │ Alt x  Sessions │: the widest key and the widest description.
+        assert_eq!(size(InputMode::Normal, &rows), (19, 4));
+        let rows = vec![("y".into(), "Go".into())];
+        assert_eq!(size(InputMode::Session, &rows), (" Session ".len() + 2, 3));
+    }
+
+    #[test]
+    fn menus_are_the_modes_behind_alt_g() {
+        assert!(is_menu(InputMode::Session));
+        assert!(!is_menu(InputMode::Locked));
+        assert!(!is_menu(InputMode::RenameTab));
+        assert!(!is_menu(InputMode::RenameSession));
     }
 }
