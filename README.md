@@ -82,22 +82,6 @@ nix flake check --all-systems --no-build   # check every config
 .github/check.sh [check|lint|rust|nvim]    # everything CI checks
 ```
 
-## Neovim project tools
-
-Neovim's plugins and Tree-sitter parsers live here; project toolchains and
-language servers come from each project's flake, loaded by direnv before
-starting Neovim. Python uses `ty` and `ruff`, Rust uses `rust-analyzer` with
-Clippy, and C/C++/CUDA use `clangd` with clang-tidy checks. Formatting on save
-falls back to the language server, so clangd uses the project's `.clang-format`.
-
-For C/C++/CUDA, the project shell should provide its compiler and the matching
-LLVM `clang-tools` (`clangd`, `clang-format`, `clang-tidy`). For CMake files,
-include `neocmakelsp` too. Keep lint rules in `.clang-tidy` and compiler flags
-in `compile_commands.json`; with CMake, configure with
-`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` and expose that file at the source root,
-or set `CompileFlags.CompilationDatabase` in the project's `.clangd` to the
-build directory. CUDA's toolkit and flags also belong in the project.
-
 ## Zellij
 
 A new terminal is a plain shell; Zellij starts when asked for:
