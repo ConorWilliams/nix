@@ -13,6 +13,106 @@ let
   # plugins, by path. A store path would need a new grant after each
   # rebuild, and pin old builds (soon garbage collected) in saved sessions.
   pluginPath = name: "${config.xdg.dataHome}/zellij/plugins/${name}.wasm";
+  fish = lib.getExe config.programs.fish.package;
+  # What a resurrected pane runs, a script named after the tool: the tool
+  # (with `defaults` if given no arguments) in the folder's direnv
+  # environment, as from the shell, unless its .envrc is blocked; then a
+  # plain shell. The name is what Zellij reports for the pane (through the
+  # discovery hook, below), and vim-zellij-navigator forwards Ctrl+arrows
+  # only to nvim.
+  resume =
+    tool: defaults:
+    pkgs.writeShellScriptBin tool /* bash */ ''
+      [[ $# -gt 0 ]] || set -- ${defaults}
+      direnv=${lib.getExe config.programs.direnv.package}
+      # Its own job, the terminal's foreground one, as if typed in the
+      # shell: Zellij reports and saves a pane's foreground job through
+      # the discovery hook, but not the pane's own process.
+      set -m
+      if "$direnv" exec . true 2>/dev/null; then
+        "$direnv" exec . ${tool} "$@"
+      else
+        ${tool} "$@"
+      fi
+      # Suspended (Ctrl-Z)? There is no shell here to suspend to, and going
+      # on would leave the tool behind, stopped: resume it. (Recursion, not
+      # a loop: bash breaks out of a loop whose job is suspended. fg's
+      # stderr stays the terminal: bash hands that to the job.)
+      unsuspend() { if [[ -n $(jobs -ps) ]]; then fg >/dev/null; unsuspend; fi; }
+      unsuspend
+      exec ${fish}
+    '';
+  # Resume scripts are at fixed paths too (xdg.dataFile, below), which saved
+  # sessions name: a store path would soon be garbage collected.
+  resumePath = tool: "${config.xdg.dataHome}/zellij/bin/${tool}";
+  # post_command_discovery_hook: given what a pane is running (its arguments
+  # joined by spaces), prints what to resurrect there (split on spaces).
+  # Only Neovim (with the folder's persistence session) and the agents (with
+  # their conversation, else the folder's latest) come back; any other pane
+  # is the default shell.
+  discoverCommand = pkgs.writeShellScript "zellij-discover-command" /* bash */ ''
+    read -r command _ <<<"$RESURRECT_COMMAND"
+    name=''${command##*/}
+    name=''${name#.}
+    name=''${name%%-wrapped*} # Nix wrappers: .foo-wrapped
+    # A Claude conversation's id, from its command line (a resurrected
+    # pane's has one). Only a UUID counts, so a prompt's words can't.
+    uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+    id=
+    if [[ $RESURRECT_COMMAND =~ (^| )(--session-id|--resume|-r)[\ =]($uuid)( |$) ]]; then
+      id="--resume ''${BASH_REMATCH[3]}"
+    fi
+    # Print mode isn't a conversation to come back to.
+    if [[ $name == claude && $RESURRECT_COMMAND =~ (^| )(-p|--print)( |$) ]]; then
+      name=
+    fi
+    case $name in
+      nvim) echo ${resumePath "nvim"} ;;
+      claude) echo ${resumePath "claude"} $id ;;
+      codex) echo ${resumePath "codex"} ;;
+      *) echo ${fish} ;;
+    esac
+  '';
+  # The agents' SessionStart and SessionEnd hooks (Claude's and Codex's are
+  # alike): a pane running one tells Zellij what to resurrect it with, the
+  # conversation it's in now (which /resume and /clear change, and the
+  # command line doesn't show). Cleared when the agent exits, so the pane
+  # is a shell again; the discovery hook still covers a pane this didn't
+  # reach (its agent killed, say). `resume` is what the tool takes before
+  # a conversation's id.
+  resurrectHooks =
+    tool: resume:
+    let
+      script = pkgs.writeShellApplication {
+        name = "zellij-${tool}-resurrect";
+        runtimeInputs = [
+          pkgs.jq
+          config.programs.zellij.package
+        ];
+        text = ''
+          [[ -n ''${ZELLIJ:-} && -n ''${ZELLIJ_PANE_ID:-} ]] || exit 0
+          IFS=$'\t' read -r event id reason < <(jq -r '[.hook_event_name, .session_id, .reason // "-"] | @tsv')
+          case $event in
+            SessionStart)
+              [[ -n $id ]] || exit 0
+              zellij action set-resurrect-command -- ${resumePath tool} ${resume} "$id"
+              ;;
+            # (not between conversations: the next one's start may come first)
+            SessionEnd)
+              [[ $reason == clear || $reason == resume ]] || zellij action set-resurrect-command --clear
+              ;;
+          esac
+        '';
+      };
+    in
+    lib.genAttrs [ "SessionStart" "SessionEnd" ] (_: [
+      {
+        hooks = lib.singleton {
+          type = "command";
+          command = lib.getExe script;
+        };
+      }
+    ]);
   zellij = lib.getExe config.programs.zellij.package;
   renameSession = pkgs.writeText "zellij-rename-session.fish" /* fish */ ''
     while read --local --prompt-str 'Session name: ' name
@@ -81,6 +181,12 @@ let
 in
 {
   programs = {
+
+    claude-code.settings.hooks = resurrectHooks "claude" "--resume";
+
+    # (Codex asks once, in /hooks, to trust these.)
+    codex.settings.hooks = resurrectHooks "codex" "resume";
+
     zellij = {
       enable = true;
       themes.rose-pine-dawn = builtins.readFile "${inputs.rose-pine-zellij}/dist/rose-pine-dawn.kdl";
@@ -92,7 +198,13 @@ in
         show_startup_tips = false;
         show_release_notes = false;
         on_force_close = "detach";
-        session_serialization = false;
+        # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
+        # just the shell is then saved as one, not as a command to re-run.
+        default_shell = fish;
+        # Exited sessions can be resurrected (s n), each pane in its folder;
+        # what ran there waits for Enter (discoverCommand above).
+        session_serialization = true;
+        post_command_discovery_hook = toString discoverCommand;
         plugins = {
           compact-bar._props.location = "zellij:compact-bar";
           # The menu of a mode's keys (zellij/hints): the controller, in the
@@ -102,6 +214,7 @@ in
             _props.location = "file:${pluginPath "zellij-hints"}";
             controller = true;
           };
+          # New sessions, and exited ones to resurrect (the finder has only live ones).
           new-session = manager {
             multi_screen = false;
           };
@@ -199,6 +312,10 @@ in
   };
 
   xdg.dataFile = {
+    # Resume scripts, where saved sessions find them (resumePath)
+    "zellij/bin/nvim".source = lib.getExe (resume "nvim" ''-c "lua require('persistence').load()"'');
+    "zellij/bin/claude".source = lib.getExe (resume "claude" "--continue");
+    "zellij/bin/codex".source = lib.getExe (resume "codex" "resume --last");
     # Plugins, where the config and permissions find them (pluginPath)
     "zellij/plugins/zellij-hints.wasm".source = "${plugins}/bin/zellij-hints.wasm";
     "zellij/plugins/zellij-finder.wasm".source = "${plugins}/bin/zellij-finder.wasm";
