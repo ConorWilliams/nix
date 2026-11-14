@@ -159,7 +159,6 @@ in
         theme = "rose-pine-dawn";
         show_startup_tips = false;
         show_release_notes = false;
-        on_force_close = "detach";
         # Panes start fish itself, not $SHELL's hand-off to it: a pane that's
         # just the shell is then saved as one, not as a command to re-run.
         default_shell = fish;
@@ -371,6 +370,48 @@ in
         fi
         rm -f "$new"
       '';
+
+    # restart-zellij: restart every live session under the current config
+    # (after a switch that changes what a running session can't pick up:
+    # plugin aliases, options). Each session is saved as Zellij saves it on
+    # its own, then ended, to bring back with `zellij attach NAME` (or s m);
+    # what ran in a pane waits for Enter. Run it outside Zellij: it ends
+    # every session, and whatever runs in them.
+    packages = [
+      (pkgs.writeShellApplication {
+        name = "restart-zellij";
+        runtimeInputs = [
+          config.programs.zellij.package
+        ];
+        text = ''
+          if [[ -n ''${ZELLIJ:-} ]]; then
+            echo 'Run this from a terminal outside Zellij: it ends every session.' >&2
+            exit 1
+          fi
+
+          # (names can have spaces: drop what follows them, not split on them)
+          mapfile -t live < <(zellij list-sessions --no-formatting 2>/dev/null | sed -n '/(EXITED/!s/ \[Created .*//p')
+          if ((''${#live[@]} == 0)); then
+            echo 'No live sessions.'
+            exit 0
+          fi
+
+          printf '%s\n' "''${live[@]}"
+          read -r -p "Save and end these ''${#live[@]} sessions? [y/N] " answer
+          [[ $answer == [yY] ]] || exit 0
+
+          for s in "''${live[@]}"; do
+            zellij --session "$s" action save-session
+            zellij kill-session "$s"
+          done
+
+          echo
+          zellij list-sessions --no-formatting
+          echo
+          echo "Bring one back with: zellij attach NAME (or s m in Zellij)."
+        '';
+      })
+    ];
 
     # Socket paths max out at 104 bytes, and macOS's long TMPDIR leaves ~24
     # for the session name.
