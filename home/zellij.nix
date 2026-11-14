@@ -129,13 +129,6 @@ let
       break
     end
   '';
-  # Quitting ends the session for every client, so it asks first.
-  quitSession = pkgs.writeText "zellij-quit-session.fish" /* fish */ ''
-    read --local --nchars 1 --prompt-str "Quit session $ZELLIJ_SESSION_NAME? [y/N] " answer
-    or exit
-    contains -- "$answer" y Y; or exit
-    ${zellij} kill-session $ZELLIJ_SESSION_NAME
-  '';
   # A fish script in a small floating pane, for a prompt.
   prompt = name: script: {
     Run = {
@@ -214,6 +207,7 @@ in
             _props.location = "file:${pluginPath "zellij-hints"}";
             controller = true;
           };
+          quit._props.location = "file:${pluginPath "zellij-quit"}";
           # New sessions, and exited ones to resurrect (the finder has only live ones).
           new-session = manager {
             multi_screen = false;
@@ -225,6 +219,7 @@ in
         };
         load_plugins = {
           hints-controller = { };
+          quit = { };
         };
         keybinds = {
           _props.clear-defaults = true;
@@ -242,7 +237,9 @@ in
           ];
           session._children = [
             (once "n" (launch "new-session"))
-            (once "q" (prompt "Quit session" quitSession))
+            # s q y: quitting ends the session for every client, so it takes
+            # a y to confirm, in a mode of its own (which the hints show).
+            (bind "q" (mode "prompt"))
             (once "d" { Detach = { }; })
             # Vim-style: [ back towards the root session, ] forward into the nested one.
             (once "[" { FocusHostSession = { }; })
@@ -261,6 +258,16 @@ in
               (mode "renametab")
             ])
             (once "d" { CloseTab = { }; })
+          ];
+          # The quit plugin (zellij/quit) saves the session as it is, then
+          # ends it: to bring back as restart-zellij's are.
+          prompt._children = [
+            (once "y" {
+              MessagePlugin = {
+                _args = [ "quit" ];
+                name = "quit";
+              };
+            })
           ];
           renametab._children = [
             (bind "Enter" (mode "locked"))
@@ -319,6 +326,7 @@ in
     # Plugins, where the config and permissions find them (pluginPath)
     "zellij/plugins/zellij-hints.wasm".source = "${plugins}/bin/zellij-hints.wasm";
     "zellij/plugins/zellij-finder.wasm".source = "${plugins}/bin/zellij-finder.wasm";
+    "zellij/plugins/zellij-quit.wasm".source = "${plugins}/bin/zellij-quit.wasm";
     "zellij/plugins/vim-zellij-navigator.wasm".source = pkgs.zellijPlugins.vim-zellij-navigator;
   };
 
@@ -340,6 +348,10 @@ in
             "ChangeApplicationState"
           ];
           zellij-finder = [
+            "ReadApplicationState"
+            "ChangeApplicationState"
+          ];
+          zellij-quit = [
             "ReadApplicationState"
             "ChangeApplicationState"
           ];

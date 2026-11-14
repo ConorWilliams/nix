@@ -1,0 +1,8 @@
+[package]
+name = "zellij-quit"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+zellij-tile.workspace = true

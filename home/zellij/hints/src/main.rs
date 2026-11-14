@@ -131,6 +131,7 @@ fn is_menu(mode: InputMode) -> bool {
             | InputMode::Tab
             | InputMode::Session
             | InputMode::Resize
+            | InputMode::Prompt
     )
 }
 
@@ -201,6 +202,7 @@ fn describe(action: &Action) -> String {
             InputMode::Tab => "Tabs".into(),
             InputMode::Pane => "Panes".into(),
             InputMode::Session => "Sessions".into(),
+            InputMode::Prompt => "Quit session...".into(),
             mode => format!("{mode:?}"),
         },
         Action::NewPane {
@@ -223,6 +225,8 @@ fn describe(action: &Action) -> String {
         Action::FocusHostSession => "Control parent session".into(),
         Action::ToggleHostFullscreen => "Maximize / restore nested session".into(),
         Action::Detach => "Detach session".into(),
+        // (the only message bound in a menu; ModeInfo has no more of it)
+        Action::KeybindPipe { .. } => "Quit session, for every client".into(),
         Action::EditScrollback { .. } => "Open scrollback in editor".into(),
         action if action.launches_plugin("new-session") => "New / resurrect session".into(),
         // New actions still appear without adding another menu entry here.
@@ -254,6 +258,7 @@ mod tests {
     #[test]
     fn menus_are_the_modes_behind_alt_g() {
         assert!(is_menu(InputMode::Session));
+        assert!(is_menu(InputMode::Prompt));
         assert!(!is_menu(InputMode::Locked));
         assert!(!is_menu(InputMode::RenameTab));
         assert!(!is_menu(InputMode::RenameSession));
