@@ -65,7 +65,7 @@ whose version changed; `hms` then applies it):
 ```sh
 bump-preview [INPUT]                       # what a bump would change, unbuilt
 nh home build -u                           # bump all pinned inputs
-nh home build -U llm-agents                # bump only claude
+nh home build -U llm-agents                # bump Claude Code and Codex
 ```
 
 Manual garbage collection (runs on a schedule automatically):

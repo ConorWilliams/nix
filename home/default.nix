@@ -117,6 +117,10 @@
     sessionVariables = {
       # Tell programs the terminal supports 24-bit colour.
       COLORTERM = "truecolor";
+      # A mosh server whose client has gone (laptop asleep, network changed)
+      # otherwise waits forever, its Zellij client still attached and holding
+      # its tab at the laptop's size: give up after an hour of silence.
+      MOSH_SERVER_NETWORK_TMOUT = 3600;
     };
   };
 
@@ -147,6 +151,7 @@
 
     codex = {
       enable = true;
+      package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
       mutableSettings = true; # preserve settings added by Codex or the user
       settings.tui = {
         theme = "rose-pine-dawn";

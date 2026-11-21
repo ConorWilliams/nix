@@ -1,5 +1,6 @@
 -- Language servers. The servers themselves come from Nix (extraPackages in
--- home/nvim.nix), or for project toolchains (rust-analyzer, ruff, ty) from
+-- home/nvim.nix), or for project toolchains (clangd, neocmakelsp, rust-analyzer,
+-- ruff, ty) from
 -- the project's direnv/devshell, on the PATH nvim starts with.
 -- nvim-lspconfig only supplies default configs (command, filetypes, root
 -- markers) as lsp/<name>.lua files; per-server tweaks live in
@@ -12,6 +13,8 @@ local servers = {
   'ty', -- Python types
   'ruff', -- Python lint and format
   'rust_analyzer', -- Rust (formats with rustfmt)
+  'clangd', -- C, C++, CUDA (clang-tidy diagnostics and clang-format)
+  'neocmake', -- CMake (neocmakelsp)
   'marksman', -- Markdown links, headings, references
   'rumdl', -- Markdown lint and format
   'copilot', -- inline suggestions (80_ai.lua)

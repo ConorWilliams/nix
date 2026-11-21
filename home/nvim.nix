@@ -85,6 +85,7 @@ in
           rust
           c
           cpp
+          cuda
           cmake
           make
           dockerfile
