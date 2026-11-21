@@ -151,6 +151,7 @@
 
     codex = {
       enable = true;
+      package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
       mutableSettings = true; # preserve settings added by Codex or the user
       settings.tui = {
         theme = "rose-pine-dawn";
